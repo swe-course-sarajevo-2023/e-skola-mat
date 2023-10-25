@@ -47,7 +47,7 @@ class User(Base):
     Role: Mapped[Role] = relationship("Role", backref="users")  # ORM-level relationship with Mapped type annotation
     hashed_password: Mapped[str] = mapped_column(String(128), nullable=False)
 
-class User(Base):
+class Homework(Base):
     __tablename__ = "homework"
 
     id: Mapped[str] = mapped_column(
@@ -124,8 +124,8 @@ class ProblemUserHomework(Base):
     commentStudent: Mapped[String] = mapped_column(
         String(255), nullable=True
     )
-    User: Mapped[User] = relationship("User", backref="homework_users")
-    Homework: Mapped[Homework] = relationship("Homework", backref="homework_users")
+    User: Mapped[User] = relationship("User", backref="problem_user_homeworks")
+    Homework: Mapped[Homework] = relationship("Homework", backref="problem_user_homeworks")
 
 class ProblemUserHomeworkImage(Base):
     __tablename__ = "problem-user-homework-image"
