@@ -9,7 +9,7 @@ Pydantic priority ordering:
 3. Default values
 
 For project name, version, description we use pyproject.toml
-For the rest, we use file `.env` (gitignored), see `.env`
+For the rest, we use file `.env` (gitignored), see `.env.example`
 
 `DEFAULT_SQLALCHEMY_DATABASE_URI` and `TEST_SQLALCHEMY_DATABASE_URI`:
 Both are ment to be validated at the runtime, do not change unless you know
