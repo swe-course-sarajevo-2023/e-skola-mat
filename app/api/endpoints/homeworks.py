@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from app.api import deps
 from app.database import get_db
 from app.models import HomeworkUser, ProblemUserHomework, User, Homework
@@ -7,6 +6,18 @@ from app.schemas.requests import TaskComment, GeneralComment
 from typing import List
 
 router = APIRouter()
+
+async def get_db() -> AsyncSession:
+
+    async_engine = create_async_engine(DATABASE_URL, echo=True)
+    AsyncSessionFactory = sessionmaker(
+        bind=async_engine, class_=AsyncSession, expire_on_commit=False
+    )
+    db = AsyncSession(engine)
+    try:
+        yield db
+    finally:
+        await db.close()
 
 @router.post("/submit-homework/{homework_id}")
 def submit_homework(
