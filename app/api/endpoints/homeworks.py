@@ -14,6 +14,7 @@ def submit_homework(
     general_comment: GeneralComment,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
+    # image_url: List[str]  # kada dodje za vrijeme to
 ):
     # Trazimo bazu
     homework = db.query(Homework).filter(Homework.id == homework_id).first()
