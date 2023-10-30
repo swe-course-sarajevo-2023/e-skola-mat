@@ -14,7 +14,7 @@ def submit_homework(
     general_comment: GeneralComment,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
-    # image_url: List[str]  # kada dodje za vrijeme to
+    image_urls: List[str] = None,
 ):
     # Trazimo bazu
     homework = db.query(Homework).filter(Homework.id == homework_id).first()
@@ -24,6 +24,12 @@ def submit_homework(
     # Postavljanje generalnog komentara
     general_comment_text = general_comment.comment
     homework.general_comment = general_comment_text
+
+    # Ovdje treba ici kod i pokriti case kada imamo image urls
+    # Mozda napraviti odvojeni endpoint za submit slike gdje saljemo sliku i task id
+    # I onda ga zvati za svaki od URL-ova
+    if image_urls:
+        pass
 
     # Obrada komentara zadataka
     for task_comment in task_comments:
