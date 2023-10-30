@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 from app.api import deps
-from app.models import HomeworkUser, ProblemUserHomework, User, Homework
+from app.models import HomeworkUserHomework, User, Homework
 from app.schemas.requests import TaskComment, GeneralComment
 from typing import List
 
-router = APIRouter()
+router = APIRouter(prefix="/homework")
 
-@router.post("/submit-homework/{homework_id}")
+@router.post(f"/submit-homework/{homework_id}")
 def submit_homework(
     homework_id: str,
     task_comments: List[TaskComment],
@@ -44,7 +45,7 @@ def submit_homework(
     db.commit()
     return {"message": "Homework submitted successfully"}
 
-@router.post("/submit-comment")
+@router.post(f"/submit-comment")
 def submit_comment(
     task_id: str,
     comment: str,
