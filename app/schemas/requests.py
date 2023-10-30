@@ -17,3 +17,11 @@ class UserUpdatePasswordRequest(BaseRequest):
 class UserCreateRequest(BaseRequest):
     email: EmailStr
     password: str
+
+class TaskComment(BaseModel):
+    task_id: str
+    comment: str
+
+class GeneralComment(BaseModel):
+    user_id: str
+    comment: str
