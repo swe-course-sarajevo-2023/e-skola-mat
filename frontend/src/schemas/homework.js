@@ -17,7 +17,30 @@ const homeworkSchema = yup.object().shape({
         return moment(value).isSameOrAfter(moment(), "day");
       }
     ),
-  groups: yup.array().required("Potrebno je izabrati bar jednu grupu!"),
+  groups: yup
+    .array()
+    .test(
+      "not-empty",
+      "Potrebno je izabrati bar jednu grupu!",
+      function (value) {
+        return value && value.length > 0;
+      }
+    )
+    .test(
+      "all-or-group",
+      'Ne može se izabrati "Sve grupe" i ostale grupe!',
+      function (value) {
+        const allSelectedIndex = value.findIndex(
+          ({ value }) => value === "all"
+        );
+
+        if (allSelectedIndex > -1) {
+          return value.length === 1;
+        }
+
+        return !value.includes(({ value }) => value === "all");
+      }
+    ),
 });
 
 export default homeworkSchema;

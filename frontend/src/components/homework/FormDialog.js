@@ -17,7 +17,7 @@ import {
 import { yupResolver } from "@hookform/resolvers/yup";
 import { homeworkSchema } from "@/schemas";
 
-const FormDialog = ({ open, handleClose }) => {
+const FormDialog = ({ open, handleClose, refetch }) => {
   const methods = useForm({
     resolver: yupResolver(homeworkSchema),
     defaultValues: {
@@ -30,7 +30,12 @@ const FormDialog = ({ open, handleClose }) => {
   });
 
   const onSubmit = async (data) => {
-    console.log(data);
+    refetch({
+      ...data,
+      dateOfCreation: new Date(),
+      id: Math.floor(Math.random() * 10000) + 1,
+    });
+    methods.reset();
     handleClose();
   };
 
@@ -71,7 +76,7 @@ const FormDialog = ({ open, handleClose }) => {
             options={[
               { value: 1, key: "Group 1" },
               { value: 2, key: "Group 2" },
-              { value: null, key: "All" },
+              { value: "all", key: "All" },
             ]}
           />
           <Button

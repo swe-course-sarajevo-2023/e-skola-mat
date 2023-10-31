@@ -14,7 +14,14 @@ const FormAutocompleteSelect = ({ name, label, options }) => {
           options={options || []}
           getOptionLabel={(option) => option.key}
           value={field.value}
-          renderInput={(params) => <TextField {...params} label={label} />}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={label}
+              error={!!fieldState.error}
+              helperText={fieldState.error && fieldState.error.message}
+            />
+          )}
           onChange={(_, values) => {
             field.onChange([...values]);
           }}
