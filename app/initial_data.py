@@ -1,18 +1,26 @@
-"""
-Put here any Python code that must be runned before application startup.
-It is included in `init.sh` script.
-
-By defualt `main` create a superuser if not exists
-"""
-
 import asyncio
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import config, security
 from app.core.session import async_session
-from app.models import User
+from app.models import User, Role, Class  
 
+async def insert_roles_and_groups(session: AsyncSession):
+    roles = ["Profesor", "Asistent", "Student"]
+    for role in roles:
+        existing_role = await session.execute(select(Role).where(Role.role == role))
+        if not existing_role.scalars().first():
+            session.add(Role(role=role))
+
+    groups = ["A", "B", "C", "D", "E"]
+    for group in groups:
+        existing_group = await session.execute(select(Class).where(Class.name == group))
+        if not existing_group.scalars().first():
+            session.add(Class(name=group))
+
+    await session.commit()
 
 async def main() -> None:
     print("Start initial data")
@@ -35,8 +43,11 @@ async def main() -> None:
         else:
             print("Superuser already exists in database")
 
-        print("Initial data created")
+        # Insert roles and groups
+        await insert_roles_and_groups(session)
+        print("Roles and groups added")
 
+        print("Initial data created")
 
 if __name__ == "__main__":
     asyncio.run(main())
