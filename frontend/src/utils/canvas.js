@@ -7,6 +7,8 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
+import { Button } from "@mui/material";
+import { TextField } from "@mui/material";
 
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -21,7 +23,7 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export const Canvas = () => {
+export const Canvas = ({ source }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState("handdrawn");
   const [tool1, setTool1] = useState("#000000");
@@ -32,6 +34,20 @@ export const Canvas = () => {
   const [[x, y], coordinates] = useState([0, 0]);
   const canvasRef = useRef();
   const contextRef = useRef();
+  const [imgComment, setImgComment] = useState("");
+
+  console.log(source, "source");
+
+  const saveImage = (event) => {
+    console.log("save");
+    let link = event.currentTarget;
+    console.log(link);
+    link.setAttribute("download", source);
+    console.log(link);
+    let image = canvasRef.current.toDataURL("image/png");
+    console.log(image);
+    link.setAttribute("href", image);
+  };
 
   function changeColor(color) {
     setTool1(color.hex);
@@ -107,10 +123,11 @@ export const Canvas = () => {
   };
 
   const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    context.fillStyle = "lightblue";
-    context.fillRect(0, 0, 500, 500);
+    // const canvas = canvasRef.current;
+    // const context = canvas.getContext("2d");
+    // context.fillStyle = "lightblue";
+    // context.fillRect(0, 0, 500, 500);
+    prepareCanvas();
   };
 
   function getImage(e) {
@@ -153,7 +170,7 @@ export const Canvas = () => {
     prepareCanvas();
   }, [img]);
   useEffect(() => {
-    setImg("./Images/test-image.jpg");
+    setImg(source);
   }, []);
 
   const handleChange = (event) => {
@@ -164,20 +181,18 @@ export const Canvas = () => {
   };
 
   return (
-    <div>
-      <Box sx={{ flexGrow: 1, marginTop: 5 }}>
+    <div style={{ display: "flex" }}>
+      <Box sx={{ flexGrow: 1, marginTop: 2, marginRight: 3 }}>
         <Grid container spacing={2}>
-          <Grid item xs={4} md={4}>
+          <Grid item xs={12} md={12}>
             {" "}
             <div className="form-group col-4 col-md-4 col-sm-4 col-xs-4">
               <CompactPicker color={tool1} onChangeComplete={changeColor} />
             </div>
           </Grid>
-          <Grid item xs={4} md={4} sx={{ textAlign: "center" }}>
+          <Grid item xs={6} md={6} sx={{}}>
             <FormControl>
-              <FormLabel id="demo-radio-buttons-group-label">
-                Selection:
-              </FormLabel>
+              <FormLabel id="demo-radio-buttons-group-label">Alat:</FormLabel>
               <RadioGroup
                 aria-labelledby="demo-radio-buttons-group-label"
                 defaultValue="handdrawn"
@@ -187,29 +202,29 @@ export const Canvas = () => {
                 <FormControlLabel
                   value="handdrawn"
                   control={<Radio />}
-                  label="Hand drawn"
+                  label="Olovka"
                 />
                 <FormControlLabel
                   value="line"
                   control={<Radio />}
-                  label="Line"
+                  label="Linija"
                 />
                 <FormControlLabel
                   value="rectangle"
                   control={<Radio />}
-                  label="Rectangle"
+                  label="Pravougaonik"
                 />
                 <FormControlLabel
                   value="circle"
                   control={<Radio />}
-                  label="Circle"
+                  label="Kružnica"
                 />
               </RadioGroup>
             </FormControl>
           </Grid>
-          <Grid item xs={4} md={4} sx={{ textAlign: "center" }}>
+          <Grid item xs={6} md={6} sx={{}}>
             <FormControl>
-              <FormLabel id="demo-radio-buttons-group-label">Style:</FormLabel>
+              <FormLabel id="demo-radio-buttons-group-label">Stil:</FormLabel>
               <RadioGroup
                 aria-labelledby="demo-radio-buttons-group-label"
                 defaultValue="empty"
@@ -219,42 +234,61 @@ export const Canvas = () => {
                 <FormControlLabel
                   value="empty"
                   control={<Radio />}
-                  label="Empty"
+                  label="Prazno"
                 />
                 <FormControlLabel
                   value="full"
                   control={<Radio />}
-                  label="Full"
+                  label="Popunjeno"
                 />
               </RadioGroup>
             </FormControl>
           </Grid>
+          <Grid item xs={12} md={12}>
+            <TextField
+              id="outlined-multiline-static"
+              label="Komentar"
+              multiline
+              fullWidth
+              rows={4}
+              defaultValue={imgComment}
+            />
+          </Grid>
+          <Grid item xs={12} md={12}>
+            <Button variant="outlined">Spasi komentar</Button>
+          </Grid>
         </Grid>
       </Box>
-      <div className="form-group col-4">
-        <form className="form-inline">
+      <Box>
+        <div>
+          <canvas
+            onMouseDown={startDrawing}
+            onMouseUp={finishDrawing}
+            onMouseMove={draw}
+            ref={canvasRef}
+          />
+        </div>
+        <div style={{ display: "flex" }}>
+          <button className="form-control" onClick={rotate}>
+            Rotiraj
+          </button>
           <button
             className="form-control"
-            onClick={rotate}
-            style={{ width: "30%" }}
+            onClick={clearCanvas}
+            style={{ marginLeft: "8px" }}
           >
-            Rotate
+            Očisti
           </button>
-        </form>
-      </div>
-      <canvas
-        onMouseDown={startDrawing}
-        onMouseUp={finishDrawing}
-        onMouseMove={draw}
-        ref={canvasRef}
-      />
-      <button
-        className="form-control"
-        onClick={clearCanvas}
-        style={{ width: "10%" }}
-      >
-        Clear
-      </button>
+          <a
+            className="form-control"
+            onClick={saveImage}
+            href="download_image"
+            style={{ marginLeft: "8px", textAlign: "center" }}
+          >
+            Spremi
+          </a>
+        </div>
+      </Box>
     </div>
   );
 };
