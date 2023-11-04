@@ -29,7 +29,7 @@ const style = {
 const homework = ["/img1.png", "/img2.png", "/img3.png", "/img3.png"]; //Zadaće koje nastavnik postavlja
 const date = [new Date('2023-09-09'), new Date('2023-12-12'), new Date('2023-12-31'), new Date('2024-01-04')]; //Rok za predati
 const comment = ['Najbolja zadaća u povijesti ljudske rase', 'Drugi zadatak netačan', '']; //Komentari nastavnik
-const comment1 = [ //Komantari po zadacima
+const homeworkComment = [ //Komantari po zadacima
 ["Ti si kralj", "Svaka čast", "Samo naprijed"],
 ["sin(pi/2) nije 15", "podcrtani dio nema smisla"],
 ["", "", "", "mrsko mi pisati komentare"],
@@ -48,23 +48,23 @@ const student = {
 };
 
 export default function UcenikView() {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalOpen1, setModalOpen1] = useState(false);
+  const [modalOpen, setModalOpenPostavka] = useState(false);
+  const [modalOpen1, setModalOpenDodaj] = useState(false);
   const [selectedHomework, setSelectedHomeworkNumb] = useState(0);
   const [expired, setDate] = useState(false);
 
-  const handleClose = () => setModalOpen(false);
+  const handleClose = () => setModalOpenPostavka(false);
 
-  const handleClose1 = () => setModalOpen1(false);
+  const handleClose1 = () => setModalOpenDodaj(false);
 
-  const handleImageButton = (homeworkNumb) => {
+  const handleImageButtonPostavka = (homeworkNumb) => {
     setSelectedHomeworkNumb(homeworkNumb);
-    setModalOpen(true);
+    setModalOpenPostavka(true);
   };
 
-  const handleImageButton1 = (homeworkNumb, expired) => {
+  const handleImageButtonDodaj = (homeworkNumb, expired) => {
     setSelectedHomeworkNumb(homeworkNumb);
-    setModalOpen1(true);
+    setModalOpenDodaj(true);
     setDate(expired);
   };
 
@@ -124,13 +124,13 @@ export default function UcenikView() {
               <CardActions>
                 <Button
                   size="small"
-                  onClick={() => handleImageButton(index)}
+                  onClick={() => handleImageButtonPostavka(index)}
                 >
                   Postavka
                 </Button>
                 <Button
                   size="small"
-                  onClick={() => handleImageButton1(index, date[index].getTime() < currentDate.getTime())}
+                  onClick={() => handleImageButtonDodaj(index, date[index].getTime() < currentDate.getTime())}
                 >
                   Pregledaj
                 </Button>
@@ -178,7 +178,7 @@ export default function UcenikView() {
                 loading="lazy"
             />
             <Typography id="modal-modal-title" variant="h5" component="h2">
-              {comment1[selectedHomework][index]}
+              {homeworkComment[selectedHomework][index]}
             </Typography>
             </>
           ))}
