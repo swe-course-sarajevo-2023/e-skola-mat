@@ -7,7 +7,7 @@ from typing import List
 
 router = APIRouter(prefix="/homework")
 
-@router.post(f"/submit-homework/{homework_id}")
+@router.post("/submit-homework/{homework_id}")
 def submit_homework(
     homework_id: str,
     task_comments: List[TaskComment],
