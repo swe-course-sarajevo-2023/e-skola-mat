@@ -1,9 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
+
 from sqlalchemy.orm import Session
+
 from app.api import deps
-from app.models import HomeworkUserHomework, User, Homework, ProblemUserHomeworkImage
+from app.models import HomeworkUserHomework, User, Homework, ProblemUserHomeworkImage, Image
 from app.schemas.requests import TaskComment, GeneralComment
+
 from typing import List
+from datetime import datetime
+from uuid import uuid4
 
 router = APIRouter(prefix="/homework")
 
@@ -14,7 +19,7 @@ def submit_homework(
     general_comment: GeneralComment,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
-    images: List[str] = None,
+    images: List[UploadFile] = File(None),
 ):
     # Trazimo bazu
     homework = db.query(Homework).filter(Homework.id == homework_id).first()
@@ -27,9 +32,23 @@ def submit_homework(
 
     if images:
         for image in images:
+            unique_filename = f"{uuid4()}_{image.filename}"
+            file_path = f"images/{unique_filename}"
+
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(image.file, buffer)
+
+            single_image = Image(filename=image.filename, file_path=file_path, \
+                created_at=datetime.now(),
+            )
+            db.add(single_image)
+            db.flush()  # Flush metoda dodaje ID za ovu instancu \
+            # ali nakon sto se doda u bazu
+
             problem_image = ProblemUserHomeworkImage(
                 problem_user_homework_id=homework_id,  
-                image_path=image,  # Komentare cemo svakako updateovati dole
+                image_id=image_record.id, # Ovdje vezemo zadatak za sliku
+                # Komentare cemo svakako updateovati dole
             )
             db.add(problem_image)  # Bice adekvatno dodano u bazu jer SQLAlchemy moze skontati
             # po modelu gdje treba da je doda. Odnosno, bice adekvatno namapirana.

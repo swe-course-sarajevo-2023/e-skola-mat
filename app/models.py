@@ -127,6 +127,14 @@ class ProblemUserHomework(Base):
     User: Mapped[User] = relationship("User", backref="problem_user_homeworks")
     Homework: Mapped[Homework] = relationship("Homework", backref="problem_user_homeworks")
 
+class Image(Base):
+    __tablename__ = "images"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    filename = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class ProblemUserHomeworkImage(Base):
     __tablename__ = "problem-user-homework-image"
 
@@ -136,9 +144,7 @@ class ProblemUserHomeworkImage(Base):
     problem_user_homework_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), ForeignKey('problem-user-homework.id'), nullable=True
     )
-    image_path: Mapped[str] = mapped_column(
-        String(255), nullable=True
-    )
+    image_id = Column(UUID(as_uuid=True), ForeignKey('images.id'), nullable=True)
     comment_teacher: Mapped[str] = mapped_column(
         String(255), nullable=True
     )
