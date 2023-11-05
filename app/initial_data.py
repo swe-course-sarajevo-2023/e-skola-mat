@@ -1,18 +1,22 @@
 import asyncio
-
+import uuid
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import config, security
 from app.core.session import async_session
-from app.models import User, Role, Class  
+from app.models import User, Role, Class
+
 
 async def insert_roles_and_groups(session: AsyncSession):
-    roles = ["Profesor", "Asistent", "Student"]
+    roles = ["Administrator", "Profesor", "Asistent", "Student"]
+    role_uuids = {}
     for role in roles:
         existing_role = await session.execute(select(Role).where(Role.role == role))
         if not existing_role.scalars().first():
-            session.add(Role(role=role))
+            role_uuid = uuid.uuid4()
+            session.add(Role(role=role, id=role_uuid))
+            role_uuids[role] = role_uuid
 
     groups = ["A", "B", "C", "D", "E"]
     for group in groups:
@@ -21,31 +25,55 @@ async def insert_roles_and_groups(session: AsyncSession):
             session.add(Class(name=group))
 
     await session.commit()
+    return role_uuids
+
 
 async def main() -> None:
     print("Start initial data")
+
     async with async_session() as session:
+        role_uuids = await insert_roles_and_groups(session)
+        print("Roles and groups added")
+
         result = await session.execute(
             select(User).where(User.email == config.settings.FIRST_SUPERUSER_EMAIL)
         )
         user = result.scalars().first()
 
         if user is None:
+            admin_uuid = role_uuids.get("Administrator")
             new_superuser = User(
                 email=config.settings.FIRST_SUPERUSER_EMAIL,
                 hashed_password=security.get_password_hash(
                     config.settings.FIRST_SUPERUSER_PASSWORD
                 ),
+                role_id=admin_uuid
             )
             session.add(new_superuser)
             await session.commit()
-            print("Superuser was created")
+            print("Superadmin was created")
         else:
             print("Superuser already exists in database")
 
-        # Insert roles and groups
-        await insert_roles_and_groups(session)
-        print("Roles and groups added")
+        result = await session.execute(
+            select(User).where(User.email == "profesor@example.com")
+        )
+        user = result.scalars().first()
+
+        if user is None:
+            professor_uuid = role_uuids.get("Profesor")
+            professor_user = User(
+                email="professor@example.com",
+                hashed_password=security.get_password_hash(
+                    "test123",
+                ),
+                role_id=professor_uuid
+            )
+            session.add(professor_user)
+            await session.commit()
+            print("Test professor was created")
+        else:
+            print("Test professor already exists in database")
 
         print("Initial data created")
 
