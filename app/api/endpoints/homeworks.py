@@ -25,15 +25,14 @@ def submit_homework(
     general_comment_text = general_comment.comment
     homework.general_comment = general_comment_text
 
-    # Ako imamo nesto u parametru images koji su tipa List[UploadFile], pri cemu j
-    # UploadFile i File dio standarne FastAPI librarya
     if images:
         for image in images:
             problem_image = ProblemUserHomeworkImage(
-                problem_user_homework_id=general_comment.task_id,  
+                problem_user_homework_id=homework_id,  
                 image_path=image,  # Komentare cemo svakako updateovati dole
             )
-            db.add(problem_image)
+            db.add(problem_image)  # Bice adekvatno dodano u bazu jer SQLAlchemy moze skontati
+            # po modelu gdje treba da je doda. Odnosno, bice adekvatno namapirana.
 
     # Updateovanje komentara zadatak
     for task_comment in task_comments:
@@ -41,7 +40,7 @@ def submit_homework(
         comment = task_comment.comment
 
         # Treba naci odgovarajuci task u bazi
-        # Te ukoliko ih ima vise, uzeti prvi
+        # Te ukoliko ih greskom ima vise, uzeti prvi
         task = db.query(ProblemUserHomework).filter(
             ProblemUserHomework.homework_id == homework_id,
             ProblemUserHomework.id == task_id
