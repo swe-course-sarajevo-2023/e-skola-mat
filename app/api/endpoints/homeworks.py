@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
-from app.models import HomeworkUserHomework, User, Homework
+from app.models import HomeworkUserHomework, User, Homework, ProblemUserHomeworkImage
 from app.schemas.requests import TaskComment, GeneralComment
 from typing import List
 
@@ -14,7 +14,7 @@ def submit_homework(
     general_comment: GeneralComment,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
-    image_urls: List[str] = None,
+    images: List[str] = None,
 ):
     # Trazimo bazu
     homework = db.query(Homework).filter(Homework.id == homework_id).first()
@@ -25,13 +25,17 @@ def submit_homework(
     general_comment_text = general_comment.comment
     homework.general_comment = general_comment_text
 
-    # Ovdje treba ici kod i pokriti case kada imamo image urls
-    # Mozda napraviti odvojeni endpoint za submit slike gdje saljemo sliku i task id
-    # I onda ga zvati za svaki od URL-ova
-    if image_urls:
-        pass
+    # Ako imamo nesto u parametru images koji su tipa List[UploadFile], pri cemu j
+    # UploadFile i File dio standarne FastAPI librarya
+    if images:
+        for image in images:
+            problem_image = ProblemUserHomeworkImage(
+                problem_user_homework_id=general_comment.task_id,  
+                image_path=image,  # Komentare cemo svakako updateovati dole
+            )
+            db.add(problem_image)
 
-    # Obrada komentara zadataka
+    # Updateovanje komentara zadatak
     for task_comment in task_comments:
         task_id = task_comment.task_id
         comment = task_comment.comment
