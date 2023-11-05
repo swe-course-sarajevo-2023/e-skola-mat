@@ -21,3 +21,7 @@ class TaskComment(BaseModel):
 class GeneralComment(BaseModel):
     user_id: str
     comment: str
+
+class UserDeleteRequest(BaseRequest):
+    email: EmailStr
+
