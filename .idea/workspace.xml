@@ -5,13 +5,51 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b35d2c51-d522-4748-96bb-f81a17099171" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/api/endpoints/admins.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/endpoints/teachers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/endpoints/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/endpoints/users.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/endpoints/admins.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/endpoints/admins.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/endpoints/teachers.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/endpoints/teachers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/schemas/requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/requests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/responses.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/responses.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/.env.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/.flake8" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/.pre-commit-config.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/alembic.ini" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/alembic/README" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/alembic/env.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/alembic/script.py.mako" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/alembic/versions/2023020440_init_user_model_07c71f4389b6.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/api/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/api/api.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/api/deps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/api/endpoints/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/api/endpoints/auth.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/api/endpoints/users.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/conftest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/core/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/core/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/core/security.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/core/session.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/initial_data.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/schemas/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/schemas/requests.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/schemas/responses.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/tests/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/tests/conftest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/tests/test_auth.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/app/tests/test_users.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/docker-compose.dev.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/init.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/poetry.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/pyproject.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/requirements-dev.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/e-skola-mat/requirements.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,21 +74,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/Users/eminm/OneDrive/Desktop/Hindija projekat/e-skola-mat",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "configurable.group.appearance",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/eminm/OneDrive/Desktop/Protein Docking/ProteinDockingKod&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -60,6 +98,9 @@
       <option name="presentableId" value="Default" />
       <updated>1698575551357</updated>
       <workItem from="1698575553022" duration="9530000" />
+      <workItem from="1698872622758" duration="849000" />
+      <workItem from="1698874536946" duration="14000" />
+      <workItem from="1699382969343" duration="9190000" />
     </task>
     <servers />
   </component>

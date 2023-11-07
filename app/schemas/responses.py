@@ -18,3 +18,11 @@ class AccessTokenResponse(BaseResponse):
 class UserResponse(BaseResponse):
     id: str
     email: EmailStr
+
+
+class GradeResponse(BaseResponse):
+    id: str
+    user_id: str
+    homework_id: str
+    grade: int
+    note: str

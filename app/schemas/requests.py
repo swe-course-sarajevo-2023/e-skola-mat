@@ -21,3 +21,15 @@ class UserCreateRequest(BaseRequest):
 
 class UserDeleteRequest(BaseRequest):
     email: EmailStr
+
+
+class TeacherCommentsHomework(BaseRequest):
+    id: str
+    comment: str
+
+
+class TeacherGradesHomework(BaseRequest):
+    homework_id: str
+    user_id: str
+    grade: int
+    note: str
