@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
-
+from typing import List, Union, Literal
+from datetime import date
 class BaseRequest(BaseModel):
     # may define additional fields or config shared across requests
     pass
@@ -13,6 +14,14 @@ class UserUpdatePasswordRequest(BaseRequest):
 class UserCreateRequest(BaseRequest):
     email: EmailStr
     password: str
+
+class HomeworkCreateRequest(BaseRequest):
+    name: str
+    maxNumbersOfProblems: int
+    deadline: date
+
+class ClassHomeworkCreateRequest(HomeworkCreateRequest):
+    groups: Union[List[str], Literal['all']]
 
 class TaskComment(BaseModel):
     task_id: str

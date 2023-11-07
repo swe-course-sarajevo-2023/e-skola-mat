@@ -1,17 +1,90 @@
-import shutil
-from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
-
-from sqlalchemy.orm import Session
-
-from app.api import deps
-from app.models import ProblemUserHomework, User, Homework, ProblemUserHomeworkImage, Image
-from app.schemas.requests import TaskComment, GeneralComment
-
-from typing import List
 from datetime import datetime
+import shutil
 from uuid import uuid4
 
-router = APIRouter(prefix="/homework")
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+from app.api import deps
+from app.models import Homework, Class, ClassHomework, User, ProblemUserHomework, ProblemUserHomeworkImage, Image
+from app.schemas.responses import ClassHomeworkResponse
+from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
+from typing import List
+
+router = APIRouter()
+
+@router.get("/", response_model=List[ClassHomeworkResponse])
+async def list_all_homeworks(
+    _: User = Depends(deps.is_professor),
+    session: AsyncSession = Depends(deps.get_session),
+    ):
+    result = await session.execute(
+            select(Homework, ClassHomework.class_id.label("group_id"))
+            .select_from(Homework)
+            .join(ClassHomework, Homework.id == ClassHomework.homework_id)
+        )
+
+    homeworks_map = {}
+    for hw, group_id in result.all():
+            if hw.id not in homeworks_map:
+                homeworks_map[hw.id] = vars(hw).copy()
+                homeworks_map[hw.id]["dateOfCreation"] = hw.dateOfCreation.date()
+                homeworks_map[hw.id]["deadline"] = hw.deadline.date()
+                homeworks_map[hw.id]["groups"] = []
+            homeworks_map[hw.id]["groups"].append(group_id)
+
+    return [ClassHomeworkResponse(**data) for data in homeworks_map.values()]
+
+@router.post("/", response_model=ClassHomeworkResponse)
+async def add_homework(
+    new_homework: ClassHomeworkCreateRequest,
+    _: User = Depends(deps.is_professor),
+    session: AsyncSession = Depends(deps.get_session),):
+    
+    current_date = datetime.utcnow().date()
+    homework = Homework(**new_homework.dict(exclude={"groups"}),
+            dateOfCreation=current_date)
+    session.add(homework)
+    await session.flush() #Nuzno kako ne bi skipalo par grupa
+
+    group_names = []
+    if isinstance(new_homework.groups, str) and new_homework.groups == "all":
+        all_groups = await session.execute(select(Class))
+        groups = all_groups.scalars().all()
+    elif isinstance(new_homework.groups, list):
+        group_query = await session.execute(select(Class).where(Class.id.in_(new_homework.groups)))
+        groups = group_query.scalars().all()
+        if len(groups) != len(new_homework.groups):
+            raise HTTPException(status_code=400, detail="One or more groups don't exist.")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid groups input.")
+    
+    if not groups:
+        raise HTTPException(status_code=400, detail="Groups list is empty.")
+
+
+    for group in groups:
+        class_homework = ClassHomework(homework_id=homework.id, class_id=group.id)
+        session.add(class_homework)
+        group_names.append(group.id)
+
+    await session.commit()
+
+    return ClassHomeworkResponse(
+            **vars(homework),
+            groups=group_names
+        )
+
+@router.delete("/{homework_id}", status_code=204)
+async def delete_homework(
+    homework_id: str,
+    _: User = Depends(deps.is_professor),
+    session: AsyncSession = Depends(deps.get_session),):
+    await session.execute(delete(ClassHomework).where(ClassHomework.homework_id == homework_id))
+    await session.execute(delete(Homework).where(Homework.id == homework_id))
+    await session.commit()
+
 
 @router.post("/submit-homework/{homework_id}")
 def submit_homework(

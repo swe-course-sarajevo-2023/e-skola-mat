@@ -1,9 +1,20 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
-
+from typing import List, Union, Literal
+from datetime import date
 
 class BaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+
+class HomeworkResponse(BaseModel):
+    name: str
+    maxNumbersOfProblems: int
+    deadline: date
+    dateOfCreation: date
+    id: str
+
+class ClassHomeworkResponse(HomeworkResponse):
+    groups: Union[List[str], Literal['all']]
 
 class AccessTokenResponse(BaseResponse):
     token_type: str
