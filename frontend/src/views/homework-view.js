@@ -16,6 +16,7 @@ import Canvas from "../utils/canvas";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
+import isAuth from "@/components/isAuth";
 
 const style = {
   position: "absolute",
@@ -40,7 +41,7 @@ const student = {
   ],
 };
 
-export default function HomeworkView() {
+const HomeworkView = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImg, setSelectedImg] = useState(0);
   const [selectedImgSource, setSelectedImgSource] = useState("");
@@ -227,4 +228,6 @@ export default function HomeworkView() {
       </Modal>
     </Container>
   );
-}
+};
+
+export default isAuth(HomeworkView);
