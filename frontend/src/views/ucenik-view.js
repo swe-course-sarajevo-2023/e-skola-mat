@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import SubmitModal from "./submit-zadaca";
 
 const currentDate = new Date();
 
@@ -52,6 +53,7 @@ export default function UcenikView() {
   const [modalOpen1, setModalOpenDodaj] = useState(false);
   const [selectedHomework, setSelectedHomeworkNumb] = useState(0);
   const [expired, setDate] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   const handleClose = () => setModalOpenPostavka(false);
 
@@ -68,7 +70,7 @@ export default function UcenikView() {
     setDate(expired);
   };
 
-  
+
 
   return (
     <>
@@ -190,10 +192,13 @@ export default function UcenikView() {
         {!expired &&
         <Button xs={12} sx={{ display: "flex" }}
         size="small"
+        onClick={() => setShowSubmitModal(true)}
       >
         Dodaj
         </Button>
+        
         }
+        <SubmitModal open={showSubmitModal} onClose={() => setShowSubmitModal(false)} brojZadace={selectedHomework}/>
         </Box>
       </Modal>
     </Container>
