@@ -15,7 +15,7 @@ alembic upgrade head
 """
 import uuid
 
-from sqlalchemy import DATETIME, TIMESTAMP, String, ForeignKey, Integer
+from sqlalchemy import TIMESTAMP, DateTime, String, ForeignKey, Integer, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -130,10 +130,10 @@ class ProblemUserHomework(Base):
 class Image(Base):
     __tablename__ = "images"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    filename = Column(String, nullable=False)
-    file_path = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    filename = mapped_column(String, nullable=False)
+    file_path = mapped_column(String, nullable=False)
+    created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 class ProblemUserHomeworkImage(Base):
     __tablename__ = "problem-user-homework-image"
@@ -144,7 +144,7 @@ class ProblemUserHomeworkImage(Base):
     problem_user_homework_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), ForeignKey('problem-user-homework.id'), nullable=True
     )
-    image_id = Column(UUID(as_uuid=True), ForeignKey('images.id'), nullable=True)
+    image_id = mapped_column(UUID(as_uuid=True), ForeignKey('images.id'), nullable=True)
     comment_teacher: Mapped[str] = mapped_column(
         String(255), nullable=True
     )

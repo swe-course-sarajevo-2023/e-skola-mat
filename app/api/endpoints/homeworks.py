@@ -1,9 +1,10 @@
+import shutil
 from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.models import HomeworkUserHomework, User, Homework, ProblemUserHomeworkImage, Image
+from app.models import ProblemUserHomework, User, Homework, ProblemUserHomeworkImage, Image
 from app.schemas.requests import TaskComment, GeneralComment
 
 from typing import List
@@ -47,7 +48,7 @@ def submit_homework(
 
             problem_image = ProblemUserHomeworkImage(
                 problem_user_homework_id=homework_id,  
-                image_id=image_record.id, # Ovdje vezemo zadatak za sliku
+                image_id=single_image.id, # Ovdje vezemo zadatak za sliku
                 # Komentare cemo svakako updateovati dole
             )
             db.add(problem_image)  # Bice adekvatno dodano u bazu jer SQLAlchemy moze skontati

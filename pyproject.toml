@@ -6,6 +6,8 @@ version = "0.1.0-alpha"
 
 [tool.poetry.dependencies]
 fastapi = "^0.103.1"
+# Fixes an issue for M1 Macbooks
+greenlet = "*"
 pyjwt = {extras = ["crypto"], version = "^2.6.0"}
 python = "^3.11"
 python-multipart = ">=0.0.5,<0.0.6"
