@@ -29,3 +29,16 @@ export const removeUser = async () => {
     throw error;
   }
 };
+
+export const getProfessorHomeworks = async () => {
+  const { data } = await axiosInstance.get("/homeworks");
+  return data;
+};
+
+export const createProfessorHomework = async (data) => {
+  await axiosInstance.post("/homeworks", data);
+};
+
+export const deleteProfessorHomework = async (id) => {
+  await axiosInstance.delete(`/homeworks/homework/${id}`);
+};
