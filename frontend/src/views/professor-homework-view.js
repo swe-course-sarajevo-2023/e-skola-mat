@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button, Container, Box, Typography } from "@mui/material";
-import { FormDialog, HomeworkCard } from "@/components/homework";
+import { FormDialog, HomeworkCard } from "@/components/professor-homework";
 
-export default function HomeworkView() {
+export default function ProfessorHomeworkView() {
   const [open, setOpen] = useState(false);
   const [homeworks, setHomeworks] = useState(mockData);
 
