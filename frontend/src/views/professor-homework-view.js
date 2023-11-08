@@ -1,10 +1,22 @@
 import { useState } from "react";
-import { Button, Container, Box, Typography } from "@mui/material";
+import {
+  Button,
+  Container,
+  Box,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import { FormDialog, HomeworkCard } from "@/components/professor-homework";
+import { useMutation, useQuery } from "react-query";
+import { deleteProfessorHomework, getProfessorHomeworks } from "@/api";
 
 export default function ProfessorHomeworkView() {
   const [open, setOpen] = useState(false);
-  const [homeworks, setHomeworks] = useState(mockData);
+  const { data, isLoading, error, isError, refetch } = useQuery(
+    ["fetchProfessorHomework"],
+    getProfessorHomeworks
+  );
+  const { mutateAsync } = useMutation(deleteProfessorHomework);
 
   const handleOpen = (e) => {
     setOpen(true);
@@ -15,18 +27,13 @@ export default function ProfessorHomeworkView() {
     setOpen(false);
   };
 
-  const handleDelete = (id) => {
-    const index = homeworks.findIndex((homework) => homework.id === id);
-    if (index !== -1)
-      setHomeworks((previousHomeworks) => {
-        const newHomeworks = [...previousHomeworks];
-        newHomeworks.splice(index, 1);
-        return newHomeworks;
-      });
-  };
-
-  const refetch = (homework) => {
-    setHomeworks((previousHomeworks) => [...previousHomeworks, homework]);
+  const handleDelete = async (id) => {
+    try {
+      await mutateAsync(id);
+      refetch();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -40,28 +47,32 @@ export default function ProfessorHomeworkView() {
       </Box>
       <Box sx={{ pt: 3 }}>
         <Typography variant="h3">Zadaće</Typography>
+        {isLoading && <CircularProgress size="xl" />}
+        {isError && <Typography>{error.message}</Typography>}
         <Box
           display="flex"
           justifyContent="space-between"
           gap={3}
           flexWrap="wrap"
         >
-          {homeworks.map((homework) => (
-            <Box
-              sx={{ py: 2 }}
-              flex={{ xs: "1 100%", md: "1 45%", lg: "1 20%" }}
-              key={homework.id}
-            >
-              <HomeworkCard
-                id={homework.id}
-                name={homework.name}
-                dateOfCreation={homework.dateOfCreation}
-                deadline={homework.deadline}
-                maxNumbersOfProblems={homework.maxNumbersOfProblems}
-                handleDelete={handleDelete}
-              />
-            </Box>
-          ))}
+          {!isLoading &&
+            !isError &&
+            data?.map((homework) => (
+              <Box
+                sx={{ py: 2 }}
+                flex={{ xs: "1 100%", md: "1 45%", lg: "1 20%" }}
+                key={homework.id}
+              >
+                <HomeworkCard
+                  id={homework.id}
+                  name={homework.name}
+                  dateOfCreation={homework.dateOfCreation}
+                  deadline={homework.deadline}
+                  maxNumbersOfProblems={homework.maxNumbersOfProblems}
+                  handleDelete={handleDelete}
+                />
+              </Box>
+            ))}
         </Box>
       </Box>
 
@@ -69,41 +80,3 @@ export default function ProfessorHomeworkView() {
     </Container>
   );
 }
-
-const mockData = [
-  {
-    id: 1,
-    name: "Zadaća 1",
-    dateOfCreation: new Date(),
-    deadline: new Date(),
-    maxNumbersOfProblems: 1,
-  },
-  {
-    id: 2,
-    name: "Zadaća 2",
-    dateOfCreation: new Date(),
-    deadline: new Date(),
-    maxNumbersOfProblems: 1,
-  },
-  {
-    id: 3,
-    name: "Zadaća 3",
-    dateOfCreation: new Date(),
-    deadline: new Date(),
-    maxNumbersOfProblems: 1,
-  },
-  {
-    id: 4,
-    name: "Zadaća 4",
-    dateOfCreation: new Date(),
-    deadline: new Date(),
-    maxNumbersOfProblems: 1,
-  },
-  {
-    id: 5,
-    name: "Zadaća 5",
-    dateOfCreation: new Date(),
-    deadline: new Date(),
-    maxNumbersOfProblems: 1,
-  },
-];

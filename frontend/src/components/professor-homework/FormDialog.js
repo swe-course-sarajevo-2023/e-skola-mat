@@ -16,6 +16,8 @@ import {
 } from "../rhf-mui";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { homeworkSchema } from "@/schemas";
+import { useMutation } from "react-query";
+import { createProfessorHomework } from "@/api";
 
 const FormDialog = ({ open, handleClose, refetch }) => {
   const methods = useForm({
@@ -28,15 +30,21 @@ const FormDialog = ({ open, handleClose, refetch }) => {
     },
     mode: "onBlur",
   });
+  const { mutateAsync } = useMutation(createProfessorHomework);
 
   const onSubmit = async (data) => {
-    refetch({
-      ...data,
-      dateOfCreation: new Date(),
-      id: Math.floor(Math.random() * 10000) + 1,
-    });
-    methods.reset();
-    handleClose();
+    try {
+      const { groups, ...otherFields } = data;
+      await mutateAsync({
+        ...otherFields,
+        groups: groups.map(({ value }) => value),
+      });
+      refetch();
+      methods.reset();
+      handleClose();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
