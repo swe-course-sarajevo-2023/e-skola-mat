@@ -4,14 +4,71 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
-from app.models import Homework, Class, ClassHomework, User
-from app.schemas.responses import ClassHomeworkResponse
+from app.models import Homework, Class, ClassHomework, User, HomeworkUser, ProblemUserHomework, ProblemUserHomeworkImage
+from app.schemas.responses import ClassHomeworkResponse, HomeworkUserDetailsResponse, HomeworkResponse, ProblemUserHomeworkImageResponse, ProblemUserHomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
 from fastapi import HTTPException
 from typing import List
 from datetime import datetime
+from sqlalchemy.orm import joinedload
+import logging
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import selectinload
+from sqlalchemy.future import select
+from typing import List
+
 
 router = APIRouter()
+@router.get("/homework-user/{homework_user_id}", response_model=HomeworkUserDetailsResponse)
+async def get_homework_user_details(
+    homework_user_id: str,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    query = select(HomeworkUser).where(HomeworkUser.id == homework_user_id)
+    result = await session.execute(query)
+    homework_user = result.scalar()
+
+    if not homework_user:
+        return None
+
+    query = select(ProblemUserHomework) \
+        .where(ProblemUserHomework.user_id == homework_user.user_id) \
+        .options(selectinload(ProblemUserHomework.images))
+    
+    result = await session.execute(query)
+    problem_user_homeworks = result.scalars().all()
+
+    problem_user_homework_responses = []
+    for pu_homework in problem_user_homeworks:
+        image_responses = [
+            ProblemUserHomeworkImageResponse(
+                id=image.id,
+                image_path=image.image_path,
+                comment_teacher=image.comment_teacher,
+                comment_student=image.comment_student,
+            )
+            for image in pu_homework.images
+        ]
+
+        pu_homework_response = ProblemUserHomeworkResponse(
+            id=pu_homework.id,
+            order_number_of_the_task=pu_homework.order_number_of_the_task,
+            commentTeacher=pu_homework.commentTeacher,
+            commentStudent=pu_homework.commentStudent,
+            images=image_responses,
+        )
+
+        problem_user_homework_responses.append(pu_homework_response)
+
+    homework_user_response = HomeworkUserDetailsResponse(
+        id=homework_user.id,
+        user_id=homework_user.user_id,
+        grade=homework_user.grade,
+        note=homework_user.note,
+        problems=problem_user_homework_responses,
+    )
+
+    return homework_user_response
 
 @router.get("/", response_model=List[ClassHomeworkResponse])
 async def list_all_homeworks(
