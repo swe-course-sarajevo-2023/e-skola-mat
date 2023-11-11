@@ -12,7 +12,7 @@ import {
 import { useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import SubmitModal from "./submit-zadaca";
+import SubmitModal from "./submit-homework";
 
 const currentDate = new Date();
 
@@ -29,11 +29,11 @@ const style = {
 
 const homework = ["/img1.png", "/img2.png", "/img3.png", "/img3.png"]; //Zadaće koje nastavnik postavlja
 const date = [new Date('2023-09-09'), new Date('2023-12-12'), new Date('2023-12-31'), new Date('2024-01-04')]; //Rok za predati
-const comment = ['Najbolja zadaća u povijesti ljudske rase', 'Drugi zadatak netačan', '']; //Komentari nastavnik
+const comment = ['Najbolja zadaća u povijesti ljudske rase', 'Drugi zadatak netačan', '']; //currCommenti nastavnik
 const homeworkComment = [ //Komantari po zadacima
 ["Ti si kralj", "Svaka čast", "Samo naprijed"],
 ["sin(pi/2) nije 15", "podcrtani dio nema smisla"],
-["", "", "", "mrsko mi pisati komentare"],
+["", "", "", "mrsko mi pisati currCommente"],
 ];
 
 const student = {
@@ -91,9 +91,9 @@ export default function UcenikView() {
         lg={3}
         sx={{ display: "flex" }}>
         </Grid>
-        {homework.map((zadaca, index) => {
-            const datum = date[index].toDateString();
-            const komentar = comment[index];
+        {homework.map((currHomework, index) => {
+            const currDate = date[index].toDateString();
+            const currComment = comment[index];
 
             return(
             <Grid item xs={3}>
@@ -102,11 +102,11 @@ export default function UcenikView() {
                 <Typography gutterBottom variant="h5" component="div">
                   Zadaća {index + 1}
                 </Typography>
-                {komentar != '' && 
+                {currComment != '' && 
                 <Typography variant="body2" color="text.secondary">
-                  {komentar}
+                  {currComment}
                 </Typography>}
-                {komentar == '' && 
+                {currComment == '' && 
                 <Typography variant="body2" color="text.secondary">
                   Zadaća nije pregledana
                 </Typography>}
@@ -119,7 +119,7 @@ export default function UcenikView() {
                 }
                 {date[index].getTime() > currentDate.getTime() &&
                     <Typography>
-                       Rok do {datum}.
+                       Rok do {currDate}.
                     </Typography>
                 }
               </CardContent>

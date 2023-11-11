@@ -1,20 +1,17 @@
 "use client";
 import {
-  Box,
   Button,
   Container,
-  Modal,
   Typography,
   Grid,
   Paper,
-  TextField,
   Link,
   Card, 
   CardContent, 
   CardActions
 } from "@mui/material";
 
-const zadaće = [{"ucenik": "ucenik 1 ime"}, {"ucenik": "ucenik 2 ime"}, {"ucenik": "ucenik 3 ime"}, {"ucenik": "ucenik 4 ime"}];
+const homeworks = [{"ucenik": "ucenik 1 ime"}, {"ucenik": "ucenik 2 ime"}, {"ucenik": "ucenik 3 ime"}, {"ucenik": "ucenik 4 ime"}];
 
 const JednaZadacaGrupeView=(props)=>{
     return (
@@ -38,7 +35,7 @@ const JednaZadacaGrupeView=(props)=>{
 
             <Grid item xs={12}>
                 <Grid container spacing={2}>
-                {zadaće.map((element) => (
+                {homeworks.map((element) => (
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Card sx={{ maxWidth: 345 }}>
                             <CardContent>
