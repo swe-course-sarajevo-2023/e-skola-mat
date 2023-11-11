@@ -1,4 +1,4 @@
-import SubmitModal from "@/views/submit-zadaca";
+import SubmitModal from "@/views/submit-homework";
 
 export const setSubmitModalShow = (props) => {
   console.log("PROPS", props);
