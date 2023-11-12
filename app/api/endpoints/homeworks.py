@@ -127,6 +127,9 @@ def submit_homework(
         else:
             raise HTTPException(status_code=404, detail="Task not found")
 
+    # Kada submitamo zadacu mijenja se status u finished
+    homework.status = HomeworkStatus.FINISHED
+
     db.commit()
     return {"message": "Homework submitted successfully"}
 
