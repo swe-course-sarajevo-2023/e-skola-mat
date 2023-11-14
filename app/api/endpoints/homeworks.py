@@ -11,6 +11,7 @@ from app.models import Homework, Class, ClassHomework, User, HomeworkStatus, Pro
 from app.schemas.responses import ClassHomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
 from typing import List
+from uuid import UUID
 
 router = APIRouter()
 
@@ -43,7 +44,7 @@ async def add_homework(
     session: AsyncSession = Depends(deps.get_session),):
     
     current_date = datetime.utcnow().date()
-    homework = Homework(**new_homework.dict(exclude={"groups"}),
+    homework = Homework(**new_homework.dict(exclude={"groups"}),status=HomeworkStatus.NOT_STARTED,
             dateOfCreation=current_date)
     session.add(homework)
     await session.flush() #Nuzno kako ne bi skipalo par grupa
