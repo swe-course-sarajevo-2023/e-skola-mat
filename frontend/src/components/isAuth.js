@@ -7,7 +7,6 @@ export default function isAuth(Component) {
   return function IsAuth(props) {
     const { authenticated } = useContext(AuthContext);
     // console.log(authenticated);
-
     useEffect(() => {
       if (!authenticated) {
         alert("not authenticated!");
