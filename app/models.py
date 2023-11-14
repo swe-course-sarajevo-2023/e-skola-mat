@@ -14,8 +14,8 @@ alembic revision --autogenerate -m "migration_name"
 alembic upgrade head
 """
 import uuid
-
-from sqlalchemy import DATETIME, TIMESTAMP, String, ForeignKey, Integer
+from enum import Enum
+from sqlalchemy import DATETIME, TIMESTAMP, String, ForeignKey, Integer, Enum as SQLAlchemyEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Optional
@@ -50,6 +50,10 @@ class User(Base):
     Role: Mapped[Role] = relationship("Role", backref="users",lazy="joined")
     hashed_password: Mapped[str] = mapped_column(String(128), nullable=False)
 
+class HomeworkStatus(Enum):
+    NOT_STARTED = "not started"
+    IN_PROGRESS = "in progress"
+    FINISHED = "finished"
 
 class Homework(Base):
     __tablename__ = "homework"
@@ -61,6 +65,8 @@ class Homework(Base):
     dateOfCreation = mapped_column(TIMESTAMP, nullable=True)
     deadline = mapped_column(TIMESTAMP, nullable=True)
     maxNumbersOfProblems = mapped_column(Integer, nullable=True)
+    status = Column(SQLAlchemyEnum(HomeworkStatus), nullable=False, default=HomeworkStatus.NOT_STARTED)
+
 
 
 class Class(Base):
