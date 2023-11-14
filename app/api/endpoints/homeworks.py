@@ -10,6 +10,7 @@ from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreat
 from fastapi import HTTPException
 from typing import List
 from datetime import datetime
+from uuid import UUID
 
 router = APIRouter()
 
@@ -52,6 +53,11 @@ async def add_homework(
         all_groups = await session.execute(select(Class))
         groups = all_groups.scalars().all()
     elif isinstance(new_homework.groups, list):
+        for group_id in new_homework.groups:
+            try:
+                UUID(group_id)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid groups input.")
         group_query = await session.execute(select(Class).where(Class.id.in_(new_homework.groups)))
         groups = group_query.scalars().all()
         if len(groups) != len(new_homework.groups):
