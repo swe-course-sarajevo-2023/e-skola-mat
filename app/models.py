@@ -15,7 +15,7 @@ alembic upgrade head
 """
 import uuid
 from enum import Enum
-from sqlalchemy import DATETIME, TIMESTAMP, String, ForeignKey, Integer, Enum as SQLAlchemyEnum
+from sqlalchemy import Column, DATETIME, TIMESTAMP, String, ForeignKey, Integer, Enum as SQLAlchemyEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Optional
