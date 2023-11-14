@@ -34,3 +34,5 @@ class GeneralComment(BaseModel):
 class UserDeleteRequest(BaseRequest):
     email: EmailStr
 
+class ClassCreateRequest(BaseModel):
+    name: str
