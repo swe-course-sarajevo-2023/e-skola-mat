@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
-from app.models import Homework, Class, ClassHomework, User
+from app.models import Homework, Class, ClassHomework, User, HomeworkStatus
 from app.schemas.responses import ClassHomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
 from fastapi import HTTPException
@@ -84,6 +84,29 @@ async def delete_homework(
     await session.execute(delete(Homework).where(Homework.id == homework_id))
     await session.commit()
 
+@router.patch("/update-homework-status/{homework_id}/{status}")
+def update_homework_status(
+    homework_id: str,
+    status: str,
+    db: Session = Depends(deps.get_db)
+):
+    # Nadjemo zadacu koju trazimo
+    homework = db.query(Homework).filter(Homework.id == homework_id).first()
+
+    if not homework:
+        raise HTTPException(status_code=404, detail="Homework not found")
+
+    if status == "not_started":
+        homework.status = HomeworkStatus.NOT_STARTED
+    elif status == "in_progress":
+        homework.status = HomeworkStatus.IN_PROGRESS
+    else:
+        homework.status = HomeworkStatus.FINISHED
+
+    # Spasimo promjene
+    db.commit()
+
+    return {"message": "Homework status updated successfully"}
 
 @router.post("/submit-homework/{homework_id}")
 def submit_homework(
@@ -126,6 +149,9 @@ def submit_homework(
             task.commentStudent = comment
         else:
             raise HTTPException(status_code=404, detail="Task not found")
+
+    # Kada submitamo zadacu mijenja se status u finished
+    homework.status = HomeworkStatus.FINISHED
 
     db.commit()
     return {"message": "Homework submitted successfully"}
