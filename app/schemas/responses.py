@@ -37,3 +37,7 @@ class GradeResponse(BaseResponse):
     homework_id: str
     grade: int
     note: str
+class ClassResponse(BaseModel):
+    id: str
+    name: str
+

@@ -2,7 +2,6 @@
 import {
   Box,
   Button,
-  CardActionArea,
   CardActions,
   Container,
   Modal,
@@ -15,7 +14,6 @@ import { useState } from "react";
 import Canvas from "../utils/canvas";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 
 const style = {
   position: "absolute",

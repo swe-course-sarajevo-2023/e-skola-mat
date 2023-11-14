@@ -3,11 +3,10 @@ import React, { useState } from "react";
 import { FileUploader } from "react-drag-drop-files"; 
 import {
     Box,
-    ListItem,
-    ListItemText,
     Modal,
     Typography,
-    TextField
+    TextField,
+    Button
   } from "@mui/material";
 const fileTypes = ["JPG", "PNG", "GIF"]; 
 const numOfTasks = [[1, 2], [1], [1, 2, 3], [1, 2, 3]]; //Broj zadataka unutar zadace
@@ -22,8 +21,8 @@ const style = {
   p: 4,
 };
 
-export default function SubmitModal(props) { 
-  const [comment, setComment]=useState("");
+export default function AddModal(props) { 
+  const [number, setNumber]=useState("");
   const [file, setFile] = useState(null); 
   const handleChange = file => { 
 	  setFile(file); 
@@ -39,25 +38,22 @@ export default function SubmitModal(props) {
     >
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h5" component="h2">
-          Pošalji zadaću {props.brojZadace + 1}
+          Dodaj zadaću
         </Typography>
-        {numOfTasks[props.brojZadace].map((zadatak, index) => (
-          <Box>
-            <ListItem
-              key={index}
-              disableGutters
-            >
-              <ListItemText primary={`Zadatak ${index+1}`} sx={{ marginRight: 3 }} />
-              <FileUploader 
+        <br></br>
+        <Box>
+        <FileUploader 
                 handleChange={handleChange} 
                 name="file"
                 types={fileTypes} 
-              />
-              
-            </ListItem>
-            <TextField fullWidth label="Komentar" id="komentar" onChange={(e)=>setComment(e.target.value)}/>
-          </Box>
-        ))}
+        />
+        <br></br>
+        <TextField fullWidth label="Redni broj zadaće" id="komentar" onChange={(e)=>setNumber(e.target.value)}/>
+      </Box>
+        <Button
+        sx={{ display: "flex" }}
+        size="small"
+        style={{border: "solid blue 1px", marginTop: "5%"}}>Postavi zadaću</Button>
       </Box>
     </Modal>  
   ); 

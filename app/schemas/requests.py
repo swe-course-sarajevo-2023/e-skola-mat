@@ -47,3 +47,5 @@ class TeacherGradesHomework(BaseRequest):
     note: str
 
 
+class ClassCreateRequest(BaseModel):
+    name: str
