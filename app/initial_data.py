@@ -56,7 +56,7 @@ async def main() -> None:
             print("Superuser already exists in database")
 
         result = await session.execute(
-            select(User).where(User.email == "profesor@example.com")
+            select(User).where(User.email == "professor@example.com")
         )
         user = result.scalars().first()
 
