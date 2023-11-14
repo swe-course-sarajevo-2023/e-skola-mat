@@ -29,3 +29,8 @@ class AccessTokenResponse(BaseResponse):
 class UserResponse(BaseResponse):
     id: str
     email: EmailStr
+
+class ClassResponse(BaseModel):
+    id: str
+    name: str
+
