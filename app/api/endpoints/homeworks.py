@@ -1,15 +1,16 @@
+from datetime import datetime
+import shutil
+from uuid import uuid4
 
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from app.api import deps
-from app.models import Homework, Class, ClassHomework, User, HomeworkStatus
+from app.models import Homework, Class, ClassHomework, User, HomeworkStatus, ProblemUserHomework, ProblemUserHomeworkImage, Image
 from app.schemas.responses import ClassHomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
-from fastapi import HTTPException
 from typing import List
-from datetime import datetime
 
 router = APIRouter()
 
@@ -115,7 +116,7 @@ def submit_homework(
     general_comment: GeneralComment,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
-    image_urls: List[str] = None,
+    images: List[UploadFile] = File(None),
 ):
     # Trazimo bazu
     homework = db.query(Homework).filter(Homework.id == homework_id).first()
@@ -126,19 +127,36 @@ def submit_homework(
     general_comment_text = general_comment.comment
     homework.general_comment = general_comment_text
 
-    # Ovdje treba ici kod i pokriti case kada imamo image urls
-    # Mozda napraviti odvojeni endpoint za submit slike gdje saljemo sliku i task id
-    # I onda ga zvati za svaki od URL-ova
-    if image_urls:
-        pass
+    if images:
+        for image in images:
+            unique_filename = f"{uuid4()}_{image.filename}"
+            file_path = f"images/{unique_filename}"
 
-    # Obrada komentara zadataka
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(image.file, buffer)
+
+            single_image = Image(filename=image.filename, file_path=file_path, \
+                created_at=datetime.now(),
+            )
+            db.add(single_image)
+            db.flush()  # Flush metoda dodaje ID za ovu instancu \
+            # ali nakon sto se doda u bazu
+
+            problem_image = ProblemUserHomeworkImage(
+                problem_user_homework_id=homework_id,  
+                image_id=single_image.id, # Ovdje vezemo zadatak za sliku
+                # Komentare cemo svakako updateovati dole
+            )
+            db.add(problem_image)  # Bice adekvatno dodano u bazu jer SQLAlchemy moze skontati
+            # po modelu gdje treba da je doda. Odnosno, bice adekvatno namapirana.
+
+    # Updateovanje komentara zadatak
     for task_comment in task_comments:
         task_id = task_comment.task_id
         comment = task_comment.comment
 
         # Treba naci odgovarajuci task u bazi
-        # Te ukoliko ih ima vise, uzeti prvi
+        # Te ukoliko ih greskom ima vise, uzeti prvi
         task = db.query(ProblemUserHomework).filter(
             ProblemUserHomework.homework_id == homework_id,
             ProblemUserHomework.id == task_id
