@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import List, Union, Literal
 from datetime import date, datetime
 from typing import Optional
+from app.models import HomeworkStatus
 
 class BaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -11,9 +12,10 @@ class BaseResponse(BaseModel):
 class HomeworkResponse(BaseModel):
     name: str
     maxNumbersOfProblems: int
-    deadline: date
-    dateOfCreation: date
+    deadline: datetime
+    dateOfCreation: datetime
     id: str
+    status: HomeworkStatus
 
 class ClassHomeworkResponse(HomeworkResponse):
     groups: Union[List[UUID], Literal['all']]

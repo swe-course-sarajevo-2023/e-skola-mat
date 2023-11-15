@@ -5,10 +5,10 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
 from app.models import Homework, Class, ClassHomework, User, HomeworkStatus, UserRole, HomeworkUser, ProblemUserHomework
-from app.schemas.responses import ClassHomeworkResponse, HomeworkUserDetailsResponse, ProblemUserHomeworkImageResponse, ProblemUserHomeworkResponse
+from app.schemas.responses import ClassHomeworkResponse, HomeworkUserDetailsResponse, ProblemUserHomeworkImageResponse, ProblemUserHomeworkResponse, HomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
 from fastapi import HTTPException
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 from sqlalchemy.orm import selectinload
@@ -17,14 +17,30 @@ from typing import List
 
 router = APIRouter()
 
+@router.get("/homeworks", response_model=List[HomeworkResponse])
+async def get_homeworks(
+    class_id: Optional[str] = None,
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    query = select(Homework)
+    if class_id:
+        query = query.join(ClassHomework).where(ClassHomework.class_id == class_id)
+    result = await session.execute(query)
+    homeworks = result.scalars().all()
+    
+    len(homeworks) or (lambda: exec('raise HTTPException(status_code=404, detail="Zadace nisu pronadjene")'))()
+
+    return homeworks
+
 @router.get("/homework-user/{homework_user_id}", response_model=HomeworkUserDetailsResponse)
 async def get_homework_user_details(
     homework_user_id: str,    
     #_: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR])),#trenutno radi kad treba jednu rolu prepoznat ali daje 403 kad su dvije
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_user),#ova linija je neophodna radi koriscenja ispod, sve i ako gornju zadrzimo
     session: AsyncSession = Depends(deps.get_session),
 ):
-    
+    #Nakon osposobljavanja komentara iznad, ovaj uslov mozemo uklonit
     if current_user.Role is None:
         raise HTTPException(status_code=403, detail="Nemate pravo pristupa")
  
@@ -33,7 +49,7 @@ async def get_homework_user_details(
     homework_user = result.scalar()
     if not homework_user:
         return None
-    
+    #ovo je nuzno da vidimo da li student zeli da cita tuđu zadaću 
     if current_user.Role.role.value != 'profesor' and homework_user.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Nemate pravo pristupa tudjoj zadaci")
 
