@@ -2,7 +2,6 @@
 import {
   Box,
   Button,
-  CardActionArea,
   CardActions,
   Container,
   Modal,

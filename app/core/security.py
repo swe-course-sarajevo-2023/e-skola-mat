@@ -26,23 +26,16 @@ class JWTTokenPayload(BaseModel):
     expires_at: int
 
 
-def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
-    """Creates jwt access or refresh token for user.
-
-    Args:
-        subject: anything unique to user, id or email etc.
-        exp_secs: expire time in seconds
-        refresh: if True, this is refresh token
-    """
-
+def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool, role: str = None):
     issued_at = int(time.time())
     expires_at = issued_at + exp_secs
 
-    to_encode: dict[str, int | str | bool] = {
+    to_encode: dict[str, int | str | bool | None] = {
         "issued_at": issued_at,
         "expires_at": expires_at,
         "sub": subject,
         "refresh": refresh,
+        "role": role,  
     }
     encoded_jwt = jwt.encode(
         to_encode,
@@ -52,10 +45,9 @@ def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
     return encoded_jwt, expires_at, issued_at
 
 
-def generate_access_token_response(subject: str | int):
-    """Generate tokens and return AccessTokenResponse"""
+def generate_access_token_response(subject: str | int, role: str = None):
     access_token, expires_at, issued_at = create_jwt_token(
-        subject, ACCESS_TOKEN_EXPIRE_SECS, refresh=False
+        subject, ACCESS_TOKEN_EXPIRE_SECS, refresh=False, role=role
     )
     refresh_token, refresh_expires_at, refresh_issued_at = create_jwt_token(
         subject, REFRESH_TOKEN_EXPIRE_SECS, refresh=True
