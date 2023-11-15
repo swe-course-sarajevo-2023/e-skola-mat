@@ -91,10 +91,12 @@ async def get_current_user(
 async def has_roles(roles: List[UserRole],current_user: User = Depends(get_current_user)):
     if current_user.Role is None:
         raise HTTPException(status_code=403, detail="User has no role assigned")
-
+    has_needed_roles=True
     for role in roles:
         if current_user.Role.role.name != role.name:
-            raise HTTPException(status_code=403, detail="Forbidden")
+            has_needed_roles=False
+    if not has_needed_roles: 
+        raise HTTPException(status_code=403, detail="Forbidden")
 
     return current_user
 
