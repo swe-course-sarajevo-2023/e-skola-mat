@@ -1,3 +1,4 @@
+import os
 import time
 from collections.abc import AsyncGenerator
 
@@ -14,39 +15,6 @@ from app.core.session import async_session
 from app.models import User, Role
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="auth/access-token")
-
-async def get_db() -> AsyncSession:
-    # Procitamo env varijable
-    ENVIRONMENT = os.environ.get("ENVIRONMENT")
-    if ENVIRONMENT == "TEST":
-        DATABASE_HOSTNAME = os.environ.get("DEFAULT_DATABASE_HOSTNAME")
-        DATABASE_USER = os.environ.get("DEFAULT_DATABASE_USER")
-        DATABASE_PASSWORD = os.environ.get("DEFAULT_DATABASE_PASSWORD")
-        DATABASE_PORT = os.environ.get("DEFAULT_DATABASE_PORT")
-        DATABASE_DB = os.environ.get("DEFAULT_DATABASE_DB")
-    else:
-        DATABASE_HOSTNAME = os.environ.get("TEST_DATABASE_HOSTNAME")
-        DATABASE_USER = os.environ.get("TEST_DATABASE_USER")
-        DATABASE_PASSWORD = os.environ.get("TEST_DATABASE_PASSWORD")
-        DATABASE_PORT = os.environ.get("TEST_DATABASE_PORT")
-        DATABASE_DB = os.environ.get("TEST_DATABASE_DB")
-
-    # Konstrukcija url-a baze
-    DATABASE_URL = f"postgresql+asyncpg://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOSTNAME}:{DATABASE_PORT}/{DATABASE_DB}"
-
-    async_engine = create_async_engine(DATABASE_URL, echo=True)
-    AsyncSessionFactory = sessionmaker(
-        bind=async_engine, class_=AsyncSession, expire_on_commit=False
-    )
-    db: AsyncSession = AsyncSessionFactory()
-    try:
-        yield db
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
-    finally:
-        await db.close()
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
