@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
-from app.models import Homework, Class, ClassHomework, User, HomeworkStatus
+from app.models import Homework, Class, ClassHomework, User, HomeworkStatus, UserRole
 from app.schemas.responses import ClassHomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
 from fastapi import HTTPException
@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[ClassHomeworkResponse])
 async def list_all_homeworks(
-    _: User = Depends(deps.is_professor),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
     ):
     result = await session.execute(
@@ -39,7 +39,7 @@ async def list_all_homeworks(
 @router.post("/", response_model=ClassHomeworkResponse)
 async def add_homework(
     new_homework: ClassHomeworkCreateRequest,
-    _: User = Depends(deps.is_professor),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),):
     
     current_date = datetime.utcnow().date()
@@ -79,7 +79,7 @@ async def add_homework(
 @router.delete("/{homework_id}", status_code=204)
 async def delete_homework(
     homework_id: str,
-    _: User = Depends(deps.is_professor),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),):
     await session.execute(delete(ClassHomework).where(ClassHomework.homework_id == homework_id))
     await session.execute(delete(Homework).where(Homework.id == homework_id))
@@ -89,7 +89,8 @@ async def delete_homework(
 def update_homework_status(
     homework_id: str,
     status: str,
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
+    _: User = Depends(deps.RoleCheck([])),
 ):
     # Nadjemo zadacu koju trazimo
     homework = db.query(Homework).filter(Homework.id == homework_id).first()
@@ -115,7 +116,7 @@ def submit_homework(
     task_comments: List[TaskComment],
     general_comment: GeneralComment,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    _: User = Depends(deps.RoleCheck([])),
     image_urls: List[str] = None,
 ):
     # Trazimo bazu
@@ -162,7 +163,7 @@ def submit_comment(
     task_id: str,
     comment: str,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),  
+    _: User = Depends(deps.RoleCheck([])),
 ):
     # Provjeriti ako task postoji
     task = db.query(ProblemUserHomework).filter(ProblemUserHomework.id == task_id).first()

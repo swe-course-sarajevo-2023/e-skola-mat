@@ -1,6 +1,6 @@
 import time
 from collections.abc import AsyncGenerator
-
+from typing import List
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -10,7 +10,7 @@ from sqlalchemy.orm import joinedload
 
 from app.core import config, security
 from app.core.session import async_session
-from app.models import User, Role
+from app.models import User, UserRole
 
 from sqlalchemy.dialects import postgresql
 
@@ -88,11 +88,20 @@ async def get_current_user(
         raise HTTPException(status_code=404, detail="User not found.")
     return user
 
-async def is_professor(current_user: User = Depends(get_current_user)):
+async def has_roles(roles: List[UserRole],current_user: User = Depends(get_current_user)):
     if current_user.Role is None:
         raise HTTPException(status_code=403, detail="User has no role assigned")
 
-    if current_user.Role.role != "Profesor":
-        raise HTTPException(status_code=403, detail="Not authorized")
+    for role in roles:
+        if current_user.Role.role.name != role.name:
+            raise HTTPException(status_code=403, detail="Forbidden")
 
     return current_user
+
+class RoleCheck:
+    def __init__(self, roles: List[UserRole]):
+        self.roles = roles
+
+    async def __call__(self, current_user: User = Depends(get_current_user)):
+        return await has_roles(self.roles, current_user)
+
