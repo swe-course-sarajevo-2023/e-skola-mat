@@ -1,5 +1,8 @@
+"use client";
 import JednaZadacaGrupeView from "@/views/jedna-zadaca-grupe-view";
 
-export default function JednaZadacaGrupe({params}) {
+const JednaZadacaGrupe = ({ params }) => {
   return <JednaZadacaGrupeView zadaca={params.id} />;
-}
+};
+
+export default JednaZadacaGrupe;

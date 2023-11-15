@@ -1,16 +1,41 @@
-import axios, { AxiosRequestConfig } from 'axios';
-
+import axios from "axios";
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: 'https://api.example.com' }); // Replace with your API URL
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:8000",
+});
 
 axiosInstance.interceptors.response.use(
   (res) => res,
-  (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong')
+  (error) =>
+    Promise.reject(
+      (error.response && error.response.data) || "Something went wrong"
+    )
 );
 
-export default axiosInstance;
+// ----------------------------------------------------------------------
+
+const axiosInstanceWithAuthToken = axios.create({
+  baseURL: "http://localhost:8000",
+});
+
+axiosInstanceWithAuthToken.interceptors.request.use(
+  (request) => {
+    const token = localStorage.getItem("token");
+    request.headers.Authorization = `Bearer ${token}`;
+    return request;
+  },
+  (error) => {
+    if (error?.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(
+      (error.response && error.response.data) || "Something went wrong"
+    );
+  }
+);
 
 // ----------------------------------------------------------------------
 
@@ -23,3 +48,6 @@ export const fetcher = async (args) => {
 };
 
 // ----------------------------------------------------------------------
+
+export default axiosInstance;
+export { axiosInstanceWithAuthToken };

@@ -1,7 +1,7 @@
 import time
 
 import jwt
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Header, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ValidationError
 from sqlalchemy import select
@@ -81,3 +81,22 @@ async def refresh_token(
         raise HTTPException(status_code=404, detail="User not found")
 
     return security.generate_access_token_response(str(user.id))
+
+@router.get("/verify-token", response_model=bool)
+def verify_access_token(
+    authorization = Header(...)
+):
+    """Verify the access token"""
+    try:
+        # Decode the token and extract claims
+        _, token = authorization.split(" ")
+        jwt.decode(
+            token,
+            key=config.settings.SECRET_KEY,
+            algorithms=[security.JWT_ALGORITHM],
+        )
+
+        return True  # Token is valid
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
