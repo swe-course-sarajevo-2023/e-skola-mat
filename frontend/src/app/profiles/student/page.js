@@ -1,6 +1,6 @@
 // import UcenikView from "@/views/login-view";
-import UcenikView from "@/views/ucenik-view";
+import StudentView from "@/views/student-view";
 
 export default function Ucenik() {
-  return <UcenikView />;
+  return <StudentView />;
 }

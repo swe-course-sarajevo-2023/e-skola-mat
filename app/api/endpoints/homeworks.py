@@ -5,17 +5,20 @@ from uuid import uuid4
 from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api import deps
-from app.models import Homework, Class, ClassHomework, User, ProblemUserHomework, ProblemUserHomeworkImage, Image
+from app.models import Homework, Class, ClassHomework, User, ProblemUserHomework, ProblemUserHomeworkImage, Image, HomeworkStatus, UserRole
 from app.schemas.responses import ClassHomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
 from typing import List
+from datetime import datetime
+from uuid import UUID
 
 router = APIRouter()
 
 @router.get("/", response_model=List[ClassHomeworkResponse])
 async def list_all_homeworks(
-    _: User = Depends(deps.is_professor),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
     ):
     result = await session.execute(
@@ -38,11 +41,11 @@ async def list_all_homeworks(
 @router.post("/", response_model=ClassHomeworkResponse)
 async def add_homework(
     new_homework: ClassHomeworkCreateRequest,
-    _: User = Depends(deps.is_professor),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),):
     
     current_date = datetime.utcnow().date()
-    homework = Homework(**new_homework.dict(exclude={"groups"}),
+    homework = Homework(**new_homework.dict(exclude={"groups"}),status=HomeworkStatus.NOT_STARTED,
             dateOfCreation=current_date)
     session.add(homework)
     await session.flush() #Nuzno kako ne bi skipalo par grupa
@@ -78,12 +81,37 @@ async def add_homework(
 @router.delete("/{homework_id}", status_code=204)
 async def delete_homework(
     homework_id: str,
-    _: User = Depends(deps.is_professor),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),):
     await session.execute(delete(ClassHomework).where(ClassHomework.homework_id == homework_id))
     await session.execute(delete(Homework).where(Homework.id == homework_id))
     await session.commit()
 
+@router.patch("/update-homework-status/{homework_id}/{status}")
+async def update_homework_status(
+    homework_id: str,
+    status: str,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([])),
+):
+    # Nadjemo zadacu koju trazimo
+    homework_query = await session.execute(select(Homework).where(Homework.id == homework_id))
+    homework = homework_query.first()
+
+    if not homework:
+        raise HTTPException(status_code=404, detail="Homework not found")
+
+    if status == "not_started":
+        homework.status = HomeworkStatus.NOT_STARTED
+    elif status == "in_progress":
+        homework.status = HomeworkStatus.IN_PROGRESS
+    else:
+        homework.status = HomeworkStatus.FINISHED
+
+    # Spasimo promjene
+    await session.commit()
+
+    return {"message": "Homework status updated successfully"}
 
 @router.post("/submit-homework/{homework_id}/task/{task_number}")
 async def submit_homework(

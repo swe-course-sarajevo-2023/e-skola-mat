@@ -5,18 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import config, security
 from app.core.session import async_session
-from app.models import User, Role, Class
+from app.models import User, Role, Class, UserRole
 
 
 async def insert_roles_and_groups(session: AsyncSession):
-    roles = ["Administrator", "Profesor", "Asistent", "Student"]
     role_uuids = {}
-    for role in roles:
+    for role in UserRole:
         existing_role = await session.execute(select(Role).where(Role.role == role))
         if not existing_role.scalars().first():
             role_uuid = uuid.uuid4()
-            session.add(Role(role=role, id=role_uuid))
-            role_uuids[role] = role_uuid
+            session.add(Role(role=role.name, id=role_uuid))
+            role_uuids[role.name] = role_uuid
 
     groups = ["A", "B", "C", "D", "E"]
     for group in groups:
@@ -41,7 +40,7 @@ async def main() -> None:
         user = result.scalars().first()
 
         if user is None:
-            admin_uuid = role_uuids.get("Administrator")
+            admin_uuid = role_uuids.get("ADMINISTRATOR")
             new_superuser = User(
                 email=config.settings.FIRST_SUPERUSER_EMAIL,
                 hashed_password=security.get_password_hash(
@@ -56,12 +55,12 @@ async def main() -> None:
             print("Superuser already exists in database")
 
         result = await session.execute(
-            select(User).where(User.email == "profesor@example.com")
+            select(User).where(User.email == "professor@example.com")
         )
         user = result.scalars().first()
 
         if user is None:
-            professor_uuid = role_uuids.get("Profesor")
+            professor_uuid = role_uuids.get("PROFESSOR")
             professor_user = User(
                 email="professor@example.com",
                 hashed_password=security.get_password_hash(

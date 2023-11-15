@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import List, Union, Literal
 from datetime import date
@@ -14,7 +15,7 @@ class HomeworkResponse(BaseModel):
     id: str
 
 class ClassHomeworkResponse(HomeworkResponse):
-    groups: Union[List[str], Literal['all']]
+    groups: Union[List[UUID], Literal['all']]
 
 class AccessTokenResponse(BaseResponse):
     token_type: str
@@ -29,3 +30,15 @@ class AccessTokenResponse(BaseResponse):
 class UserResponse(BaseResponse):
     id: str
     email: EmailStr
+
+
+class GradeResponse(BaseResponse):
+    id: str
+    user_id: str
+    homework_id: str
+    grade: int
+    note: str
+class ClassResponse(BaseModel):
+    id: str
+    name: str
+
