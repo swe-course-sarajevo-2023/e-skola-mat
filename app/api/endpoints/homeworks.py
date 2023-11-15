@@ -7,14 +7,93 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
-from app.models import Homework, Class, ClassHomework, User, ProblemUserHomework, ProblemUserHomeworkImage, Image, HomeworkStatus, UserRole
-from app.schemas.responses import ClassHomeworkResponse
+from app.models import Homework, Class, ClassHomework, User, ProblemUserHomework, ProblemUserHomeworkImage, Image, HomeworkStatus, UserRole, HomeworkUser, ProblemUserHomework
+from app.schemas.responses import ClassHomeworkResponse, HomeworkUserDetailsResponse, ProblemUserHomeworkImageResponse, ProblemUserHomeworkResponse, HomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
-from typing import List
+from typing import List, Optional
 from datetime import datetime
-from uuid import UUID
+
+from sqlalchemy.orm import selectinload
+from sqlalchemy.future import select
+from typing import List
 
 router = APIRouter()
+#dodati pregled za studenta
+@router.get("/homeworks", response_model=List[HomeworkResponse])
+async def get_homeworks(
+    class_id: Optional[str] = None,
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    query = select(Homework)
+    if class_id:
+        query = query.join(ClassHomework).where(ClassHomework.class_id == class_id)
+    result = await session.execute(query)
+    homeworks = result.scalars().all()
+    
+    len(homeworks) or (lambda: exec('raise HTTPException(status_code=404, detail="Zadace nisu pronadjene")'))()
+
+    return homeworks
+
+@router.get("/homework-user/{homework_user_id}", response_model=HomeworkUserDetailsResponse)
+async def get_homework_user_details(
+    homework_user_id: str,    
+    #_: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR])),#trenutno radi kad treba jednu rolu prepoznat ali daje 403 kad su dvije
+    current_user: User = Depends(deps.get_current_user),#ova linija je neophodna radi koriscenja ispod, sve i ako gornju zadrzimo
+    session: AsyncSession = Depends(deps.get_session),
+):
+    #Nakon osposobljavanja komentara iznad, ovaj uslov mozemo uklonit
+    if current_user.Role is None:
+        raise HTTPException(status_code=403, detail="Nemate pravo pristupa")
+ 
+    query = select(HomeworkUser).where(HomeworkUser.id == homework_user_id)
+    result = await session.execute(query)
+    homework_user = result.scalar()
+    if not homework_user:
+        return None
+    #ovo je nuzno da vidimo da li student zeli da cita tuđu zadaću 
+    if current_user.Role.role.value != 'profesor' and homework_user.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Nemate pravo pristupa tudjoj zadaci")
+
+    query = select(ProblemUserHomework) \
+        .where(ProblemUserHomework.user_id == homework_user.user_id) \
+        .options(selectinload(ProblemUserHomework.images))
+
+    result = await session.execute(query)
+    problem_user_homeworks = result.scalars().all()
+
+    problem_user_homework_responses = []
+    for pu_homework in problem_user_homeworks:
+        image_responses = [
+            ProblemUserHomeworkImageResponse(
+                id=image.id,
+                image_path=image.image_path,
+                comment_teacher=image.comment_teacher,
+                comment_student=image.comment_student,
+            )
+            for image in pu_homework.images
+        ]
+
+        pu_homework_response = ProblemUserHomeworkResponse(
+            id=pu_homework.id,
+            order_number_of_the_task=pu_homework.order_number_of_the_task,
+            commentTeacher=pu_homework.commentTeacher,
+            commentStudent=pu_homework.commentStudent,
+            images=image_responses,
+        )
+
+        problem_user_homework_responses.append(pu_homework_response)
+
+    homework_user_response = HomeworkUserDetailsResponse(
+        id=homework_user.id,
+        user_id=homework_user.user_id,
+        grade=homework_user.grade,
+        note=homework_user.note,
+        problems=problem_user_homework_responses,
+    )
+
+    return homework_user_response
+
 
 @router.get("/", response_model=List[ClassHomeworkResponse])
 async def list_all_homeworks(
