@@ -1,5 +1,5 @@
-import ProfesorHomepageView from "@/views/profesor-homepage-view";
+import ProfesorHomepageView from "@/views/professor-homepage-view";
 
 export default function ProfesorHomepage() {
-  return <ProfesorHomepageView/>;
+  return <ProfesorHomepageView />;
 }

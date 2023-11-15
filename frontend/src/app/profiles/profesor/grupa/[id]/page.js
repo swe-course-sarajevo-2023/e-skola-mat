@@ -1,5 +1,5 @@
-import ProfesorGrupaView from "@/views/profesor-grupa-view";
+import ProfessorGroupView from "@/views/professor-group-view";
 
-export default function ProfesorGrupa({params}) {
-  return <ProfesorGrupaView grupa={params.id} />;
+export default function ProfessorGroup({ params }) {
+  return <ProfessorGroupView grupa={params.id} />;
 }

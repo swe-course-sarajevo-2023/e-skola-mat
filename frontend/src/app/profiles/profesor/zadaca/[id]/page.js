@@ -1,5 +1,5 @@
-import JednaZadacaGrupeView from "@/views/jedna-zadaca-grupe-view";
+import GroupsHomeworkView from "@/views/groups-homework-view";
 
-export default function JednaZadacaGrupe({params}) {
-  return <JednaZadacaGrupeView zadaca={params.id} />;
+export default function GroupsHomework({ params }) {
+  return <GroupsHomeworkView zadaca={params.id} />;
 }

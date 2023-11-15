@@ -9,8 +9,9 @@ import {
 import { FormDialog, HomeworkCard } from "@/components/professor-homework";
 import { useMutation, useQuery } from "react-query";
 import { deleteProfessorHomework, getProfessorHomeworks } from "@/api";
+import isAuth from "@/components/isAuth";
 
-export default function ProfessorHomeworkView() {
+const ProfessorHomeworkView = () => {
   const [open, setOpen] = useState(false);
   const { data, isLoading, error, isError, refetch } = useQuery(
     ["fetchProfessorHomework"],
@@ -79,4 +80,6 @@ export default function ProfessorHomeworkView() {
       <FormDialog open={open} handleClose={handleClose} refetch={refetch} />
     </Container>
   );
-}
+};
+
+export default isAuth(ProfessorHomeworkView, "professor-homework-view");
