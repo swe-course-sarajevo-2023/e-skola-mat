@@ -36,7 +36,7 @@ async def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
     # Fetch the role from the user object
-    user_role = user.Role.role if user.Role else None
+    user_role = user.Role.role.value if user.Role else None
 
     # Generate the access token response including the user's role
     return security.generate_access_token_response(str(user.id), user_role)

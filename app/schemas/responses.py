@@ -1,6 +1,9 @@
+from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import List, Union, Literal
-from datetime import date
+from datetime import date, datetime
+from typing import Optional
+from app.models import HomeworkStatus
 
 class BaseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -9,12 +12,13 @@ class BaseResponse(BaseModel):
 class HomeworkResponse(BaseModel):
     name: str
     maxNumbersOfProblems: int
-    deadline: date
-    dateOfCreation: date
+    deadline: datetime
+    dateOfCreation: datetime
     id: str
+    status: HomeworkStatus
 
 class ClassHomeworkResponse(HomeworkResponse):
-    groups: Union[List[str], Literal['all']]
+    groups: Union[List[UUID], Literal['all']]
 
 class AccessTokenResponse(BaseResponse):
     token_type: str
@@ -41,3 +45,22 @@ class ClassResponse(BaseModel):
     id: str
     name: str
 
+class ProblemUserHomeworkImageResponse(BaseModel):
+    id: str
+    image_path: Optional[str]
+    comment_teacher: Optional[str]
+    comment_student: Optional[str]
+
+class ProblemUserHomeworkResponse(BaseModel):
+    id: str
+    order_number_of_the_task: Optional[int]
+    commentTeacher: Optional[str]
+    commentStudent: Optional[str]
+    images: List[ProblemUserHomeworkImageResponse]
+
+class HomeworkUserDetailsResponse(BaseModel):
+    id: str
+    user_id: str
+    grade: Optional[int]
+    note: Optional[str]
+    problems: List[ProblemUserHomeworkResponse]

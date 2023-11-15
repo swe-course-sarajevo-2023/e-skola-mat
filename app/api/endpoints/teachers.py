@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 from app.api import deps
 from app.core.security import get_password_hash
-from app.models import User, Role, Homework, ProblemUserHomework, HomeworkUser
+from app.models import User, Role, Homework, ProblemUserHomework, HomeworkUser, UserRole
 from app.schemas.requests import UserCreateRequest, UserUpdatePasswordRequest, UserDeleteRequest, \
     TeacherCommentsHomework, TeacherGradesHomework
 from app.schemas.responses import UserResponse, GradeResponse
@@ -25,13 +25,8 @@ def is_valid_uuid(uuid_str):
 async def add_teacher(
         new_student: UserCreateRequest,
         session: AsyncSession = Depends(deps.get_session),
-        current_user: User = Depends(deps.get_current_user),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR])),
 ):
-    role = await session.execute(select(Role.role).where(Role.id == current_user.role_id))
-    role = role.scalar()
-    if role not in ["admin", "teacher"]:
-        raise HTTPException(status_code=403, detail="Only admins and teachers can add students")
-
     email = await session.execute(select(User).where(User.email == new_student.email))
     if email.scalar() is not None:
         raise HTTPException(status_code=403, detail="Cannot use this email address")
@@ -49,13 +44,9 @@ async def add_teacher(
 async def delete_teacher(
         student: UserDeleteRequest,
         session: AsyncSession = Depends(deps.get_session),
-        current_user: User = Depends(deps.get_current_user),
-):
-    role = await session.execute(select(Role.role).where(Role.id == current_user.role_id))
-    role = role.scalar()
-    if role not in ["admin", "teacher"]:
-        raise HTTPException(status_code=403, detail="Only admins and teachers can delete students")
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR])),
 
+):
     user = await session.execute(select(User).where(User.email == student.email))
     user = user.scalar()
     if user is None:
@@ -75,12 +66,8 @@ async def delete_teacher(
 async def get_homeworks(
         homework_id,
         session: AsyncSession = Depends(deps.get_session),
-        current_user: User = Depends(deps.get_current_user),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR])),
 ):
-    role = await session.execute(select(Role.role).where(Role.id == current_user.role_id))
-    role = role.scalar()
-    if role not in ["admin", "teacher"]:
-        raise HTTPException(status_code=403, detail="Only admins and teachers can see submited homeworks")
 
     if not is_valid_uuid(homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
@@ -89,7 +76,6 @@ async def get_homeworks(
         select(ProblemUserHomework).where(ProblemUserHomework.homework_id == homework_id))
     problem_user_homeworks = problem_user_homeworks.scalars().all()
 
-    print("OVO", problem_user_homeworks)
     if len(problem_user_homeworks) == 0:
         raise HTTPException(status_code=400, detail="id does not exist")
 
@@ -116,13 +102,8 @@ async def get_homeworks(
 async def get_homeworks(
         problem_user_homework_id,
         session: AsyncSession = Depends(deps.get_session),
-        current_user: User = Depends(deps.get_current_user),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR])),
 ):
-    role = await session.execute(select(Role.role).where(Role.id == current_user.role_id))
-    role = role.scalar()
-    if role not in ["admin", "teacher"]:
-        raise HTTPException(status_code=403, detail="Only admins and teachers can see submited homeworks")
-
     if not is_valid_uuid(problem_user_homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
 
@@ -153,13 +134,8 @@ async def get_homeworks(
 async def comment_homework(
         comment: TeacherCommentsHomework,
         session: AsyncSession = Depends(deps.get_session),
-        current_user: User = Depends(deps.get_current_user),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR])),
 ):
-    role = await session.execute(select(Role.role).where(Role.id == current_user.role_id))
-    role = role.scalar()
-    if role not in ["admin", "teacher"]:
-        raise HTTPException(status_code=403, detail="Only admins and teachers comment homeworks")
-
     if not is_valid_uuid(comment.id):
         raise HTTPException(status_code=400, detail="id is not valid")
 
@@ -179,12 +155,8 @@ async def comment_homework(
 async def grade_homework(
         grade: TeacherGradesHomework,
         session: AsyncSession = Depends(deps.get_session),
-        current_user: User = Depends(deps.get_current_user),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR])),
 ):
-    role = await session.execute(select(Role.role).where(Role.id == current_user.role_id))
-    role = role.scalar()
-    if role not in ["admin", "teacher"]:
-        raise HTTPException(status_code=403, detail="Only admins and teachers grade homeworks")
 
     if not is_valid_uuid(grade.user_id) or not is_valid_uuid(grade.homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
