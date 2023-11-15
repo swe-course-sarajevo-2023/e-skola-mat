@@ -7,7 +7,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
-from app.models import Homework, Class, ClassHomework, User, ProblemUserHomework, ProblemUserHomeworkImage, Image, HomeworkStatus, UserRole, HomeworkUser, ProblemUserHomework
+from app.models import Homework, Class, ClassHomework, User, ProblemUserHomework, ProblemUserHomeworkImage, Image, HomeworkStatus, UserRole, HomeworkUser, ProblemUserHomework, UserClass
 from app.schemas.responses import ClassHomeworkResponse, HomeworkUserDetailsResponse, ProblemUserHomeworkImageResponse, ProblemUserHomeworkResponse, HomeworkResponse
 from app.schemas.requests import TaskComment, GeneralComment, ClassHomeworkCreateRequest
 from typing import List, Optional
@@ -18,20 +18,34 @@ from sqlalchemy.future import select
 from typing import List
 
 router = APIRouter()
-#dodati pregled za studenta
-@router.get("/homeworks", response_model=List[HomeworkResponse])
+
+@router.get("/homeworks", response_model=List[HomeworkResponse]) ##Profesor ukoliko pozove bez parametara vraća sve zadaće, a sa parametrom samo zadaće da određenu grupu. Student ako pozove sa ili bez paraletara uvijek vraća samo za njegovu grupu
 async def get_homeworks(
     class_id: Optional[str] = None,
-    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+    current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
+    # Initialize the query
     query = select(Homework)
-    if class_id:
+
+    # Check if the current user is a student
+    if current_user.Role.role.value == UserRole.STUDENT.value:
+        # Query the UserClass table to get class IDs for this student
+        student_class_query = select(UserClass.class_id).where(UserClass.user_id == current_user.id)
+        student_class_result = await session.execute(student_class_query)
+        student_class_id = student_class_result.scalars().one()
+        print(student_class_id)
+        # Modify query to filter homeworks based on these class IDs
+        query = query.join(ClassHomework).where(ClassHomework.class_id == student_class_id)
+    elif class_id:
+        # If a specific class_id is provided, modify query based on that
         query = query.join(ClassHomework).where(ClassHomework.class_id == class_id)
+
     result = await session.execute(query)
     homeworks = result.scalars().all()
     
-    len(homeworks) or (lambda: exec('raise HTTPException(status_code=404, detail="Zadace nisu pronadjene")'))()
+    if not homeworks:
+        raise HTTPException(status_code=404, detail="Homeworks not found")
 
     return homeworks
 
