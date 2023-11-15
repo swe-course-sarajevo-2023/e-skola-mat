@@ -24,15 +24,19 @@ from typing import Optional
 class Base(DeclarativeBase):
     pass
 
-
-class Role(Base):
+class UserRole (Enum):
+    ADMINISTRATOR= "administrator"
+    PROFESSOR= "profesor"
+    STUDENT= "student"
+    TA= "asistent"
+    GUEST= "gost"
+class Role (Base):
     __tablename__ = "roles"
 
     id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), primary_key=True, default=lambda _: str(uuid.uuid4())
     )
-    role = mapped_column(String, nullable=True)
-
+    role = Column(SQLAlchemyEnum(UserRole, name="user_role_enum"), nullable=False)
 
 class User(Base):
     __tablename__ = "user_model"
@@ -65,7 +69,7 @@ class Homework(Base):
     dateOfCreation = mapped_column(TIMESTAMP, nullable=True)
     deadline = mapped_column(TIMESTAMP, nullable=True)
     maxNumbersOfProblems = mapped_column(Integer, nullable=True)
-    status = Column(SQLAlchemyEnum(HomeworkStatus), nullable=False, default=HomeworkStatus.NOT_STARTED)
+    status = Column(SQLAlchemyEnum(HomeworkStatus,name="homeworkstatus"), nullable=False, default=HomeworkStatus.NOT_STARTED)
 
 
 

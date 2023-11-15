@@ -29,7 +29,6 @@ class JWTTokenPayload(BaseModel):
 def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool, role: str = None):
     issued_at = int(time.time())
     expires_at = issued_at + exp_secs
-
     to_encode: dict[str, int | str | bool | None] = {
         "issued_at": issued_at,
         "expires_at": expires_at,
