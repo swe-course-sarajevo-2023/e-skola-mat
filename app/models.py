@@ -14,8 +14,9 @@ alembic revision --autogenerate -m "migration_name"
 alembic upgrade head
 """
 import uuid
+
 from enum import Enum
-from sqlalchemy import Column, DATETIME, TIMESTAMP, String, ForeignKey, Integer, Enum as SQLAlchemyEnum
+from sqlalchemy import Column, DateTime, func, TIMESTAMP, String, ForeignKey, Integer, Enum as SQLAlchemyEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Optional
@@ -147,6 +148,14 @@ class ProblemUserHomework(Base):
         "Homework", backref="problem_user_homeworks")
 
 
+class Image(Base):
+    __tablename__ = "images"
+
+    id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    filename = mapped_column(String, nullable=False)
+    file_path = mapped_column(String, nullable=False)
+    created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
+
 class ProblemUserHomeworkImage(Base):
     __tablename__ = "problem-user-homework-image"
 
@@ -156,9 +165,7 @@ class ProblemUserHomeworkImage(Base):
     problem_user_homework_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), ForeignKey('problem-user-homework.id'), nullable=True
     )
-    image_path: Mapped[str] = mapped_column(
-        String(255), nullable=True
-    )
+    image_id = mapped_column(UUID(as_uuid=True), ForeignKey('images.id'), nullable=True)
     comment_teacher: Mapped[str] = mapped_column(
         String(255), nullable=True
     )

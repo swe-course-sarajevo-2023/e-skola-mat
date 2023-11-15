@@ -1,5 +1,9 @@
-import ProfesorHomepageView from "@/views/professor-homepage-view";
+"use client";
+import { useProtectedRoute } from "@/hooks";
+import ProfesorHomepageView from "@/views/profesor-homepage-view";
 
-export default function ProfesorHomepage() {
+const ProfesorHomepage = () => {
   return <ProfesorHomepageView />;
-}
+};
+
+export default useProtectedRoute(ProfesorHomepage);

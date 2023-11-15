@@ -1,5 +1,9 @@
+"use client";
 import ProfessorGroupView from "@/views/professor-group-view";
+import { useProtectedRoute } from "@/hooks";
 
-export default function ProfessorGroup({ params }) {
+const ProfessorGroup = ({ params }) => {
   return <ProfessorGroupView grupa={params.id} />;
-}
+};
+
+export default useProtectedRoute(ProfesorGrupa);
