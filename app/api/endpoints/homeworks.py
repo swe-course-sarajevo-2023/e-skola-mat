@@ -16,7 +16,7 @@ from sqlalchemy.future import select
 from typing import List
 
 router = APIRouter()
-
+#dodati pregled za studenta
 @router.get("/homeworks", response_model=List[HomeworkResponse])
 async def get_homeworks(
     class_id: Optional[str] = None,
