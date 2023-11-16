@@ -1,6 +1,9 @@
-// import LoginView from "@/views/login-view";
+"use client";
+import { useProtectedRoute } from "@/hooks";
 import HomeworkView from "@/views/homework-view";
 
-export default function Login() {
+const Homework = () => {
   return <HomeworkView />;
-}
+};
+
+export default useProtectedRoute(Homework);

@@ -1,6 +1,9 @@
-// import UcenikView from "@/views/login-view";
+"use client";
+import { useProtectedRoute } from "@/hooks";
 import StudentView from "@/views/student-view";
 
-export default function Ucenik() {
+const Ucenik = () => {
   return <StudentView />;
-}
+};
+
+export default useProtectedRoute(StudentView);

@@ -1,4 +1,12 @@
-import axiosInstance from "@/utils/axios";
+import axiosInstance, { axiosInstanceWithAuthToken } from "@/utils/axios";
+
+export const loginUser = async ({ username, password }) => {
+  const formData = new FormData();
+  formData.append("username", username);
+  formData.append("password", password);
+  const { data } = await axiosInstance.post("/auth/access-token", formData);
+  return data;
+};
 
 export const getUsers = async () => {
   try {
@@ -31,14 +39,14 @@ export const removeUser = async () => {
 };
 
 export const getProfessorHomeworks = async () => {
-  const { data } = await axiosInstance.get("/homeworks");
+  const { data } = await axiosInstanceWithAuthToken.get("/homeworks");
   return data;
 };
 
 export const createProfessorHomework = async (data) => {
-  await axiosInstance.post("/homeworks", data);
+  await axiosInstanceWithAuthToken.post("/homeworks", data);
 };
 
 export const deleteProfessorHomework = async (id) => {
-  await axiosInstance.delete(`/homeworks/homework/${id}`);
+  await axiosInstanceWithAuthToken.delete(`/homeworks/homework/${id}`);
 };
