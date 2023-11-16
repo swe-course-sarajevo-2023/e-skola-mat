@@ -19,14 +19,14 @@ async def add_teacher(
         current_user: User = Depends(deps.get_current_user),
 ):
     role = await session.execute(select(Role.role).where(Role.id == current_user.role_id))
-    if role.scalar() == "admin":
+    if role.scalar() == "Administrator":
         email = await session.execute(select(User).where(User.email == new_teacher.email))
         if email.scalar() is not None:
             raise HTTPException(status_code=400, detail="Cannot use this email address")
         user = User(
             email=new_teacher.email,
             hashed_password=get_password_hash(new_teacher.password),
-            role_id=select(Role.id).where(Role.role == "teacher")
+            role_id=select(Role.id).where(Role.role == "Profesor")
         )
         session.add(user)
         await session.commit()
@@ -42,14 +42,14 @@ async def delete_teacher(
         current_user: User = Depends(deps.get_current_user),
 ):
     role = await session.execute(select(Role.role).where(Role.id == current_user.role_id))
-    if role.scalar() == "admin":
+    if role.scalar() == "Administrator":
         user = await session.execute(select(User).where(User.email == teacher.email))
         user = user.scalar()
         if user is None:
             raise HTTPException(status_code=400, detail="This teacher doesn't exist")
         user_role = await session.execute(select(Role.role).where(Role.id == user.role_id))
         user_role = user_role.scalar()
-        if user_role != "teacher":
+        if user_role != "Profesor":
             raise HTTPException(status_code=400, detail="The user connected to given email is not a teacher")
         await session.execute(delete(User).where(User.email == teacher.email))
         await session.commit()
