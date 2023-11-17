@@ -9,8 +9,9 @@ import {
 import { useQuery, useMutation } from "react-query";
 import { FromDialog, UserCard } from "@/components/users";
 import { getUsers, removeUser } from "@/api";
+import isAuth from "@/components/isAuth";
 
-export default function UsersView() {
+const UsersView = () => {
   const removeuserMutation = useMutation(removeUser);
   const { data, isLoading, isError, error } = useQuery("fetchUsers", getUsers, {
     enabled: false,
@@ -60,4 +61,6 @@ export default function UsersView() {
       <FromDialog open={open} handleClose={handleClose} />
     </Container>
   );
-}
+};
+
+export default isAuth(UsersView, "users-view");

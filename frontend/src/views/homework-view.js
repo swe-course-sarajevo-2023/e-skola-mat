@@ -229,4 +229,4 @@ const HomeworkView = () => {
   );
 };
 
-export default isAuth(HomeworkView);
+export default isAuth(HomeworkView, "homework-view");

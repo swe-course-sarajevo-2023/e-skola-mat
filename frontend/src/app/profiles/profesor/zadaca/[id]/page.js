@@ -1,8 +1,5 @@
-"use client";
-import JednaZadacaGrupeView from "@/views/jedna-zadaca-grupe-view";
+import GroupsHomeworkView from "@/views/groups-homework-view";
 
-const JednaZadacaGrupe = ({ params }) => {
-  return <JednaZadacaGrupeView zadaca={params.id} />;
-};
-
-export default JednaZadacaGrupe;
+export default function GroupsHomework({ params }) {
+  return <GroupsHomeworkView zadaca={params.id} />;
+}
