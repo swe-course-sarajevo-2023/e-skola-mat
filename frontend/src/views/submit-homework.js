@@ -24,10 +24,12 @@ const style = {
 };
 
 export default function SubmitModal(props) { 
-  const [comment, setComment]=useState("");
-  const [file, setFile] = useState(null); 
-  const handleChange = file => { 
-	  setFile(file); 
+  const [comments, setComment]=useState(""); // comment from specific exercise
+  const [genComment, setGeneralComment]=useState(""); // general comment
+  const [fileList, setFiles] = useState([]); // uploaded files from one specific exercise
+  const handleChange = (files) => { 
+	  setFiles(files);
+    console.log(fileList); //shows structure of files for one exercise in console
   }; 
   
   return ( 
@@ -51,23 +53,29 @@ export default function SubmitModal(props) {
               <ListItemText primary={`Zadatak ${index+1}`} sx={{ marginRight: 3 }} />
               <FileUploader 
                 handleChange={handleChange} 
-                name="file"
+                name="files"
                 types={fileTypes} 
+                multiple
               />
               
             </ListItem>
             <TextField fullWidth label="Komentar" id="komentar" onChange={(e)=>setComment(e.target.value)}/>
-          </Box>
+            <Button
+              sx={{ display: "flex" }}
+              size="small"
+              style={{border: "solid blue 1px", marginTop: "5%"}}>Pošalji zadatak {index + 1}
+            </Button>
+           </Box>
         ))}
         <br></br>
         <Typography id="modal-modal-title" variant="h5" component="h2">
           Dodaj komentar na zadaću {props.brojZadace + 1}
         </Typography>
-        <TextField fullWidth label="Komentar" id="komentar" onChange={(e)=>setComment(e.target.value)}/>
+        <TextField fullWidth label="Komentar" id="komentar" onChange={(e)=>setGeneralComment(e.target.value)}/>
         <Button
         sx={{ display: "flex" }}
         size="small"
-        style={{border: "solid blue 1px", marginTop: "5%"}}>Pošalji zadaću</Button>
+        style={{border: "solid blue 1px", marginTop: "5%"}}>Pošalji komentar</Button>
       </Box>
     </Modal>  
   ); 
