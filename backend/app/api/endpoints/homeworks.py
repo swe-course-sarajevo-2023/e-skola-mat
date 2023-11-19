@@ -3,7 +3,7 @@ import shutil
 from uuid import uuid4
 
 from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
@@ -26,7 +26,7 @@ async def get_homeworks(
     session: AsyncSession = Depends(deps.get_session),
 ):
     # Initialize the query
-    query = select(Homework)
+    query = select(Homework).order_by(desc(Homework.dateOfCreation))
 
     # Check if the current user is a student
     if current_user.Role.role.value == UserRole.STUDENT.value:

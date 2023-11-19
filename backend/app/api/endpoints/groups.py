@@ -10,6 +10,18 @@ from app.schemas.responses import ClassResponse
 
 router = APIRouter()
 
+@router.get("/class", response_model=ClassResponse)
+async def get_class(
+    class_id: str,
+     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    result = await session.execute(select(Class).where(Class.id == class_id))
+    class_ = result.scalars().one()
+    if not class_:
+        raise HTTPException(status_code=404, detail="Class not found")
+    return class_
+
 @router.get("/classes", response_model=List[ClassResponse])
 async def get_all_classes(
      _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),

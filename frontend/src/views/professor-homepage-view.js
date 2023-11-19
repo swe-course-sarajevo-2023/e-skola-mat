@@ -10,27 +10,34 @@ import {
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import isAuth from "@/components/isAuth";
-
-const grupe = [
-  { id: "a1", naziv: "A1" },
-  { id: "a2", naziv: "A2" },
-  { id: "b", naziv: "B" },
-  { id: "sg", naziv: "srednja" },
-  { id: "ng", naziv: "napredna" },
-  { id: "pg", naziv: "predolimpijska" },
-  { id: "og", naziv: "olimpijska" },
-];
+import { useEffect, useState } from "react";
+import axiosInstance from "@/utils/axios";
 
 const ProfesorHomepageView = () => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+      const token=localStorage.getItem('token');
+      axiosInstance.get('/groups/classes', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }).then(response => {
+          setData(response.data);
+        }).catch(error => {
+          console.error('Error fetching data:', error);
+        });
+      }, []);
+
   return (
     <Container sx={{ padding: 5 }}>
       <Grid container spacing={2} sx={{ marginTop: 5 }}>
-        {grupe.map((element) => (
-          <Grid item xs={12} sm={6} md={4} lg={3}>
+        {data.map((element) => (
+          <Grid item key={element.id} xs={12} sm={6} md={4} lg={3}>
             <Card sx={{ maxWidth: 345 }}>
               <CardContent>
                 <Typography gutterBottom variant="h5" component="div">
-                  Grupa {element.naziv}
+                  Grupa {element.name}
                 </Typography>
               </CardContent>
               <CardActions>
