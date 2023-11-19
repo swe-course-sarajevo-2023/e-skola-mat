@@ -6,4 +6,4 @@ const ProfessorGroup = ({ params }) => {
   return <ProfessorGroupView grupa={params.id} />;
 };
 
-export default useProtectedRoute(ProfesorGrupa);
+export default useProtectedRoute(ProfessorGroup);

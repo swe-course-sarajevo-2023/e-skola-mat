@@ -10,47 +10,87 @@ import {
   CardContent,
   CardActions,
 } from "@mui/material";
-import { useState } from "react";
-import AddModal from "./add-homework";
+import { useState, useEffect } from "react";
 import isAuth from "@/components/isAuth";
+import axiosInstance from "@/utils/axios";
 
-const OpenHomeworks = [
-  { index: "6", datum: new Date("2023-12-12") },
-  { index: "7", datum: new Date("2023-11-13") },
-];
-const ForReviewHomeworks = [
-  { index: "5", datum: new Date("2023-10-12") },
-  { index: "4", datum: new Date("2023-10-03") },
-];
-const finishedHomeworks = [
-  { index: "3", datum: new Date("2023-09-22") },
-  { index: "2", datum: new Date("2023-09-12") },
-  { index: "1", datum: new Date("2023-09-01") },
-];
+const cutTimeFromDate=(date) => {
+  const index = date.indexOf('T');
+  const newDate=date.substring(0, index);
+  return newDate.split('-').reverse().join('-');
+}
 
 const ProfessorGroupView = (props) => {
-  const [showSubmitModal, setShowSubmitModal] = useState(false);
+
+  const [groupName, setGroupName] = useState("");
+
+  const [openHomeworks, setOpenHomeworks] = useState([]);
+  const [forReviewHomeworks, setForReviewHomeworks] = useState([]);
+  const [finishedHomeworks, setFinishedHomeworks] = useState([]);
+
+  useEffect(() => {
+
+      const token=localStorage.getItem('token');
+
+      axiosInstance.get('/groups/class', {
+        params: {
+          class_id: props.grupa,
+        },
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }).then(response => {
+        setGroupName(response.data.name);
+        console.log(response.data.name);
+      }).catch(error => {
+        console.error('Error fetching data:', error);
+      });
+
+      axiosInstance.get('/homeworks/homeworks', {
+          params: {
+            class_id: props.grupa,
+          },
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }).then(response => {
+          setOpenHomeworks([]);
+          setFinishedHomeworks([]);
+          setForReviewHomeworks([]);
+          response.data.forEach((obj) => {
+            switch (obj.status) {
+              case 'finished':
+                setFinishedHomeworks((prev) => [...prev, obj]);
+                break;
+              case 'in progress':
+                setForReviewHomeworks((prev) => [...prev, obj]);
+                break;
+              default:
+                setOpenHomeworks((prev) => [...prev, obj]);
+                break;
+            }
+          });       
+        }).catch(error => {
+          console.error('Error fetching data:', error);
+        });
+      }, []);
   return (
     <Container>
       <Grid container spacing={1} sx={{ marginTop: 5 }}>
-        <Grid item xs={12} sx={{ marginBottom: 5 }}>
+        <Grid item xs={12} sx={{ marginBottom: 1 }}>
           <Paper>
             <Grid container spacing={2}>
               <Grid item>
                 <Typography variant="h5" sx={{ marginLeft: 2 }}>
                   {" "}
-                  GRUPA: {props.grupa}
+                  GRUPA: {groupName}
                 </Typography>
               </Grid>
               <Grid item>
-                <Button onClick={() => setShowSubmitModal(true)}>
+                <Button>
                   DODAJ ZADAĆU
                 </Button>
               </Grid>
-              <AddModal
-                open={showSubmitModal}
-                onClose={() => setShowSubmitModal(false)}
-              />
             </Grid>
           </Paper>
         </Grid>
@@ -60,7 +100,7 @@ const ProfessorGroupView = (props) => {
         </Grid>
 
         <Grid item xs={12} sx={{ marginTop: 2 }}>
-          <Paper sx={{ backgroundColor: "#ffd6d6" }}>
+          <Paper sx={{ backgroundColor: "#b5ffb3" }}>
             <Grid container spacing={2}>
               <Grid item>
                 <Typography variant="h7">OTVORENO</Typography>
@@ -73,23 +113,28 @@ const ProfessorGroupView = (props) => {
 
         <Grid item xs={12}>
           <Grid container spacing={2}>
-            {OpenHomeworks.map((element) => (
+            {openHomeworks.map((element) => (
               <Grid item xs={12} sm={6} md={4} lg={3}>
-                <Card sx={{ maxWidth: 345 }}>
+                <Card sx={{ maxWidth: 345, backgroundColor: "#b5ffb3"}}>
                   <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      Zadaća {element.index}
+                    <Typography gutterBottom variant="h6" component="div">
+                      Zadaća: {element.name}
                     </Typography>
 
-                    <Typography>
-                      Datum: {element.datum.toDateString()}.
+                    <Typography variant="h9">
+                      Postavljeno: {cutTimeFromDate(element.dateOfCreation)}.
+                      <br />
                     </Typography>
+
+                    <Typography variant="h9">
+                      Rok: {cutTimeFromDate(element.deadline)}.
+                    </Typography>
+
                   </CardContent>
-                  <CardActions>
-                    <Button size="small">POSTAVKA</Button>
+                  <CardActions sx={{justifyContent: "center", marginTop: -1}}>
                     <Button size="small">
                       <Link
-                        href={"/profiles/profesor/zadaca/" + element.index}
+                        href={"/profiles/profesor/zadaca/" + element.id}
                         underline="none"
                       >
                         PRIKAZ
@@ -120,23 +165,27 @@ const ProfessorGroupView = (props) => {
 
         <Grid item xs={12}>
           <Grid container spacing={2}>
-            {ForReviewHomeworks.map((element) => (
+            {forReviewHomeworks.map((element) => (
               <Grid item xs={12} sm={6} md={4} lg={3}>
-                <Card sx={{ maxWidth: 345 }}>
+                <Card sx={{ maxWidth: 345, backgroundColor: "#ffffb3"}}>
                   <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      Zadaća {element.index}
+                    <Typography gutterBottom variant="h6" component="div">
+                      Zadaća: {element.name}
                     </Typography>
 
-                    <Typography>
-                      Datum: {element.datum.toDateString()}.
+                    <Typography variant="h9">
+                      Postavljeno: {cutTimeFromDate(element.dateOfCreation)}.
+                      <br />
+                    </Typography>
+
+                    <Typography variant="h9">
+                      Rok: {cutTimeFromDate(element.deadline)}.
                     </Typography>
                   </CardContent>
-                  <CardActions>
-                    <Button size="small">POSTAVKA</Button>
+                  <CardActions sx={{justifyContent: "center", marginTop: -1}}>
                     <Button size="small">
                       <Link
-                        href={"/profiles/profesor/zadaca/" + element.index}
+                        href={"/profiles/profesor/zadaca/" + element.id}
                         underline="none"
                       >
                         PRIKAZ
@@ -154,7 +203,7 @@ const ProfessorGroupView = (props) => {
         </Grid>
 
         <Grid item xs={12} sx={{ marginTop: 2 }}>
-          <Paper sx={{ backgroundColor: "#b5ffb3" }}>
+          <Paper sx={{ backgroundColor: "#ffd6d6" }}>
             <Grid container spacing={2}>
               <Grid item>
                 <Typography variant="h7">ZAVRŠENO</Typography>
@@ -169,21 +218,25 @@ const ProfessorGroupView = (props) => {
           <Grid container spacing={2}>
             {finishedHomeworks.map((element) => (
               <Grid item xs={12} sm={6} md={4} lg={3}>
-                <Card sx={{ maxWidth: 345 }}>
+                <Card sx={{ maxWidth: 345, backgroundColor: "#ffd6d6" }}>
                   <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      Zadaća {element.index}
+                    <Typography gutterBottom variant="h6" component="div">
+                      Zadaća: {element.name}
                     </Typography>
 
-                    <Typography>
-                      Datum: {element.datum.toDateString()}.
+                    <Typography variant="h9">
+                      Postavljeno: {cutTimeFromDate(element.dateOfCreation)}.
+                      <br />
+                    </Typography>
+
+                    <Typography variant="h9">
+                      Rok: {cutTimeFromDate(element.deadline)}.
                     </Typography>
                   </CardContent>
-                  <CardActions>
-                    <Button size="small">POSTAVKA</Button>
+                  <CardActions sx={{justifyContent: "center", marginTop: -1}}>
                     <Button size="small">
                       <Link
-                        href={"/profiles/profesor/zadaca/" + element.index}
+                        href={"/profiles/profesor/zadaca/" + element.id}
                         underline="none"
                       >
                         PRIKAZ
