@@ -20,7 +20,7 @@ const FormDateInput = ({ name, label }) => {
               },
               textField: {
                 helperText: fieldState.error && fieldState.error.message,
-                error: fieldState.error,
+                error: !!fieldState.error,
               },
             }}
             sx={{ width: 1 }}
