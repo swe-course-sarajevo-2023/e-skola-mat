@@ -48,5 +48,10 @@ export const createProfessorHomework = async (data) => {
 };
 
 export const deleteProfessorHomework = async (id) => {
-  await axiosInstanceWithAuthToken.delete(`/homeworks/homework/${id}`);
+  await axiosInstanceWithAuthToken.delete(`/homeworks/${id}`);
+};
+
+export const getGroups = async () => {
+  const { data } = await axiosInstanceWithAuthToken.get("/groups/classes");
+  return data;
 };

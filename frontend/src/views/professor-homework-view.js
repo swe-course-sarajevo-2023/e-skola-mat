@@ -13,15 +13,15 @@ import isAuth from "@/components/isAuth";
 
 const ProfessorHomeworkView = () => {
   const [open, setOpen] = useState(false);
-  const { data, isLoading, error, isError, refetch } = useQuery(
+  const { data, isLoading, isRefetching, error, isError, refetch } = useQuery(
     ["fetchProfessorHomework"],
     getProfessorHomeworks
   );
   const { mutateAsync } = useMutation(deleteProfessorHomework);
 
   const handleOpen = (e) => {
-    setOpen(true);
     e.stopPropagation();
+    setOpen(true);
   };
 
   const handleClose = () => {
@@ -41,14 +41,18 @@ const ProfessorHomeworkView = () => {
     <Container
       sx={{ p: 5, background: "silver", height: "100vh", overflowY: "auto" }}
     >
-      <Box display="flex" justifyContent="center">
-        <Button variant="contained" onClick={handleOpen}>
-          Dodaj zadaću
-        </Button>
-      </Box>
       <Box sx={{ pt: 3 }}>
         <Typography variant="h3">Zadaće</Typography>
-        {isLoading && <CircularProgress size="xl" />}
+        <Box display="flex">
+          <Button variant="contained" onClick={handleOpen}>
+            Dodaj zadaću
+          </Button>
+        </Box>
+        {(isLoading || isRefetching) && (
+          <Box display="flex" justifyContent="center" mt={3}>
+            <CircularProgress size={50} />
+          </Box>
+        )}
         {isError && <Typography>{error.message}</Typography>}
         <Box
           display="flex"
@@ -56,7 +60,7 @@ const ProfessorHomeworkView = () => {
           gap={3}
           flexWrap="wrap"
         >
-          {!isLoading &&
+          {!(isLoading || isRefetching) &&
             !isError &&
             data?.map((homework) => (
               <Box
