@@ -55,3 +55,42 @@ export const getGroups = async () => {
   const { data } = await axiosInstanceWithAuthToken.get("/groups/classes");
   return data;
 };
+
+export const getGroup = async (id) => {
+  const {data} = await axiosInstanceWithAuthToken.get("/groups/class", {
+    params: {
+      class_id: id,
+    }
+  });
+  return data;
+}
+
+export const getProfessorHomeworksForSpecificGroup = async (id) => {
+  const {data} = await axiosInstanceWithAuthToken.get('/homeworks/homeworks', {
+    params: {
+      class_id: id,
+    }
+  });
+  const openHomeworks = [];
+  const forReviewHomeworks = [];
+  const finishedHomeworks = [];
+  data.forEach((obj) => {
+    switch (obj.status) {
+      case 'finished':
+        finishedHomeworks.push(obj);
+        break;
+      case 'in progress':
+        forReviewHomeworks.push(obj);
+        break;
+      default:
+        openHomeworks.push(obj);
+        break;
+    }
+  });
+  let data2 = [];
+  data2.push(openHomeworks);
+  data2.push(forReviewHomeworks);
+  data2.push(finishedHomeworks);
+
+  return data2;
+}

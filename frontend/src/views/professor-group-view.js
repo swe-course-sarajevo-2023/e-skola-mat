@@ -9,73 +9,40 @@ import {
   Card,
   CardContent,
   CardActions,
+  CircularProgress,
+  Box
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import isAuth from "@/components/isAuth";
-import axiosInstance from "@/utils/axios";
+import { getGroup, getProfessorHomeworksForSpecificGroup } from "@/api";
+import { useQuery } from "react-query";
 
 const cutTimeFromDate=(date) => {
   const index = date.indexOf('T');
   const newDate=date.substring(0, index);
-  return newDate.split('-').reverse().join('-');
+  return newDate.split('-').reverse().join('.');
 }
 
 const ProfessorGroupView = (props) => {
 
-  const [groupName, setGroupName] = useState("");
+  const { data, isLoading, isRefetching, error, isError } = useQuery(
+    ["professorHomeworksForSpecificGroup"],
+    () => getProfessorHomeworksForSpecificGroup(props.grupa)
+  );
 
-  const [openHomeworks, setOpenHomeworks] = useState([]);
-  const [forReviewHomeworks, setForReviewHomeworks] = useState([]);
-  const [finishedHomeworks, setFinishedHomeworks] = useState([]);
+  const { data: grupa, refetch: refetch2} = useQuery(
+    ["group"],
+    () => getGroup(props.grupa),
+    {enabled: false}
+  );
 
   useEffect(() => {
+    refetch2();
+  }, [refetch2]);
 
-      const token=localStorage.getItem('token');
-
-      axiosInstance.get('/groups/class', {
-        params: {
-          class_id: props.grupa,
-        },
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }).then(response => {
-        setGroupName(response.data.name);
-        console.log(response.data.name);
-      }).catch(error => {
-        console.error('Error fetching data:', error);
-      });
-
-      axiosInstance.get('/homeworks/homeworks', {
-          params: {
-            class_id: props.grupa,
-          },
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }).then(response => {
-          setOpenHomeworks([]);
-          setFinishedHomeworks([]);
-          setForReviewHomeworks([]);
-          response.data.forEach((obj) => {
-            switch (obj.status) {
-              case 'finished':
-                setFinishedHomeworks((prev) => [...prev, obj]);
-                break;
-              case 'in progress':
-                setForReviewHomeworks((prev) => [...prev, obj]);
-                break;
-              default:
-                setOpenHomeworks((prev) => [...prev, obj]);
-                break;
-            }
-          });       
-        }).catch(error => {
-          console.error('Error fetching data:', error);
-        });
-      }, []);
   return (
     <Container>
+
       <Grid container spacing={1} sx={{ marginTop: 5 }}>
         <Grid item xs={12} sx={{ marginBottom: 1 }}>
           <Paper>
@@ -83,7 +50,7 @@ const ProfessorGroupView = (props) => {
               <Grid item>
                 <Typography variant="h5" sx={{ marginLeft: 2 }}>
                   {" "}
-                  GRUPA: {groupName}
+                  GRUPA: {grupa && grupa.name}
                 </Typography>
               </Grid>
               <Grid item>
@@ -99,6 +66,14 @@ const ProfessorGroupView = (props) => {
           {" "}
         </Grid>
 
+        {(isLoading || isRefetching) && (
+          <Grid item xs={12}>
+            <Box display="flex" justifyContent="center" mt={3}>
+              <CircularProgress size={50} />
+              </Box>
+          </Grid>
+        )}
+        
         <Grid item xs={12} sx={{ marginTop: 2 }}>
           <Paper sx={{ backgroundColor: "#b5ffb3" }}>
             <Grid container spacing={2}>
@@ -113,8 +88,9 @@ const ProfessorGroupView = (props) => {
 
         <Grid item xs={12}>
           <Grid container spacing={2}>
-            {openHomeworks.map((element) => (
-              <Grid item xs={12} sm={6} md={4} lg={3}>
+          {!(isLoading || isRefetching) &&
+            !isError &&  data[0]?.map((element) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={element.id}>
                 <Card sx={{ maxWidth: 345, backgroundColor: "#b5ffb3"}}>
                   <CardContent>
                     <Typography gutterBottom variant="h6" component="div">
@@ -142,8 +118,7 @@ const ProfessorGroupView = (props) => {
                     </Button>
                   </CardActions>
                 </Card>
-              </Grid>
-            ))}
+              </Grid>))}
           </Grid>
         </Grid>
 
@@ -165,8 +140,9 @@ const ProfessorGroupView = (props) => {
 
         <Grid item xs={12}>
           <Grid container spacing={2}>
-            {forReviewHomeworks.map((element) => (
-              <Grid item xs={12} sm={6} md={4} lg={3}>
+          {!(isLoading || isRefetching) &&
+            !isError &&  data[1]?.map((element) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={element.id}>
                 <Card sx={{ maxWidth: 345, backgroundColor: "#ffffb3"}}>
                   <CardContent>
                     <Typography gutterBottom variant="h6" component="div">
@@ -181,6 +157,7 @@ const ProfessorGroupView = (props) => {
                     <Typography variant="h9">
                       Rok: {cutTimeFromDate(element.deadline)}.
                     </Typography>
+
                   </CardContent>
                   <CardActions sx={{justifyContent: "center", marginTop: -1}}>
                     <Button size="small">
@@ -193,8 +170,7 @@ const ProfessorGroupView = (props) => {
                     </Button>
                   </CardActions>
                 </Card>
-              </Grid>
-            ))}
+              </Grid>))}
           </Grid>
         </Grid>
 
@@ -216,9 +192,10 @@ const ProfessorGroupView = (props) => {
 
         <Grid item xs={12}>
           <Grid container spacing={2}>
-            {finishedHomeworks.map((element) => (
-              <Grid item xs={12} sm={6} md={4} lg={3}>
-                <Card sx={{ maxWidth: 345, backgroundColor: "#ffd6d6" }}>
+          {!(isLoading || isRefetching) &&
+            !isError && data[2]?.map((element) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={element.id}>
+                <Card sx={{ maxWidth: 345, backgroundColor: "#ffd6d6"}}>
                   <CardContent>
                     <Typography gutterBottom variant="h6" component="div">
                       Zadaća: {element.name}
@@ -232,6 +209,7 @@ const ProfessorGroupView = (props) => {
                     <Typography variant="h9">
                       Rok: {cutTimeFromDate(element.deadline)}.
                     </Typography>
+
                   </CardContent>
                   <CardActions sx={{justifyContent: "center", marginTop: -1}}>
                     <Button size="small">
@@ -244,8 +222,7 @@ const ProfessorGroupView = (props) => {
                     </Button>
                   </CardActions>
                 </Card>
-              </Grid>
-            ))}
+              </Grid>))}
           </Grid>
         </Grid>
       </Grid>
