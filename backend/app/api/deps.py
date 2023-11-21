@@ -1,20 +1,20 @@
-import os
 import time
 from collections.abc import AsyncGenerator
 from typing import List
+
 import jwt
+from app.core.session import async_session
+from app.models import User, UserRole
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
-from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.core import config, security
-from app.core.session import async_session
-from app.models import User, UserRole
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="auth/access-token")
+
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
@@ -48,24 +48,30 @@ async def get_current_user(
             detail="Could not validate credentials, token expired or not yet valid",
         )
 
-    result = await session.execute(select(User).options(joinedload(User.Role)).where(User.id == token_data.sub))
+    result = await session.execute(
+        select(User).options(joinedload(User.Role)).where(User.id == token_data.sub)
+    )
     user = result.scalars().first()
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
     return user
 
-async def has_roles(roles: List[UserRole],current_user: User = Depends(get_current_user)):
+
+async def has_roles(
+    roles: List[UserRole], current_user: User = Depends(get_current_user)
+):
     if current_user.Role is None:
         raise HTTPException(status_code=403, detail="User has no role assigned")
-    has_needed_roles=True
+    has_needed_roles = False
     for role in roles:
-        if current_user.Role.role.name != role.name:
-            has_needed_roles=False
-    if not has_needed_roles: 
+        if current_user.Role.role.name == role.name:
+            has_needed_roles = True
+    if not has_needed_roles:
         raise HTTPException(status_code=403, detail="Forbidden")
 
     return current_user
+
 
 class RoleCheck:
     def __init__(self, roles: List[UserRole]):

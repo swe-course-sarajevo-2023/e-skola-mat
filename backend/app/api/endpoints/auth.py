@@ -1,7 +1,10 @@
 import time
 
 import jwt
-from fastapi import APIRouter, Depends, HTTPException, Header, status
+from app.models import User
+from app.schemas.requests import RefreshTokenRequest
+from app.schemas.responses import AccessTokenResponse
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ValidationError
 from sqlalchemy import select
@@ -9,9 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
 from app.core import config, security
-from app.models import User, Role
-from app.schemas.requests import RefreshTokenRequest
-from app.schemas.responses import AccessTokenResponse
 
 router = APIRouter()
 
@@ -40,6 +40,7 @@ async def login_access_token(
 
     # Generate the access token response including the user's role
     return security.generate_access_token_response(str(user.id), user_role)
+
 
 @router.post("/refresh-token", response_model=AccessTokenResponse)
 async def refresh_token(
@@ -82,10 +83,9 @@ async def refresh_token(
 
     return security.generate_access_token_response(str(user.id))
 
+
 @router.get("/verify-token", response_model=bool)
-def verify_access_token(
-    authorization = Header(...)
-):
+def verify_access_token(authorization=Header(...)):
     """Verify the access token"""
     try:
         # Decode the token and extract claims
@@ -97,6 +97,5 @@ def verify_access_token(
         )
 
         return True  # Token is valid
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-

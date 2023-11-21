@@ -3,11 +3,11 @@
 import time
 
 import jwt
+from app.schemas.responses import AccessTokenResponse
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
 from app.core import config
-from app.schemas.responses import AccessTokenResponse
 
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECS = config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
@@ -26,7 +26,9 @@ class JWTTokenPayload(BaseModel):
     expires_at: int
 
 
-def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool, role: str = None):
+def create_jwt_token(
+    subject: str | int, exp_secs: int, refresh: bool, role: str = None
+):
     issued_at = int(time.time())
     expires_at = issued_at + exp_secs
     to_encode: dict[str, int | str | bool | None] = {
@@ -34,7 +36,7 @@ def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool, role: str
         "expires_at": expires_at,
         "sub": subject,
         "refresh": refresh,
-        "role": role,  
+        "role": role,
     }
     encoded_jwt = jwt.encode(
         to_encode,

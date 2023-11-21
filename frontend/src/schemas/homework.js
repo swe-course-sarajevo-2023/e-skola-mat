@@ -3,7 +3,7 @@ import moment from "moment";
 
 const homeworkSchema = yup.object().shape({
   name: yup.string().required("Potrebno je unijeti naziv zadaće!"),
-  maxNumbersOfProblems: yup
+  maxNumbersOfTasks: yup
     .number()
     .required("Potrebno je unijeti broj zadataka!")
     .min(1, "Minimalan broj zadataka mora biti 1!"),

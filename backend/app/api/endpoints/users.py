@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.responses import JSONResponse
-
-from app.api import deps
 from app.core.security import get_password_hash
-from app.models import User, Role
+from app.models import Role, User
 from app.schemas.requests import UserCreateRequest, UserUpdatePasswordRequest
 from app.schemas.responses import UserResponse
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api import deps
 
 router = APIRouter()
 
@@ -28,7 +28,9 @@ async def delete_current_user(
     """Delete current user"""
     await session.execute(delete(User).where(User.id == current_user.id))
     await session.commit()
-    return JSONResponse(content={"detail": "Teacher deleted successfully"}, status_code=200)
+    return JSONResponse(
+        content={"detail": "Professor deleted successfully"}, status_code=200
+    )
 
 
 @router.post("/reset-password", response_model=UserResponse)
@@ -56,10 +58,8 @@ async def register_new_user(
     user = User(
         email=new_user.email,
         hashed_password=get_password_hash(new_user.password),
-        role_id=select(Role.id).where(Role.role == "admin")
+        role_id=select(Role.id).where(Role.role == "admin"),
     )
     session.add(user)
     await session.commit()
     return user
-
-
