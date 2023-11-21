@@ -73,7 +73,7 @@ const ProfessorHomeworkView = () => {
                   name={homework.name}
                   dateOfCreation={homework.dateOfCreation}
                   deadline={homework.deadline}
-                  maxNumbersOfProblems={homework.maxNumbersOfProblems}
+                  maxNumbersOfTasks={homework.maxNumbersOfTasks}
                   handleDelete={handleDelete}
                 />
               </Box>

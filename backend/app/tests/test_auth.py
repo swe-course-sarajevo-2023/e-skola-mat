@@ -1,8 +1,7 @@
-from httpx import AsyncClient
-
 from app.main import app
 from app.models import User
 from app.tests.conftest import default_user_email, default_user_password
+from httpx import AsyncClient
 
 
 async def test_auth_access_token(client: AsyncClient, default_user: User):

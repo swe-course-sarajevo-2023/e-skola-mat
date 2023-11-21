@@ -1,19 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
-from app.api import deps
-from app.models import User, Class, UserRole
+from app.models import Class, User, UserRole
 from app.schemas.requests import ClassCreateRequest
 from app.schemas.responses import ClassResponse
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api import deps
 
 router = APIRouter()
 
+
 @router.get("/class", response_model=ClassResponse)
-async def get_class(
+async def get_group(
     class_id: str,
-     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
 ):
     result = await session.execute(select(Class).where(Class.id == class_id))
@@ -22,20 +24,21 @@ async def get_class(
         raise HTTPException(status_code=404, detail="Class not found")
     return class_
 
-@router.get("/classes", response_model=List[ClassResponse])
-async def get_all_classes(
-     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+
+@router.get("/groups", response_model=List[ClassResponse])
+async def get_all_groups(
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
 ):
     # Check if the current user is a professor
-    """Get all classes"""
+    """Get all groups"""
     result = await session.execute(select(Class))
-    classes = result.scalars().all()
-    return classes
+    groups = result.scalars().all()
+    return groups
 
 
-@router.post("/classes", response_model=ClassResponse)
-async def create_class(
+@router.post("/groups", response_model=ClassResponse)
+async def create_group(
     class_data: ClassCreateRequest,
     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
@@ -47,4 +50,3 @@ async def create_class(
 
     # Return the created class
     return new_class
-

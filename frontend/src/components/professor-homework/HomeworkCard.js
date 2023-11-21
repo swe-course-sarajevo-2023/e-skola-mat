@@ -16,7 +16,7 @@ const HomeworkCard = ({
   name,
   dateOfCreation,
   deadline,
-  maxNumbersOfProblems,
+  maxNumbersOfTasks,
   handleDelete,
 }) => {
   return (
@@ -46,7 +46,7 @@ const HomeworkCard = ({
           <ListItem disablePadding>
             <ListItemText
               primary="Broj zadataka"
-              secondary={maxNumbersOfProblems}
+              secondary={maxNumbersOfTasks}
             />
           </ListItem>
         </List>

@@ -5,9 +5,10 @@ Revises: 3bca7bf44a33
 Create Date: 2023-11-14 20:59:46.244312
 
 """
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "5ef361f31e8b"
@@ -26,23 +27,20 @@ def upgrade():
         ),
         nullable=False,
     )
-    
+
     user_role_enum = sa.Enum(
-        'ADMINISTRATOR',
-        'PROFESSOR',
-        'STUDENT',
-        'TA',
-        'GUEST',
-        name='user_role_enum'
+        "ADMINISTRATOR", "PROFESSOR", "STUDENT", "TA", "GUEST", name="user_role_enum"
     )
     user_role_enum.create(op.get_bind(), checkfirst=True)
 
-    op.execute("""
-    ALTER TABLE roles 
+    op.execute(
+        """
+    ALTER TABLE roles
     ALTER COLUMN role TYPE user_role_enum
     USING role::text::user_role_enum
-    """)
-    
+    """
+    )
+
     op.alter_column(
         "roles",
         "role",

@@ -1,11 +1,12 @@
 import asyncio
 import uuid
-from sqlalchemy import select, insert
+
+from app.core.session import async_session
+from app.models import Class, Role, User, UserRole
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import config, security
-from app.core.session import async_session
-from app.models import User, Role, Class, UserRole
 
 
 async def insert_roles_and_groups(session: AsyncSession):
@@ -46,7 +47,7 @@ async def main() -> None:
                 hashed_password=security.get_password_hash(
                     config.settings.FIRST_SUPERUSER_PASSWORD
                 ),
-                role_id=admin_uuid
+                role_id=admin_uuid,
             )
             session.add(new_superuser)
             await session.commit()
@@ -66,7 +67,7 @@ async def main() -> None:
                 hashed_password=security.get_password_hash(
                     "test123",
                 ),
-                role_id=professor_uuid
+                role_id=professor_uuid,
             )
             session.add(professor_user)
             await session.commit()
@@ -75,6 +76,7 @@ async def main() -> None:
             print("Test professor already exists in database")
 
         print("Initial data created")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

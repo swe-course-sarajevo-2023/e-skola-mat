@@ -26,7 +26,7 @@ const FormDialog = ({ open, handleClose, refetch }) => {
     resolver: yupResolver(homeworkSchema),
     defaultValues: {
       name: "",
-      maxNumbersOfProblems: 1,
+      maxNumbersOfTasks: 1,
       deadline: moment(new Date(new Date().setHours(0, 0, 0, 0))),
       groups: [],
     },
@@ -98,7 +98,7 @@ const FormDialog = ({ open, handleClose, refetch }) => {
         <Form methods={methods} onSubmit={onSubmit}>
           <FormInput name="name" label="Naziv" />
           <FormInput
-            name="maxNumbersOfProblems"
+            name="maxNumbersOfTasks"
             label="Broj zadataka"
             type="number"
           />
