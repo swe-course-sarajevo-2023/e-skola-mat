@@ -1,5 +1,8 @@
 "use client";
 import {
+  TextField,
+  Box,
+  Modal,
   Button,
   Container,
   Typography,
@@ -9,6 +12,7 @@ import {
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import isAuth from "@/components/isAuth";
+import { useState } from "react";
 
 
 const style = {
@@ -33,6 +37,7 @@ const student = {
     ["/img1.png", "/img2.png"],
     ["/img1.png", "/img2.png", "/img3.png", "/img3.png"],
   ],
+  email: "niko.nikic@yahoo.com"
 };
 
 const student1 = {
@@ -46,6 +51,7 @@ const student1 = {
       ["/img1.png", "/img2.png"],
       ["/img1.png", "/img2.png", "/img3.png", "/img3.png"],
     ],
+    email: "neko.nekic@gmail.com"
   };
 
   const student2 = {
@@ -59,6 +65,7 @@ const student1 = {
       ["/img1.png", "/img2.png"],
       ["/img1.png", "/img2.png", "/img3.png", "/img3.png"],
     ],
+    email: "mozda.mozdic@gmail.com"
   };
 
 const students = [student, student1, student2]
@@ -66,6 +73,27 @@ const students = [student, student1, student2]
 const group = 3; // Group ID
 
 const StudentGroupView = () => {
+  const [modalOpen, setModalOpenAdd] = useState(false);
+  const [modalOpen1, setModalOpenDelete] = useState(false);
+
+  const handleImageButtonAdd = () => {
+    setModalOpenAdd(true);
+  };
+
+  const handleImageButtonDelete = () => {
+    setModalOpenDelete(true);
+  };
+
+  
+  const handleClose = () => setModalOpenAdd(false);
+
+  const handleClose1 = () => setModalOpenDelete(false);
+
+  const [name, setName]=useState(""); // set name of new student
+  const [surname, setSurname]=useState(""); // set surname of new student
+  const [email, setEmail]=useState(""); // set email of new student
+
+  const [emailDelete, setEmailDelete]=useState(""); // set email of student you want to delete
 
   return (
     <>
@@ -75,7 +103,7 @@ const StudentGroupView = () => {
         <Grid item xs={6}>
                 <Card sx={{ maxWidth: 345 }}>
                   <CardContent>
-                    <Button gutterBottom variant="h5" component="div">
+                    <Button gutterBottom variant="h5" component="div" onClick={() => handleImageButtonAdd()}>
                       Dodaj učenika
                     </Button>
                   </CardContent>
@@ -85,7 +113,7 @@ const StudentGroupView = () => {
          <Grid item xs={6}>
                 <Card sx={{ maxWidth: 345 }}>
                   <CardContent>
-                    <Button gutterBottom variant="h5" component="div">
+                    <Button gutterBottom variant="h5" component="div" onClick={() => handleImageButtonDelete()}>
                     Obriši učenika
                     </Button>
                   </CardContent>
@@ -122,6 +150,9 @@ const StudentGroupView = () => {
                     <Typography gutterBottom variant="h5" component="div">
                       {student.surname}
                     </Typography>
+                    <Typography gutterBottom variant="h6" component="div">
+                      {student.email}
+                    </Typography>
                   </CardContent>
                   
                 </Card>
@@ -130,10 +161,51 @@ const StudentGroupView = () => {
           })}
         </Grid>
 
+        <Modal
+          open={modalOpen}
+          onClose={handleClose}
+          sx={{ width: "auto" }}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+          <Typography variant="h6">Unesite podatke novog učenika</Typography>
+        <TextField fullWidth label="Ime učenika" id="name" onChange={(e)=>setName(e.target.value)}/>
+        <TextField fullWidth label="Prezime učenika" id="surname" onChange={(e)=>setSurname(e.target.value)}/>
+        <TextField fullWidth label="Email učenika" id="email" onChange={(e)=>setEmail(e.target.value)}/>
+        <Button
+        sx={{ display: "flex" }}
+        size="small"
+        style={{border: "solid blue 1px", marginTop: "5%"}}
         
+        >Dodaj učenika
+        </Button>
+
+          </Box>
+        </Modal>
+
+        <Modal
+          open={modalOpen1}
+          onClose={handleClose1}
+          sx={{ width: "auto" }}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+          <Typography variant="h6">Unesite email učenika kojeg želite obrisati</Typography>
+          <TextField fullWidth label="Email učenika" id="emailDelete" onChange={(e)=>setEmailDelete(e.target.value)}/>
+          <Button
+        sx={{ display: "flex" }}
+        size="small"
+        style={{border: "solid blue 1px", marginTop: "5%"}}
+        
+        >Obriši učenika
+        </Button>
+          </Box>
+        </Modal>
       </Container>
     </>
   );
 };
 
-export default isAuth(StudentGroupView, "student-view");
+export default isAuth(StudentGroupView, "group-student-view");
