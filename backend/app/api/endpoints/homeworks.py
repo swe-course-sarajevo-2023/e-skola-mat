@@ -258,7 +258,7 @@ async def submit_homework(
     homework_id: str,
     task_number: int,
     task_comment: str,
-    images: List[UploadFile],
+    image_paths: List[str],  # Promijenjeni parametar da prima listu putanja
     session: AsyncSession = Depends(deps.get_session),
     current_user: User = Depends(deps.get_current_user),
 ):
@@ -300,30 +300,21 @@ async def submit_homework(
         session.flush()
         task_user_homework_id = new_task_submission.id
 
-    for image in images:
-        unique_filename = f"{uuid4()}_{image.filename}"
-        file_path = f"images/{unique_filename}"
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
-
+    for path in image_paths:
+        # Ovdje pretpostavljamo da su putanje validne i da slike već postoje na serveru
         single_image = Image(
-            filename=image.filename,
-            file_path=file_path,
+            filename=os.path.basename(path),
+            file_path=path,
             created_at=datetime.now(),
         )
         session.add(single_image)
-        session.flush()  # Flush metoda dodaje ID za ovu instancu \
-        # ali nakon sto se doda u bazu
+        session.flush()  # Flush metoda dodaje ID za ovu instancu
 
         task_image = taskUserHomeworkImage(
             task_user_homework_id=task_user_homework_id,
-            image_id=single_image.id,  # Ovdje vezemo zadatak za sliku
+            image_id=single_image.id,
         )
-        session.add(
-            task_image
-        )  # Bice adekvatno dodano u bazu jer SQLAlchemy moze skontati
-        # po modelu gdje treba da je doda. Odnosno, bice adekvatno namapirana
+        session.add(task_image)
 
     session.commit()
     return {"message": "Homework task submitted successfully"}
