@@ -62,16 +62,24 @@ async def get_homework_data(
     
     tasks_data = []
     for task in tasks:
-        image = await session.execute(select(taskUserHomeworkImage).where(taskUserHomeworkImage.task_user_homework_id == task.id))
-        image = image.scalar()
-        image2 = await session.execute(select(Image).where(Image.id == image.image_id))
-        image2 = image2.scalar()
+        images = await session.execute(select(taskUserHomeworkImage).where(taskUserHomeworkImage.task_user_homework_id == task.id))
+        images = images.scalars().all()
+        images2 = []
+        for i in images:
+            image = await session.execute(select(Image).where(Image.id == i.image_id))
+            image = image.scalar()
+            images2.append({
+                "id": i.id,
+                "comment_professor": i.comment_professor,
+                "comment_student": i.comment_student,
+                "file_path": image.file_path
+            })
         tasks_data.append({
             "id": task.id,
             "order_num": task.order_number_of_the_task,
             "teacher_comment": task.commentProfessor,
             "student_comment": task.commentStudent,
-            "image": image2.file_path
+            "images": images2
         })
         
     return JSONResponse(content={"homework":  {"id": homework2.id, "name": homework2.name, "number_of_tasks": homework2.maxNumbersOfTasks},
