@@ -88,6 +88,39 @@ async def delete_student(
     )
 
 
+@router.get("/list_students/{class_id}", response_model=UserResponse)
+async def list_students(
+    class_id,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+):
+    if not is_valid_uuid(class_id):
+        raise HTTPException(status_code=400, detail="id is not valid")
+
+    class_users = await session.execute(
+        select(UserClass).where(UserClass.class_id == class_id)
+    )
+    class_users = class_users.scalars().all()
+
+    if len(class_users) == 0:
+        raise HTTPException(status_code=400, detail="id does not exist")
+
+    response_data = []
+    for class_user in class_users:
+        user = await session.execute(select(User).where(User.id == class_user.user_id))
+        user = user.scalar()
+
+        response_data.append(
+            {
+                "name": user.name,
+                "surname": user.surname,
+                "email": user.email,
+            }
+        )
+
+    return JSONResponse(content={"data": response_data}, status_code=200)
+
+
 @router.get("/get_homeworks/{homework_id}", response_model=UserResponse)
 async def get_homeworks(
     homework_id,
