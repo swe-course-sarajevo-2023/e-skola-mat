@@ -95,10 +95,12 @@ const HomeworkView = (props) => {
             id="standard-basic"
             size="small"
             fullWidth
-            label="Unesite komentar"
+            label="Unesite generalni komentar"
             focused={(!(isLoading || isRefetching) || data?.data.comment) ? true : false}
             variant="outlined"
             defaultValue={ data?.data.comment }
+            multiline
+            rows={2}
           />
         </Grid>
 
@@ -128,16 +130,25 @@ const HomeworkView = (props) => {
 
         {data && data.problems.map((element) => (
           <Grid item xs={12} md={3} lg={3}>
-          <Card sx={{ maxWidth: 345 }}>
-            <div
-              style={{
-                backgroundImage: `url('${element.image}')`,
-                backgroundRepeat: "no-repeat",
-                height: "140px",
-                width: "200px",
-              }}
-            ></div>
+          <Card fullWidth>
             <CardContent>
+            <Grid container spacing={1}>
+              {element.images.map((image) => (
+                <Grid item xs={4} lg={4} md={4}>
+                <Button onClick={() => handleImageButton(element.order_num, image.file_path, image.comment_professor)}>
+                  <div
+                  style={{
+                    backgroundImage: `url('${image.file_path}')`,
+                    backgroundRepeat: "no-repeat",
+                    height: "0",
+                    paddingTop: "200%",
+                    width: "500%",
+                  }}
+                  ></div>
+                </Button>
+                </Grid>
+              ))}
+              </Grid>
               <Typography gutterBottom variant="h6" component="div">
                 Zadatak {element.order_num}
               </Typography>
@@ -145,12 +156,21 @@ const HomeworkView = (props) => {
                 {element.student_comment}
               </Typography>
             </CardContent>
-            <CardActions>
-              <Button
-                size="small"
-                onClick={() => handleImageButton(element.order_num, element.image, element.teacher_comment)}
-              >
-              PREGLEDAJ
+            <CardActions sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <TextField
+              id="standard-basic"
+              size="small"
+              fullWidth
+              label="Unesite komentar za zadatak"
+              focused={(!(isLoading || isRefetching) || element.teacher_comment) ? true : false}
+              variant="outlined"
+              defaultValue={element?.teacher_comment}
+              sx={{marginTop: 2, marginBottom: 1}}
+              multiline
+              rows={2}
+              />
+              <Button variant="outlined" size="small">
+                SPASI KOMENTAR
               </Button>
             </CardActions>
           </Card>

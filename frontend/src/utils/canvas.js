@@ -250,7 +250,7 @@ export const Canvas = (props) => {
           <Grid item xs={12} md={12}>
             <TextField
               id="outlined-multiline-static"
-              label="Komentar"
+              label="Unesite komentar za sliku"
               multiline
               fullWidth
               rows={4}
