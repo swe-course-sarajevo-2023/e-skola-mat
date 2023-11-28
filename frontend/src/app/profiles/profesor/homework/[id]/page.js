@@ -2,8 +2,8 @@
 import { useProtectedRoute } from "@/hooks";
 import HomeworkView from "@/views/homework-view";
 
-const Homework = () => {
-  return <HomeworkView />;
+const Homework = ({params}) => {
+  return <HomeworkView id={params.id}/>;
 };
 
 export default useProtectedRoute(Homework);

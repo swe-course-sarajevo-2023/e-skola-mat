@@ -21,7 +21,7 @@ async def get_group(
     result = await session.execute(select(Class).where(Class.id == class_id))
     class_ = result.scalars().one()
     if not class_:
-        raise HTTPException(status_code=404, detail="Class not found")
+        raise HTTPException(status_code=204, detail="Class not found")
     return class_
 
 
@@ -34,6 +34,8 @@ async def get_all_groups(
     """Get all groups"""
     result = await session.execute(select(Class))
     groups = result.scalars().all()
+    if not groups:
+        raise HTTPException(status_code=204, detail="Classes not found")
     return groups
 
 

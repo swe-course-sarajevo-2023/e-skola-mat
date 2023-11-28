@@ -9,13 +9,15 @@ import {
   Grid,
   Paper,
   TextField,
+  CircularProgress
 } from "@mui/material";
 import { useState } from "react";
 import Canvas from "../utils/canvas";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 import isAuth from "@/components/isAuth";
+import { useQuery } from "react-query";
+import { getHomeworkDataForReview } from "@/api";
 
 const style = {
   position: "absolute",
@@ -28,184 +30,133 @@ const style = {
   p: 4,
 };
 
-const student = {
-  name: "Mujo",
-  surname: "Mujic",
-  group: 3,
-  id: 15,
-  homeworks: [
-    ["image1", "image2", "image3"],
-    ["image1", "image2"],
-    ["image1", "image2", "image3", "image4"],
-  ],
-};
-
-const HomeworkView = () => {
+const HomeworkView = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedImg, setSelectedImg] = useState(0);
+  const [selectedTaskNumber, setSelectedTaskNumber] = useState(0);
   const [selectedImgSource, setSelectedImgSource] = useState("");
-  const [selectedHomework, setSelectedHomework] = useState(0);
+  const [selectedComment, setSelectedComment] = useState("");
 
   const handleClose = () => setModalOpen(false);
 
-  const handleImageButton = (imageNum, imageSource) => {
-    setSelectedImg(imageNum);
+  const handleImageButton = (taskNumber, imageSource, commnet) => {
+    setSelectedTaskNumber(taskNumber);
     setSelectedImgSource(imageSource);
+    setSelectedComment(commnet);
     setModalOpen(true);
+
   };
+
+  const { data, isLoading, isRefetching, error, isError } = useQuery(
+    ["getHomeworkDataForReview"],
+    () => getHomeworkDataForReview(props.id)
+  );
 
   return (
     <Container>
       <Grid container spacing={2} sx={{ marginTop: 5 }}>
-        <Grid item xs={4}>
+
+        <Grid item xs={12} md={4} lg={4}>
           <Paper>
-            <Typography variant="h4">
-              {" "}
-              Učenik: {student.name} {student.surname}
+            <Typography variant="h5">
+              Učenik: {data && data.user.name} {data && data.user.surname}
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={8}></Grid>
-        <Grid item xs={4}>
+
+        <Grid item xs={12} md={4} lg={4}>
           <Paper>
-            <Typography variant="h5"> Grupa: {student.group}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={8}></Grid>
-        <Grid item xs={4}>
-          <Paper>
-            <Typography variant="h6">
-              Pregled zadaće {selectedHomework + 1}
+            <Typography variant="h5">
+              Zadaća: {data && data.homework.name}
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={8}></Grid>
-        <Grid item xs={12} sx={{ display: "flex" }}>
+
+        <Grid item xs={12} md={4} lg={4}>
+          <Paper>
+            <Typography variant="h5"> Ukupan broj zadataka: {data && data.homework.number_of_tasks}</Typography>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12}></Grid>
+
+        <Grid item xs={12} md={2} lg={2} sx={{ display: "flex" }}>
+          <TextField
+            id="outlined-multiline-static"
+            size="small"
+            label="Unesite ocjenu"
+            focused={(!(isLoading || isRefetching) || data?.data.grade) ? true : false}
+            defaultValue={ data?.data.grade }
+          />
+
+        </Grid>
+
+        <Grid item xs={12} md={8} lg={8}>
           <TextField
             id="standard-basic"
             size="small"
-            sx={{ marginRight: 2 }}
-            label="Unesite ocjenu"
+            fullWidth
+            label="Unesite komentar"
+            focused={(!(isLoading || isRefetching) || data?.data.comment) ? true : false}
             variant="outlined"
+            defaultValue={ data?.data.comment }
           />
-          <div style={{ marginTop: "auto", marginBottom: "auto" }}>
+        </Grid>
+
+        <Grid item xs={12} md={2} lg={2}>
             <Button variant="outlined" size="small">
-              Snimi ocjenu
+              SPASI OCJENU I KOMENTAR
             </Button>
-          </div>
         </Grid>
-        <Grid item xs={3}>
+
+        {(isLoading || isRefetching) && (
+          <Grid item xs={12}>
+            <Box display="flex" justifyContent="center" mt={3}>
+              <CircularProgress size={50} />
+              </Box>
+          </Grid>
+        )}
+
+        <Grid item xs={12} md={12} lg={12} sx={{marginTop: 6}}>
+          <Paper>
+            <Typography variant="h7">
+              {" "}
+              <b>Komentar učenika: </b>Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+               Integer ultricies dui ante, eget volutpat lorem pharetra at. Sed sollicitudin justo et eros pharetra consequat.
+            </Typography>
+          </Paper>
+        </Grid>
+
+        {data && data.problems.map((element) => (
+          <Grid item xs={12} md={3} lg={3}>
           <Card sx={{ maxWidth: 345 }}>
             <div
               style={{
-                backgroundImage: `url('/img1.png')`,
+                backgroundImage: `url('${element.image}')`,
                 backgroundRepeat: "no-repeat",
                 height: "140px",
                 width: "200px",
               }}
             ></div>
             <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                Slika 1
+              <Typography gutterBottom variant="h6" component="div">
+                Zadatak {element.order_num}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Komentar na sliku 1
+                {element.student_comment}
               </Typography>
             </CardContent>
             <CardActions>
               <Button
                 size="small"
-                onClick={() => handleImageButton(1, "img1.png")}
+                onClick={() => handleImageButton(element.order_num, element.image, element.teacher_comment)}
               >
-                Pregledaj
+              PREGLEDAJ
               </Button>
             </CardActions>
           </Card>
         </Grid>
-        <Grid item xs={3}>
-          <Card sx={{ maxWidth: 345 }}>
-            <div
-              style={{
-                backgroundImage: `url('/img2.png')`,
-                backgroundRepeat: "no-repeat",
-                height: "140px",
-                width: "200px",
-              }}
-            ></div>
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                Slika 2
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Komentar na sliku 2
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                size="small"
-                onClick={() => handleImageButton(2, "img2.png")}
-              >
-                Pregledaj
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
-        <Grid item xs={3}>
-          <Card sx={{ maxWidth: 345 }}>
-            <div
-              style={{
-                backgroundImage: `url('/img3.png')`,
-                backgroundRepeat: "no-repeat",
-                height: "140px",
-                width: "200px",
-              }}
-            ></div>
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                Slika 3
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Komentar na sliku 3
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                size="small"
-                onClick={() => handleImageButton(3, "img3.png")}
-              >
-                Pregledaj
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
-        <Grid item xs={3} sx={{ padding: 2 }}>
-          <Card sx={{ maxWidth: 345 }}>
-            <div
-              style={{
-                backgroundImage: `url('/img3.png')`,
-                backgroundRepeat: "no-repeat",
-                height: "140px",
-                width: "200px",
-              }}
-            ></div>
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                Slika 4
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Komentar na sliku 4
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                size="small"
-                onClick={() => handleImageButton(4, "img3.png")}
-              >
-                Pregledaj
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
+        ))}
+
       </Grid>
 
       <Modal
@@ -216,15 +167,13 @@ const HomeworkView = () => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h5" component="h2">
-            Zadaća {selectedHomework + 1}
-          </Typography>
           <Typography variant="h5" id="modal-modal-description" sx={{ mt: 2 }}>
-            Slika {selectedImg}
+            Zadatak {selectedTaskNumber}
           </Typography>
-          <Canvas source={selectedImgSource} />
+          <Canvas source={selectedImgSource} comment={selectedComment}/>
         </Box>
       </Modal>
+
     </Container>
   );
 };
