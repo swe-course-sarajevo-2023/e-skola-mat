@@ -54,9 +54,11 @@ const ProfessorGroupView = (props) => {
                 </Typography>
               </Grid>
               <Grid item>
-                <Button>
+              <Button size="small">
+                <Link href="/profiles/profesor/professor-homework" underline="none">
                   DODAJ ZADAĆU
-                </Button>
+                </Link>
+              </Button>
               </Grid>
             </Grid>
           </Paper>

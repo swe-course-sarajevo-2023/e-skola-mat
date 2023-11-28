@@ -23,7 +23,10 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export const Canvas = ({ source }) => {
+export const Canvas = (props) => {
+
+  const { source, comment } = props;
+
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState("handdrawn");
   const [tool1, setTool1] = useState("#000000");
@@ -251,7 +254,7 @@ export const Canvas = ({ source }) => {
               multiline
               fullWidth
               rows={4}
-              defaultValue={imgComment}
+              defaultValue={comment ? comment : ""}
             />
           </Grid>
           <Grid item xs={12} md={12}>

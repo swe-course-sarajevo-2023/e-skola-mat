@@ -52,7 +52,7 @@ export const deleteProfessorHomework = async (id) => {
 };
 
 export const getGroups = async () => {
-  const { data } = await axiosInstanceWithAuthToken.get("/groups/classes");
+  const { data } = await axiosInstanceWithAuthToken.get("/groups/groups");
   return data;
 };
 
@@ -74,23 +74,36 @@ export const getProfessorHomeworksForSpecificGroup = async (id) => {
   const openHomeworks = [];
   const forReviewHomeworks = [];
   const finishedHomeworks = [];
-  data.forEach((obj) => {
-    switch (obj.status) {
-      case 'finished':
-        finishedHomeworks.push(obj);
-        break;
-      case 'in progress':
-        forReviewHomeworks.push(obj);
-        break;
-      default:
-        openHomeworks.push(obj);
-        break;
-    }
-  });
+  if(data){
+    data.forEach((obj) => {
+      switch (obj.status) {
+        case 'finished':
+          finishedHomeworks.push(obj);
+          break;
+        case 'in progress':
+          forReviewHomeworks.push(obj);
+          break;
+        default:
+          openHomeworks.push(obj);
+          break;
+      }
+    });
+  }
   let data2 = [];
   data2.push(openHomeworks);
   data2.push(forReviewHomeworks);
   data2.push(finishedHomeworks);
 
   return data2;
+}
+
+export const getProfessorAllSubmitedHomeworks = async (id) => {
+  const { data } = await axiosInstanceWithAuthToken.get(`/homeworks/get_homeworks/${id}`);
+  return data;
+}
+
+export const getHomeworkDataForReview = async (id) => {
+  const { data } = await axiosInstanceWithAuthToken.get(`/homeworks/get_homework_data/${id}`);
+  console.log(data);
+  return data;
 }

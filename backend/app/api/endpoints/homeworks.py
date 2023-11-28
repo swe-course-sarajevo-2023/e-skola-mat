@@ -25,7 +25,8 @@ from app.schemas.responses import (
     taskUserHomeworkResponse,
 )
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
-from sqlalchemy import delete, desc, select
+from fastapi.responses import JSONResponse
+from sqlalchemy import delete, desc, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -33,6 +34,76 @@ from app.api import deps
 
 router = APIRouter()
 
+@router.get("/get_homework_data/{id}", response_model=list[HomeworkResponse]) 
+async def get_homework_data(
+        id,
+        session: AsyncSession = Depends(deps.get_session),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+):
+    homework = await session.execute(
+        select(HomeworkUser).where(HomeworkUser.id == id))
+    homework = homework.scalar()
+    
+    if not homework:
+        raise HTTPException(status_code=204, detail="Homework not found")
+    
+    homework2 = await session.execute(select(Homework).where(Homework.id == homework.homework_id))
+    homework2 = homework2.scalar()
+    
+    user = await session.execute(select(User).where(User.id == homework.user_id))
+    user = user.scalar()
+    
+    tasks = await session.execute(select(taskUserHomework).where(and_(
+            taskUserHomework.user_id == homework.user_id,
+            taskUserHomework.homework_id == homework.homework_id
+        ))
+    .order_by(taskUserHomework.order_number_of_the_task))
+    tasks = tasks.scalars().all()
+    
+    tasks_data = []
+    for task in tasks:
+        image = await session.execute(select(taskUserHomeworkImage).where(taskUserHomeworkImage.task_user_homework_id == task.id))
+        image = image.scalar()
+        image2 = await session.execute(select(Image).where(Image.id == image.image_id))
+        image2 = image2.scalar()
+        tasks_data.append({
+            "id": task.id,
+            "order_num": task.order_number_of_the_task,
+            "teacher_comment": task.commentProfessor,
+            "student_comment": task.commentStudent,
+            "image": image2.file_path
+        })
+        
+    return JSONResponse(content={"homework":  {"id": homework2.id, "name": homework2.name, "number_of_tasks": homework2.maxNumbersOfTasks},
+                                 "user": {"id": user.id, "name": user.name, "surname": user.surname}, "data": {"grade": homework.grade, "comment": homework.note},
+                                "problems": tasks_data}, status_code=200)
+
+@router.get("/get_homeworks/{homework_id}", response_model=list[HomeworkResponse]) ##Sve predate zadaće jedne zadate zadaće za konkretnu grupu
+async def get_homeworks(
+        homework_id,
+        session: AsyncSession = Depends(deps.get_session),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+):
+    homeworks = await session.execute(
+        select(HomeworkUser).where(HomeworkUser.homework_id == homework_id).order_by(desc(HomeworkUser.grade)))
+    homeworks = homeworks.scalars().all()
+    
+    response_data = []
+    homework = await session.execute(select(Homework).where(Homework.id == homework_id))
+    homework = homework.scalar()
+    for h in homeworks:
+        user = await session.execute(select(User).where(User.id == h.user_id))
+        user = user.scalar()
+        response_data.append({
+            "id": h.id,
+            "grade": h.grade,
+            "user": {"id": user.id, "name": user.name, "surname": user.surname, "username": user.username},
+        })
+        
+    if not homework and not homeworks:
+        raise HTTPException(status_code=204, detail="Homeworks not found")
+        
+    return JSONResponse(content={"homework":  {"id": homework.id, "name": homework.name}, "data": response_data}, status_code=200)
 
 # Profesor ukoliko pozove bez parametara vraća sve zadaće,
 # a sa parametrom samo zadaće da određenu grupu.
@@ -67,7 +138,7 @@ async def get_homeworks(
     homeworks = result.scalars().all()
 
     if not homeworks:
-        raise HTTPException(status_code=404, detail="Homeworks not found")
+        raise HTTPException(status_code=204, detail="Homeworks not found")
 
     return homeworks
 
