@@ -49,6 +49,8 @@ async def add_student(
         email=new_student.email,
         hashed_password=get_password_hash(new_student.password),
         role_id=select(Role.id).where(Role.role == UserRole.STUDENT),
+        name=new_student.name,
+        surname=new_student.surname
     )
     session.add(user)
     await session.commit()
@@ -95,7 +97,7 @@ async def list_students(
     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(class_id):
-        raise HTTPException(status_code=400, detail="id is not valid")
+        raise HTTPException(status_code=204, detail="id is not valid")
 
     class_users = await session.execute(
         select(UserClass).where(UserClass.class_id == class_id)
@@ -103,7 +105,7 @@ async def list_students(
     class_users = class_users.scalars().all()
 
     if len(class_users) == 0:
-        raise HTTPException(status_code=400, detail="id does not exist")
+        raise HTTPException(status_code=204, detail="id does not exist")
 
     response_data = []
     for class_user in class_users:

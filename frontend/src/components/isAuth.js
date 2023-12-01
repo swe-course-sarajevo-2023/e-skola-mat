@@ -7,8 +7,9 @@ export default function isAuth(Component, route) {
   // console.log(route, "route");
   return function IsAuth(props) {
     const { authenticated, role } = useContext(AuthContext);
-    // console.log(role, "role");
-    // console.log(authenticated);
+     //console.log(role, "role");
+     //console.log(authenticated);
+     
     const student_routes = ["student-view"];
     const professor_routes = [
       "homework-view",
@@ -16,6 +17,7 @@ export default function isAuth(Component, route) {
       "professor-group-view",
       "professor-homepage-view",
       "groups-homework-view",
+      "group-student-view",
     ];
     const admin_routes = [
       "users-view",
@@ -24,6 +26,7 @@ export default function isAuth(Component, route) {
       "professor-group-view",
       "professor-homepage-view",
       "groups-homework-view",
+      "group-student-view",
     ];
 
     useEffect(() => {
