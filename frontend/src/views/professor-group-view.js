@@ -47,16 +47,23 @@ const ProfessorGroupView = (props) => {
         <Grid item xs={12} sx={{ marginBottom: 1 }}>
           <Paper>
             <Grid container spacing={2}>
-              <Grid item>
+              <Grid item xs={12} md={8} lg={8}>
                 <Typography variant="h5" sx={{ marginLeft: 2 }}>
                   {" "}
                   GRUPA: {grupa && grupa.name}
                 </Typography>
               </Grid>
-              <Grid item>
-              <Button size="small">
+              <Grid item xs={6} md={2} lg={2}>
+              <Button>
                 <Link href="/profiles/profesor/professor-homework" underline="none">
                   DODAJ ZADAĆU
+                </Link>
+              </Button>
+              </Grid>
+              <Grid item xs={6} md={2} lg={2}>
+              <Button>
+                <Link href={"/profiles/profesor/group-student/" + props.grupa} underline="none">
+                  PRIKAZ ČLANOVA
                 </Link>
               </Button>
               </Grid>

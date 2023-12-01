@@ -29,14 +29,14 @@ const GroupsHomeworkView = (props) => {
         <Grid item xs={12} sx={{ marginBottom: 5 }}>
           <Paper>
             <Grid container spacing={2}>
-              <Grid item>
+              <Grid item xs={12} md={8} lg={8}>
                 <Typography variant="h5" sx={{ marginLeft: 2 }}>
                   {" "}
                   Zadaća: {!(isLoading || isRefetching) &&
                   !isError && data?.homework.name}
                 </Typography>
               </Grid>
-              <Grid item>
+              <Grid item xs={12} md={4} lg={4}>
                 <Button>POSTAVI REZULTATE</Button>
               </Grid>
             </Grid>
