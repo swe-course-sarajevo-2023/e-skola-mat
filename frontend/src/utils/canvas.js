@@ -101,13 +101,13 @@ export const Canvas = (props) => {
     }
     const { offsetX, offsetY } = nativeEvent;
     if(tool2 == "Thin"){
-      contextRef.current.lineWidth = 2;
+      contextRef.current.lineWidth = 1;
     }
     if(tool2 == "Medium"){
-      contextRef.current.lineWidth = 5;
+      contextRef.current.lineWidth = 2;
     }
     if(tool2 == "Thick"){
-      contextRef.current.lineWidth = 7;
+      contextRef.current.lineWidth = 3;
     }
     if (tool == "handdrawn") {
       contextRef.current.lineTo(offsetX, offsetY);

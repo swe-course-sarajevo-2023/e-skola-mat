@@ -83,8 +83,9 @@ async def get_homework_data(
         })
         
     return JSONResponse(content={"homework":  {"id": homework2.id, "name": homework2.name, "number_of_tasks": homework2.maxNumbersOfTasks},
-                                 "user": {"id": user.id, "name": user.name, "surname": user.surname}, "data": {"grade": homework.grade, "comment": homework.note},
-                                "problems": tasks_data}, status_code=200)
+                                 "user": {"id": user.id, "name": user.name, "surname": user.surname}, 
+                                 "data": {"grade": homework.grade, "comment_professor": homework.note, "comment_student": homework.note_student},
+                                 "problems": tasks_data}, status_code=200)
 
 @router.get("/get_homeworks/{homework_id}", response_model=list[HomeworkResponse]) ##Sve predate zadaće jedne zadate zadaće za konkretnu grupu
 async def get_homeworks(

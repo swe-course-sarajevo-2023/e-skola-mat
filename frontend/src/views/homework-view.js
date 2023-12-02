@@ -98,7 +98,7 @@ const HomeworkView = (props) => {
             label="Unesite generalni komentar"
             focused={(!(isLoading || isRefetching) || data?.data.comment) ? true : false}
             variant="outlined"
-            defaultValue={ data?.data.comment }
+            defaultValue={ data?.data.comment_professor }
             multiline
             rows={2}
           />
@@ -122,8 +122,7 @@ const HomeworkView = (props) => {
           <Paper>
             <Typography variant="h7">
               {" "}
-              <b>Komentar učenika: </b>Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-               Integer ultricies dui ante, eget volutpat lorem pharetra at. Sed sollicitudin justo et eros pharetra consequat.
+              <b>Komentar učenika: </b>{ data?.data.comment_student}
             </Typography>
           </Paper>
         </Grid>
