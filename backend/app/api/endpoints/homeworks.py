@@ -285,7 +285,7 @@ async def submit_homework(
     )
     task = task_query.first()
 
-    # Ako smo nasli trazeni task, postaviti da
+    # Ako smo nasli trazeni task, postaviti odredjene propertye
     if task:
         task.commentStudent = task_comment
         task_user_homework_id = task.id
