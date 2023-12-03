@@ -86,6 +86,73 @@ async def get_homework_data(
                                  "user": {"id": user.id, "name": user.name, "surname": user.surname}, "data": {"grade": homework.grade, "comment": homework.note},
                                 "problems": tasks_data}, status_code=200)
 
+
+@router.get("/get_student_homework_data/{student_id}", response_model=list[HomeworkResponse]) 
+async def get_homework_data(
+        student_id,
+        session: AsyncSession = Depends(deps.get_session),
+        _: User = Depends(deps.RoleCheck([UserRole.STUDENT, UserRole.PROFESSOR])),
+):
+    student_homeworks = await session.execute(
+        select(HomeworkUser).where(HomeworkUser.user_id == student_id))
+    student_homeworks = student_homeworks.scalars().all()
+
+    if not student_homeworks:
+        raise HTTPException(status_code=204, detail="Homeworks not found")
+    
+    student_homeworks2 = []
+    for homework in student_homeworks:
+        homework2 = await session.execute(select(Homework).where(Homework.id == homework.homework_id))
+        homework2 = homework2.scalar()
+        student_homeworks2.append({
+            "id": homework2.id, "name": homework2.name,"grade": homework.grade,"note": homework.note, "number_of_tasks": homework2.maxNumbersOfTasks, "deadline": homework2.deadline, "status": homework2.status
+        })
+    
+    # user = await session.execute(select(User).where(User.id == student_id))
+    # user = user.scalar()
+    student_homeworks3 = []
+    for homework in student_homeworks2:
+        print(homework, "hw loop")
+        tasks = await session.execute(select(taskUserHomework).where(and_(
+            taskUserHomework.user_id == student_id,
+            taskUserHomework.homework_id == homework['id']
+        )).order_by(taskUserHomework.order_number_of_the_task))
+        tasks = tasks.scalars().all()
+        student_homeworks3.append({
+            "id": homework['id'], "name": homework['name'],"grade": homework['grade'],"note": homework['note'], "number_of_tasks": homework['number_of_tasks'], "deadline": homework['deadline'], "status": homework['status'].value, "tasks":tasks
+        })    
+
+    tasks_data = []
+    student_homeworks4 = []
+    for homework in student_homeworks3:
+        for task in tasks:
+            images = await session.execute(select(taskUserHomeworkImage).where(taskUserHomeworkImage.task_user_homework_id == task.id))
+            images = images.scalars().all()
+            images2 = []
+            for i in images:
+                image = await session.execute(select(Image).where(Image.id == i.image_id))
+                image = image.scalar()
+                images2.append({
+                    "id": i.id,
+                    "comment_professor": i.comment_professor,
+                    "comment_student": i.comment_student,
+                    "file_path": image.file_path
+                })
+            tasks_data.append({
+                "id": task.id,
+                "order_num": task.order_number_of_the_task,
+                "teacher_comment": task.commentProfessor,
+                "student_comment": task.commentStudent,
+                "images": images2
+            })
+        student_homeworks4.append({
+            "id": homework['id'], "name": homework['name'],"grade": homework['grade'],"note": homework['note'], "number_of_tasks": homework['number_of_tasks'], "deadline": homework['deadline'], "status": homework['status'], "tasks":tasks_data
+        })
+        tasks_data = []
+        
+    return JSONResponse(content={"data": student_homeworks4}, status_code=200)
+
+
 @router.get("/get_homeworks/{homework_id}", response_model=list[HomeworkResponse]) ##Sve predate zadaće jedne zadate zadaće za konkretnu grupu
 async def get_homeworks(
         homework_id,
@@ -426,3 +493,5 @@ async def submit_comment(
     task.commentStudent = comment
     session.commit()
     return {"message": "Comment submitted successfully"}
+
+
