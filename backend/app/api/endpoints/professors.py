@@ -275,33 +275,3 @@ async def grade_homework(
     session.add(homework_user)
     await session.commit()
     return homework_user
-
-@router.post("/professor/edit-image/")
-async def edit_image(
-    file: UploadFile,
-    task_user_homework_id: str,
-    original_image_id: str,
-    comment_professor: Optional[str] = None,
-    db: AsyncSession = Depends(get_session)
-):
-    # Logika za čitanje slike
-    file_path = IMAGES_DIR / file.filename
-    with file_path.open("wb") as buffer:
-        buffer.write(file.file.read())
-
-    # Pretraga za originalnim taskUserHomeworkImage 
-    original_image = await db.get(taskUserHomeworkImage, original_image_id)
-    if original_image is None:
-        raise HTTPException(status_code=404, detail="Original image not found")
-
-    # Kreiranje novog taskUserHomeworkImage
-    edited_image = taskUserHomeworkImage(
-        task_user_homework_id=task_user_homework_id,
-        image_path=str(file_path),
-        original_image_url=original_image.file_path, 
-        comment_professor=comment_professor
-    )
-    db.add(edited_image)
-    await db.commit()
-
-    return {"edited_image_id": str(edited_image.id), "filename": file.filename}

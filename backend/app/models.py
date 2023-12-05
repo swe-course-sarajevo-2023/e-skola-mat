@@ -159,6 +159,7 @@ class Image(Base):
     filename = mapped_column(String, nullable=False)
     file_path = mapped_column(String, nullable=False)
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
+    originalImageID = Column(UUID(as_uuid=True), nullable=True)
 
 
 class taskUserHomeworkImage(Base):
