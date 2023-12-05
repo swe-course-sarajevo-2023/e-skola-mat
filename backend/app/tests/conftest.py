@@ -4,7 +4,7 @@ from collections.abc import AsyncGenerator
 import pytest
 import pytest_asyncio
 from app.core.session import async_engine, async_session
-from app.main import app
+from main import app
 from app.models import Base, User
 from httpx import AsyncClient
 from sqlalchemy import delete, select
