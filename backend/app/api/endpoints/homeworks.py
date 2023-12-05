@@ -1,8 +1,10 @@
 import shutil
+import uuid
 from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
+from app.api import deps
 from app.models import (
     Class,
     ClassHomework,
@@ -26,21 +28,20 @@ from app.schemas.responses import (
 )
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
-from sqlalchemy import delete, desc, select, and_
+from sqlalchemy import and_, delete, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-
-from app.api import deps
 
 router = APIRouter()
 
 
 @router.get("/get_homework_data/{id}", response_model=list[HomeworkResponse])
 async def get_homework_data(
-        id,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+    id,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
 ):
+
     homework = await session.execute(
         select(taskUserHomework).where(taskUserHomework.id == id))
     homework = homework.scalar()
@@ -49,6 +50,7 @@ async def get_homework_data(
         raise HTTPException(status_code=204, detail="Homework not found")
 
     homework2 = await session.execute(select(Homework).where(Homework.id == homework.homework_id))
+
     homework2 = homework2.scalar()
 
     user = await session.execute(select(User).where(User.id == homework.user_id))
@@ -65,8 +67,6 @@ async def get_homework_data(
     ))
                                   .order_by(taskUserHomework.order_number_of_the_task))
     tasks = tasks.scalars().all()
-    print("HELLOO")
-    print(tasks)
     tasks_data = []
     for task in tasks:
         images = await session.execute(
@@ -76,6 +76,7 @@ async def get_homework_data(
         for i in images:
             image = await session.execute(select(Image).where(Image.id == i.image_id))
             image = image.scalar()
+            
             images2.append({
                 "id": i.id,
                 "comment_professor": i.comment_professor,
@@ -112,12 +113,15 @@ async def get_homework_data(
 @router.get("/get_homeworks/{homework_id}",
             response_model=list[HomeworkResponse])  ##Sve predate zadaće jedne zadate zadaće za konkretnu grupu
 async def get_homeworks(
-        homework_id,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+    homework_id,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
 ):
     homeworks = await session.execute(
-        select(HomeworkUser).where(HomeworkUser.homework_id == homework_id).order_by(desc(HomeworkUser.grade)))
+        select(HomeworkUser)
+        .where(HomeworkUser.homework_id == homework_id)
+        .order_by(desc(HomeworkUser.grade))
+    )
     homeworks = homeworks.scalars().all()
 
     response_data = []
@@ -374,6 +378,21 @@ async def submit_homework(
     if not homework:
         raise HTTPException(status_code=404, detail="Homework not found")
 
+    homework_user_query = await session.execute(
+        select(HomeworkUser).where(
+            HomeworkUser.user_id == current_user.id,
+            HomeworkUser.homework_id == homework.id,
+        )
+    )
+    homework_user = homework_user_query.scalars().first()
+    if not homework_user:
+        new_homework_submission = HomeworkUser(
+            user_id=current_user.id,
+            homework_id=homework_id,
+        )
+        session.add(new_homework_submission)
+        session.flush()
+
     if task_number > homework.maxNumbersOfTasks:
         raise HTTPException(
             status_code=404,
@@ -408,8 +427,8 @@ async def submit_homework(
         unique_filename = f"{uuid4()}_{image.filename}"
         file_path = f"images/{unique_filename}"
 
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
+        # with open(file_path, "wb") as buffer:
+        #   shutil.copyfileobj(image.file, buffer)
 
         single_image = Image(
             filename=image.filename,
