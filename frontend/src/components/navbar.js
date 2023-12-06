@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-
+import Link from 'next/link';
 export default function ButtonAppBar() {
 
     return (
@@ -32,7 +32,20 @@ export default function ButtonAppBar() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1, marginLeft: 2}}>
               eŠkola matematike
             </Typography>
+            <Link href="/profiles/profesor" passHref>
+            <Button color="inherit">Profesori</Button>
+          </Link>
+
+          <Link href="/profiles/student" passHref>
+            <Button color="inherit">Učenici</Button>
+          </Link>
+
+          <Link href="/users" passHref>
+            <Button color="inherit">Korisnici</Button>
+          </Link>
             <Button color="inherit">LOGOUT</Button>
+            
+    
           </Toolbar>
         </AppBar>
       </Box>
