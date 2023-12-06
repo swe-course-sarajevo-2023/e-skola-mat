@@ -57,7 +57,6 @@ const Home = () => {
         <a
           href="login"
           className={styles.card}
-          target="_blank"
           rel="noopener noreferrer"
         >
           <h2>
