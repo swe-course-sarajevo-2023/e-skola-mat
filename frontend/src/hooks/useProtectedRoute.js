@@ -4,10 +4,12 @@ import { Box, CircularProgress } from "@mui/material";
 
 const useProtectedRoute = (Component) => {
   const ProtectedComponent = (props) => {
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [auth, setAuth] = useState(false);
 
     useEffect(() => {
       const verifyToken = async () => {
+        setLoading(true);
         const token = localStorage.getItem("token");
         try {
           await axiosInstance.get("/auth/verify-token", {
@@ -16,7 +18,11 @@ const useProtectedRoute = (Component) => {
             },
           });
           setLoading(false);
+          setAuth(true)
+          
         } catch (error) {
+          setAuth(false)
+          setLoading(false);
           localStorage.removeItem("token");
           window.location.href = "/login";
         }
@@ -26,7 +32,8 @@ const useProtectedRoute = (Component) => {
     }, []);
 
     if (loading)
-      return (
+      {
+        return (
         <Box
           display="flex"
           justifyContent="center"
@@ -36,9 +43,21 @@ const useProtectedRoute = (Component) => {
           <CircularProgress size={80} />
         </Box>
       );
+    }else{
+      if (auth)
+          return <Component {...props} />;
+      
+      return <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      height="100vh"
+    >
+      Unauthorized!
+    </Box>;
+    }
 
-    // Render the original component if the token is valid
-    return <Component {...props} />;
+    
   };
 
   return ProtectedComponent;
