@@ -1,3 +1,4 @@
+from uuid import uuid4
 from pathlib import Path
 
 from app.models import taskUserHomeworkImage
@@ -39,7 +40,8 @@ async def edit_image(
     original_image_id: str,
     db: AsyncSession = Depends(get_session)
 ):
-    file_path = IMAGES_DIR / file.filename
+    unique_filename = str(uuid4())
+    file_path = IMAGES_DIR / unique_filename
     with file_path.open("wb") as buffer:
         buffer.write(await file.read())  
 
