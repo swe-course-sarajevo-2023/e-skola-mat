@@ -45,7 +45,16 @@ async def edit_image(
     with file_path.open("wb") as buffer:
         buffer.write(await file.read())  
 
-    new_image = taskUserHomeworkImage(image_path=str(file_path))
+    result = await db.execute(
+        select(taskUserHomeworkImage.task_user_homework_id).where(taskUserHomeworkImage.image_id == original_image_id)
+    )
+    task_user_homework_id = result.scalar_one_or_none()
+
+    if task_user_homework_id is None:
+        raise HTTPException(status_code=404, detail="Original image not found")
+
+    new_image = taskUserHomeworkImage(image_path=str(file_path), task_user_homework_id=task_user_homework_id)
+
     db.add(new_image)
     await db.commit()
 
