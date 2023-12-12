@@ -17,29 +17,38 @@ import styles from "./page.module.css";
 
 export default function ResetPasswordView() {
   const [user, setUser] = React.useState({
-    oldPassword: "",
     newPassword: "",
     newPasswordRepeat: ""
   });
-  const { mutateAsync, error, isLoading } = useMutation(ResetPasswordView);
+
+  const [alertVisible, setAlertVisible] = React.useState(false);
+ 
   const router = useRouter();
 
-  const onLogin = async (e) => {
-    e.preventDefault();
-   if(user.newPassword == user.newPasswordRepeat){
-    try {
-      const data = await mutateAsync(user);
-      localStorage.setItem("token", data.access_token);
-      router.push("/");
-    } catch (error) {}
+  const mutation = useMutation(ResetPassword, {
+    onSuccess: () => {
+        router.push('/');
+    },
+    onError: (error) => {
+      console.log(error);
+      setAlertVisible(true);
+    },
+  });
+
+  const onLogin = () => {
+    if(!(user.newPassword=='' || user.newPasswordRepeat=='' || user.newPassword!=user.newPasswordRepeat)){
+        let data = {password: user.newPassword}
+        mutation.mutate(data);
+    }else{
+        setAlertVisible(true);
+    }
   }
-  };
 
   return (
     <main className={styles.main}>
-    
+
       <div className={styles.description}>
-        
+
         <div>
           <a
             href="https://pmf.unsa.ba"
@@ -57,7 +66,7 @@ export default function ResetPasswordView() {
       >
         <Grid item>
           <div
-            
+
             style={{
               marginLeft: 100,
               backgroundImage: "url('/logo.png')",
@@ -93,29 +102,14 @@ export default function ResetPasswordView() {
                 eŠkola matematike
               </Typography>
                 </Grid>
-              
-                <Grid item xs={12} mb={2}>
-                  {error && (
-                    <Alert severity="error">
-                      {error?.response?.data || error?.message || error?.detail}
-                    </Alert>
-                  )}
-                </Grid>
+
                 <Grid item xs={12}>
-                
-                  <TextField
-                    id="oldPasswrd"
-                    label="Stara lozinka"
-                    type="password"
-                    autoComplete="current-oldPasswrd"
-                    fullWidth
-                    value={user.oldPassword}
-                    onChange={(e) =>
-                      setUser({ ...user, oldPassword: e.target.value })
-                    }
-                  />
+                {alertVisible && (
+                <Alert severity="error">
+                Došlo je do greške!
+                </Alert>
+                )}
                 </Grid>
-                <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
                   <TextField
                     id="newPassowrd"
@@ -149,7 +143,7 @@ export default function ResetPasswordView() {
                     variant="contained"
                     fullWidth
                     onClick={onLogin}
-                    disabled={isLoading}
+                   
                   >
                     PROMJENI LOZINKU
                   </Button>
