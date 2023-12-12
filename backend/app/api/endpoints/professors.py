@@ -26,6 +26,9 @@ from app.api import deps
 
 router = APIRouter()
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+IMAGES_DIR = BASE_DIR / "images"
+
 
 def is_valid_uuid(uuid_str):
     try:
