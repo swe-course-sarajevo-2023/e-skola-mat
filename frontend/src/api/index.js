@@ -141,3 +141,7 @@ export const commentTask = async (data) => {
   await axiosInstanceWithAuthToken.post(`/professors/comment_homework/`,
       data)
 };
+
+export const ResetPassword = async (data) => {
+  await axiosInstanceWithAuthToken.post("/users/reset-password/", data);
+};
