@@ -141,3 +141,13 @@ export const commentTask = async (data) => {
   await axiosInstanceWithAuthToken.post(`/professors/comment_homework/`,
       data)
 };
+
+export const ResetPassword = async (data) => {
+  try {
+    const reponse = await axiosInstance.post("/reset-password", data);
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
