@@ -20,11 +20,13 @@ async def upload_file(
     file: UploadFile,
     db: AsyncSession = Depends(deps.get_session)
 ):
+    IMAGES_DIR.mkdir(parents=True, exist_ok=True)
     file_path = IMAGES_DIR / file.filename
     with file_path.open("wb") as buffer:
         buffer.write(await file.read())  
 
-    new_image = taskUserHomeworkImage(image_path=str(file_path))
+    new_image = taskUserHomeworkImage()
+    new_image.image_path = str(file_path)
     db.add(new_image)
     await db.commit()
 
@@ -38,7 +40,7 @@ async def upload_file(
 async def edit_image(
     file: UploadFile,
     original_image_id: str,
-    db: AsyncSession = Depends(get_session)
+    db: AsyncSession = Depends(deps.get_session)
 ):
     unique_filename = str(uuid4())
     file_path = IMAGES_DIR / unique_filename

@@ -25,9 +25,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
 
 router = APIRouter()
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-IMAGES_DIR = BASE_DIR / "images"
+# #naredne dvije linije nigdje se ne koriste pa cemo ih zakomentraisat da ne prave gresku  
+# BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# IMAGES_DIR = BASE_DIR / "images"
 
 
 def is_valid_uuid(uuid_str):
