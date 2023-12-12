@@ -72,3 +72,6 @@ class HomeworkUserDetailsResponse(BaseModel):
     grade: Optional[int]
     note: Optional[str]
     tasks: List[taskUserHomeworkResponse]
+
+class VerifyTokenResponse(BaseModel):
+    id: str

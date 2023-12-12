@@ -1,5 +1,3 @@
-import shutil
-import uuid
 from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
@@ -182,7 +180,7 @@ async def get_homeworks(
 
 
 @router.get(
-    "/homework-user/{homework_user_id}", response_model=HomeworkUserDetailsResponse
+    "/homework-user/{homework_user_id}", response_model=Optional[HomeworkUserDetailsResponse]
 )
 async def get_homework_user_details(
         homework_user_id: str,
