@@ -38,7 +38,7 @@ async def upload_file(
 async def edit_image(
     file: UploadFile,
     original_image_id: str,
-    db: AsyncSession = Depends(get_session)
+    db: AsyncSession = Depends(deps.get_session)
 ):
     unique_filename = str(uuid4())
     file_path = IMAGES_DIR / unique_filename
