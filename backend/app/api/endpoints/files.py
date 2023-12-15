@@ -1,13 +1,12 @@
-from uuid import uuid4
 from pathlib import Path
+from uuid import uuid4
 
-from app.models import taskUserHomeworkImage
+from app.api import deps
+from app.models import Image, taskUserHomeworkImage
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.api import deps
 
 router = APIRouter()
 
@@ -18,58 +17,78 @@ IMAGES_DIR = BASE_DIR / "images"
 @router.post("/upload/")
 async def upload_file(
     file: UploadFile,
-    db: AsyncSession = Depends(deps.get_session)
+    task_user_homework_id: str,  # da znamo kojem tasku slika pripada
+    db: AsyncSession = Depends(deps.get_session),
 ):
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-    file_path = IMAGES_DIR / file.filename
+    unique_filename = str(uuid4())
+    file_path = IMAGES_DIR / unique_filename
     with file_path.open("wb") as buffer:
-        buffer.write(await file.read())  
+        buffer.write(await file.read())
 
-    new_image = taskUserHomeworkImage()
-    new_image.image_path = str(file_path)
+    new_image = Image(filename=file.filename, file_path=str(file_path))
     db.add(new_image)
     await db.commit()
 
+    task_image = taskUserHomeworkImage(
+        image_path=str(file_path),
+        image_id=new_image.id,
+        task_user_homework_id=task_user_homework_id,
+    )
+    db.add(task_image)
+
     # Postavljanje originalImageID na ID same slike jer je ovo original
     new_image.originalImageID = new_image.id
-    await db.commit()  
-
+    await db.commit()
     return {"image_id": str(new_image.id), "filename": file.filename}
+
 
 @router.post("/edit-image/")
 async def edit_image(
     file: UploadFile,
     original_image_id: str,
-    db: AsyncSession = Depends(deps.get_session)
+    db: AsyncSession = Depends(deps.get_session),
 ):
+    IMAGES_DIR.mkdir(parents=True, exist_ok=True)
     unique_filename = str(uuid4())
     file_path = IMAGES_DIR / unique_filename
     with file_path.open("wb") as buffer:
-        buffer.write(await file.read())  
+        buffer.write(await file.read())
 
-    result = await db.execute(
-        select(taskUserHomeworkImage.task_user_homework_id).where(taskUserHomeworkImage.image_id == original_image_id)
+    original_image = await db.execute(
+        select(taskUserHomeworkImage).where(
+            taskUserHomeworkImage.image_id == original_image_id
+        )
     )
-    task_user_homework_id = result.scalar_one_or_none()
+    original_image = original_image.scalar_one_or_none()
 
-    if task_user_homework_id is None:
+    if original_image is None:
         raise HTTPException(status_code=404, detail="Original image not found")
 
-    new_image = taskUserHomeworkImage(image_path=str(file_path), task_user_homework_id=task_user_homework_id)
-
+    new_image = Image(
+        filename=file.filename,
+        file_path=str(file_path),
+        originalImageID=original_image_id,
+    )
     db.add(new_image)
     await db.commit()
 
-    # Postavljanje originalImageID na ID same slike jer je ovo original
-    new_image.originalImageID = original_image_id
-    await db.commit()  
+    task_image = taskUserHomeworkImage(
+        image_path=str(file_path),
+        image_id=new_image.id,
+        task_user_homework_id=original_image.task_user_homework_id,
+    )
+
+    db.add(task_image)
+    await db.commit()
 
     return {"image_id": str(new_image.id), "filename": file.filename}
+
 
 @router.get("/images/{image_id}")
 async def read_image(image_id: str, db: AsyncSession = Depends(deps.get_session)):
     image = await db.execute(
-        select(taskUserHomeworkImage).where(taskUserHomeworkImage.id == image_id)
+        select(taskUserHomeworkImage).where(taskUserHomeworkImage.image_id == image_id)
     )
     image = image.scalar_one_or_none()
     if image is None:
@@ -80,7 +99,7 @@ async def read_image(image_id: str, db: AsyncSession = Depends(deps.get_session)
 @router.delete("/images/{image_id}")
 async def delete_image(image_id: str, db: AsyncSession = Depends(deps.get_session)):
     image = await db.execute(
-        select(taskUserHomeworkImage).where(taskUserHomeworkImage.id == image_id)
+        select(taskUserHomeworkImage).where(taskUserHomeworkImage.image_id == image_id)
     )
     image = image.scalar_one_or_none()
     if image is None:
