@@ -3,7 +3,7 @@ import axios from "axios";
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "https://sample-zeaqndbcnq-oa.a.run.app/",
 });
 
 axiosInstance.interceptors.response.use(
@@ -17,7 +17,7 @@ axiosInstance.interceptors.response.use(
 // ----------------------------------------------------------------------
 
 const axiosInstanceWithAuthToken = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "https://sample-zeaqndbcnq-oa.a.run.app/",
 });
 
 axiosInstanceWithAuthToken.interceptors.request.use(
