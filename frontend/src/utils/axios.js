@@ -1,6 +1,7 @@
 import axios from "axios";
 
 // ----------------------------------------------------------------------
+console.log(process.env.NODE_ENV);
 
 const axiosInstance = axios.create({
   baseURL: "https://sample-zeaqndbcnq-oa.a.run.app/",
