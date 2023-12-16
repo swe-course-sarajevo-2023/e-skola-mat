@@ -1,3 +1,4 @@
+"use client";
 import SubmitModal from "@/views/submit-homework";
 
 export const setSubmitModalShow = (props) => {
