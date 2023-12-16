@@ -28,6 +28,7 @@
     "react-query": "^3.39.3",
     "yup": "^1.3.2"
   },
+  "proxy": "https://sample-zeaqndbcnq-oa.a.run.app",
   "devDependencies": {
     "eslint": "^8",
     "eslint-config-next": "13.5.5"
