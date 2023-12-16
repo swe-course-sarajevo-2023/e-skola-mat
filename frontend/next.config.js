@@ -5,7 +5,7 @@ module.exports = {
       return [
         {
           source: '/api/:path*',
-          destination: 'https://api.example.com/:path*',
+          destination: 'https://sample-zeaqndbcnq-oa.a.run.app/:path*',
         },
       ]
     },
