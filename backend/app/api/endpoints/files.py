@@ -1,9 +1,10 @@
 from pathlib import Path
+from typing import Annotated
 from uuid import uuid4
 
 from app.api import deps
 from app.models import Image, taskUserHomeworkImage
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,13 +17,13 @@ IMAGES_DIR = BASE_DIR / "images"
 
 @router.post("/upload/")
 async def upload_file(
-    file: UploadFile,
-    task_user_homework_id: str,  # da znamo kojem tasku slika pripada
+    file: Annotated[UploadFile, File()],
+    task_user_homework_id: str = Form(...),  # da znamo kojem tasku slika pripada
     db: AsyncSession = Depends(deps.get_session),
 ):
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
     unique_filename = str(uuid4())
-    file_path = IMAGES_DIR / unique_filename
+    file_path = IMAGES_DIR / (unique_filename + file.filename)
     with file_path.open("wb") as buffer:
         buffer.write(await file.read())
 
@@ -45,13 +46,13 @@ async def upload_file(
 
 @router.post("/edit-image/")
 async def edit_image(
-    file: UploadFile,
-    original_image_id: str,
+    file: Annotated[UploadFile, File()],
+    original_image_id: str = Form(...),
     db: AsyncSession = Depends(deps.get_session),
 ):
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
     unique_filename = str(uuid4())
-    file_path = IMAGES_DIR / unique_filename
+    file_path = IMAGES_DIR / (unique_filename + file.filename)
     with file_path.open("wb") as buffer:
         buffer.write(await file.read())
 
