@@ -12,31 +12,43 @@ import {
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "react-query";
-import { loginUser } from "@/api";
+import { ResetPassword } from "@/api";
 import styles from "./page.module.css";
 
-export default function LoginView() {
+export default function ResetPasswordView() {
   const [user, setUser] = React.useState({
-    username: "",
-    password: "",
+    newPassword: "",
+    newPasswordRepeat: ""
   });
-  const { mutateAsync, error, isLoading } = useMutation(loginUser);
+
+  const [alertVisible, setAlertVisible] = React.useState(false);
+ 
   const router = useRouter();
 
-  const onLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const data = await mutateAsync(user);
-      localStorage.setItem("token", data.access_token);
-      router.push("/");
-    } catch (error) {}
-  };
+  const mutation = useMutation(ResetPassword, {
+    onSuccess: () => {
+        router.push('/');
+    },
+    onError: (error) => {
+      console.log(error);
+      setAlertVisible(true);
+    },
+  });
+
+  const onLogin = () => {
+    if(!(user.newPassword=='' || user.newPasswordRepeat=='' || user.newPassword!=user.newPasswordRepeat)){
+        let data = {password: user.newPassword}
+        mutation.mutate(data);
+    }else{
+        setAlertVisible(true);
+    }
+  }
 
   return (
     <main className={styles.main}>
-    
+
       <div className={styles.description}>
-        
+
         <div>
           <a
             href="https://pmf.unsa.ba"
@@ -54,7 +66,7 @@ export default function LoginView() {
       >
         <Grid item>
           <div
-            
+
             style={{
               marginLeft: 100,
               backgroundImage: "url('/logo.png')",
@@ -90,39 +102,38 @@ export default function LoginView() {
                 eŠkola matematike
               </Typography>
                 </Grid>
-              
-                <Grid item xs={12} mb={2}>
-                  {error && (
-                    <Alert severity="error">
-                      {error?.response?.data || error?.message || error?.detail}
-                    </Alert>
-                  )}
+
+                <Grid item xs={12}>
+                {alertVisible && (
+                <Alert severity="error">
+                Došlo je do greške!
+                </Alert>
+                )}
                 </Grid>
                 <Grid item xs={12}>
-                
                   <TextField
-                    id="email"
-                    label="Email"
-                    type="text"
-                    autoComplete="current-email"
+                    id="newPassowrd"
+                    label="Nova lozinka"
+                    type="password"
+                    autoComplete="current-newPassowrd"
                     fullWidth
-                    value={user.username}
+                    value={user.newPassword}
                     onChange={(e) =>
-                      setUser({ ...user, username: e.target.value })
+                      setUser({ ...user, newPassword: e.target.value })
                     }
                   />
                 </Grid>
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
                   <TextField
-                    id="password"
-                    label="Lozinka"
+                    id="newPassowrdRepeat"
+                    label="Nova lozinka ponovno"
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete="current-newPassowrdRepeat"
                     fullWidth
-                    value={user.password}
+                    value={user.newPasswordRepeat}
                     onChange={(e) =>
-                      setUser({ ...user, password: e.target.value })
+                      setUser({ ...user, newPasswordRepeat: e.target.value })
                     }
                   />
                 </Grid>
@@ -132,9 +143,9 @@ export default function LoginView() {
                     variant="contained"
                     fullWidth
                     onClick={onLogin}
-                    disabled={isLoading}
+                   
                   >
-                    LOGIN
+                    PROMJENI LOZINKU
                   </Button>
                 </Grid>
               </Grid>

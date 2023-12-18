@@ -3,7 +3,7 @@ import time
 import jwt
 from app.models import User
 from app.schemas.requests import RefreshTokenRequest
-from app.schemas.responses import AccessTokenResponse
+from app.schemas.responses import AccessTokenResponse, VerifyTokenResponse
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ValidationError
@@ -84,18 +84,18 @@ async def refresh_token(
     return security.generate_access_token_response(str(user.id))
 
 
-@router.get("/verify-token", response_model=bool)
+@router.get("/verify-token", response_model=VerifyTokenResponse)
 def verify_access_token(authorization=Header(...)):
     """Verify the access token"""
     try:
         # Decode the token and extract claims
         _, token = authorization.split(" ")
-        jwt.decode(
+        result = jwt.decode(
             token,
             key=config.settings.SECRET_KEY,
             algorithms=[security.JWT_ALGORITHM],
         )
 
-        return True  # Token is valid
+        return VerifyTokenResponse(id=result["sub"])  # Token is valid
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired token")

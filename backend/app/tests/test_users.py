@@ -1,4 +1,4 @@
-from app.main import app
+from main import app
 from app.models import User
 from app.tests.conftest import (
     default_user_email,

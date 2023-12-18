@@ -17,7 +17,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import isAuth from "@/components/isAuth";
 import { useQuery } from "react-query";
-import { getHomeworkDataForReview } from "@/api";
+import {commentTask, getHomeworkDataForReview, gradeStudent} from "@/api";
 
 const style = {
   position: "absolute",
@@ -30,11 +30,46 @@ const style = {
   p: 4,
 };
 
+const Comment = ({element, isLoading, isRefetching}) => {
+  const [commentValue, setCommentValue] = useState(element?.teacher_comment || '');
+
+  const handleChange = (event) => {
+    setCommentValue(event.target.value);
+  };
+
+  return (
+      <CardActions sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+        <TextField
+            id="standard-basic"
+            size="small"
+            fullWidth
+            label="Unesite komentar za zadatak"
+            focused={(!(isLoading || isRefetching) || element.teacher_comment) ? true : false}
+            variant="outlined"
+            value={commentValue}
+            onChange={handleChange}
+            sx={{ marginTop: 2, marginBottom: 1 }}
+            multiline
+            rows={2}
+        />
+        <Button variant="outlined" size="small" onClick={()=>{commentTask({"id":element?.id, "comment":commentValue})}}>
+          SPASI KOMENTAR
+        </Button>
+      </CardActions>
+  );
+};
+
 const HomeworkView = (props) => {
+  const { data, isLoading, isRefetching, error, isError } = useQuery(
+      ["getHomeworkDataForReview"],
+      () => getHomeworkDataForReview(props.id)
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTaskNumber, setSelectedTaskNumber] = useState(0);
   const [selectedImgSource, setSelectedImgSource] = useState("");
   const [selectedComment, setSelectedComment] = useState("");
+  const [commentProfessor, setCommentProfessor] = useState(data?.comment_proffesor);
+  const [grade, setGrade] = useState(data?.grade);
 
   const handleClose = () => setModalOpen(false);
 
@@ -46,10 +81,9 @@ const HomeworkView = (props) => {
 
   };
 
-  const { data, isLoading, isRefetching, error, isError } = useQuery(
-    ["getHomeworkDataForReview"],
-    () => getHomeworkDataForReview(props.id)
-  );
+
+
+  console.log(data);
 
   return (
     <Container>
@@ -84,8 +118,10 @@ const HomeworkView = (props) => {
             id="outlined-multiline-static"
             size="small"
             label="Unesite ocjenu"
-            focused={(!(isLoading || isRefetching) || data?.data.grade) ? true : false}
-            defaultValue={ data?.data.grade }
+            focused={(!(isLoading || isRefetching) || data?.grade) ? true : false}
+            defaultValue={ data?.grade }
+            value={grade}
+            onChange={(e)=>{setGrade(e.target.value)}}
           />
 
         </Grid>
@@ -96,16 +132,18 @@ const HomeworkView = (props) => {
             size="small"
             fullWidth
             label="Unesite generalni komentar"
-            focused={(!(isLoading || isRefetching) || data?.data.comment) ? true : false}
+            focused={(!(isLoading || isRefetching) || data?.comment) ? true : false}
             variant="outlined"
-            defaultValue={ data?.data.comment_professor }
+            defaultValue={ data?.comment_proffesor }
+            value={commentProfessor}
+            onChange={(e)=>{setCommentProfessor(e.target.value)}}
             multiline
             rows={2}
           />
         </Grid>
 
         <Grid item xs={12} md={2} lg={2}>
-            <Button variant="outlined" size="small">
+            <Button variant="outlined" size="small" onClick={()=>gradeStudent({"homework_id":data?.homework.id, "user_id":data?.user.id, "grade":grade, "note":commentProfessor})}>
               SPASI OCJENU I KOMENTAR
             </Button>
         </Grid>
@@ -122,7 +160,7 @@ const HomeworkView = (props) => {
           <Paper>
             <Typography variant="h7">
               {" "}
-              <b>Komentar učenika: </b>{ data?.data.comment_student}
+              <b>Komentar učenika: </b>{ data?.comment_student}
             </Typography>
           </Paper>
         </Grid>
@@ -155,23 +193,7 @@ const HomeworkView = (props) => {
                 {element.student_comment}
               </Typography>
             </CardContent>
-            <CardActions sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <TextField
-              id="standard-basic"
-              size="small"
-              fullWidth
-              label="Unesite komentar za zadatak"
-              focused={(!(isLoading || isRefetching) || element.teacher_comment) ? true : false}
-              variant="outlined"
-              defaultValue={element?.teacher_comment}
-              sx={{marginTop: 2, marginBottom: 1}}
-              multiline
-              rows={2}
-              />
-              <Button variant="outlined" size="small">
-                SPASI KOMENTAR
-              </Button>
-            </CardActions>
+            <Comment element={element} isLoading={isLoading} isRefetching={isRefetching}/>
           </Card>
         </Grid>
         ))}
