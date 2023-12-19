@@ -57,30 +57,33 @@ export const getGroups = async () => {
 };
 
 export const getGroup = async (id) => {
-  const {data} = await axiosInstanceWithAuthToken.get("/groups/class", {
+  const { data } = await axiosInstanceWithAuthToken.get("/groups/class", {
     params: {
       class_id: id,
-    }
+    },
   });
   return data;
-}
+};
 
 export const getProfessorHomeworksForSpecificGroup = async (id) => {
-  const {data} = await axiosInstanceWithAuthToken.get('/homeworks/homeworks', {
-    params: {
-      class_id: id,
+  const { data } = await axiosInstanceWithAuthToken.get(
+    "/homeworks/homeworks",
+    {
+      params: {
+        class_id: id,
+      },
     }
-  });
+  );
   const openHomeworks = [];
   const forReviewHomeworks = [];
   const finishedHomeworks = [];
-  if(data){
+  if (data) {
     data.forEach((obj) => {
       switch (obj.status) {
-        case 'finished':
+        case "finished":
           finishedHomeworks.push(obj);
           break;
-        case 'in progress':
+        case "in progress":
           forReviewHomeworks.push(obj);
           break;
         default:
@@ -95,35 +98,58 @@ export const getProfessorHomeworksForSpecificGroup = async (id) => {
   data2.push(finishedHomeworks);
 
   return data2;
-}
+};
 
 export const getProfessorAllSubmitedHomeworks = async (id) => {
-  const { data } = await axiosInstanceWithAuthToken.get(`/homeworks/get_homeworks/${id}`);
+  const { data } = await axiosInstanceWithAuthToken.get(
+    `/homeworks/get_homeworks/${id}`
+  );
   return data;
-}
+};
 
 export const getHomeworkDataForReview = async (id) => {
-  const { data } = await axiosInstanceWithAuthToken.get(`/homeworks/get_homework_data/${id}`);
+  const { data } = await axiosInstanceWithAuthToken.get(
+    `/homeworks/get_homework_data/${id}`
+  );
   return data;
-}
+};
 
 export const getAllStudentsForSpecificGroup = async (id) => {
-  const { data } = await axiosInstanceWithAuthToken.get(`/professors/list_students/${id}`);
+  const { data } = await axiosInstanceWithAuthToken.get(
+    `/professors/list_students/${id}`
+  );
   return data;
-}
+};
 
 export const deleteStudent = async (data) => {
-  await axiosInstanceWithAuthToken.delete('/professors/delete_student', {data});
+  await axiosInstanceWithAuthToken.delete("/professors/delete_student", {
+    data,
+  });
 };
 
 export const addStudent = async (data) => {
   const { group_id, new_student } = data;
-  await axiosInstanceWithAuthToken.post(`/professors/register_student/`, 
-  data.new_student,  
-  {
-    params: {
-      group_id: data.group_id,
-    },
-  });
+  await axiosInstanceWithAuthToken.post(
+    `/professors/register_student/`,
+    data.new_student,
+    {
+      params: {
+        group_id: data.group_id,
+      },
+    }
+  );
 };
 
+export const submitTask = async (data) => {
+  await axiosInstanceWithAuthToken.post(
+    `/homeworks/submit-task/${data.homework_id}/task/${data.task_number}`,
+    data
+  );
+};
+
+export const submitHomeworkGeneralComment = async (data) => {
+  await axiosInstanceWithAuthToken.post(
+    `/homeworks/submit-general-comment/${data.homework_id}`,
+    data
+  );
+};

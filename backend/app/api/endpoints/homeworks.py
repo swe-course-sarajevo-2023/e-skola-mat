@@ -381,8 +381,8 @@ async def update_homework_status(
     return {"message": "Homework status updated successfully"}
 
 
-@router.post("/submit-homework/{homework_id}/task/{task_number}")
-async def submit_homework(
+@router.post("/submit-task/{homework_id}/task/{task_number}")
+async def submit_task(
     homework_id: str,
     task_number: int,
     task_comment: str,
@@ -471,6 +471,39 @@ async def submit_homework(
 
     await session.commit()
     return {"message": "Homework task submitted successfully"}
+
+@router.post("/submit-general-comment/{homework_id}")
+async def submit_comment(
+    homework_id: str,
+    comment: str,
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user),
+
+):
+    
+    print(homework_id, comment, "submit general comment")
+    
+    homework_user_query = await session.execute(
+        select(HomeworkUser).where(
+            HomeworkUser.user_id == current_user.id,
+            HomeworkUser.homework_id == homework_id,
+        )
+    )
+    homework_user = homework_user_query.scalars().first()
+    if not homework_user:
+        new_homework_submission = HomeworkUser(
+            user_id=current_user.id,
+            homework_id=homework_id,
+        )
+        session.add(new_homework_submission)
+        session.flush()
+
+
+
+    # Setovanje generalnog komentara komentara
+    homework_user.note = comment
+    session.commit()
+    return {"message": "General comment submitted successfully"}
 
 
 @router.post("/submit-comment")
