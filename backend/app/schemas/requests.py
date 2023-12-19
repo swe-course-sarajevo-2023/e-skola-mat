@@ -21,6 +21,8 @@ class UserUpdatePasswordRequest(BaseRequest):
 class UserCreateRequest(BaseRequest):
     email: EmailStr
     password: str
+    name: str
+    surname: str
 
 
 class HomeworkCreateRequest(BaseRequest):

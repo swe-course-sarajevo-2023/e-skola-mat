@@ -30,7 +30,7 @@ export const Canvas = (props) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState("handdrawn");
   const [tool1, setTool1] = useState("#000000");
-  const [tool2, setTool2] = useState("empty");
+  const [tool2, setTool2] = useState("Medium");
   const [img, setImg] = useState();
   const [name, setName] = useState("");
   const [name1, setName1] = useState("");
@@ -91,24 +91,6 @@ export const Canvas = (props) => {
       contextRef.current.lineTo(offsetX, offsetY);
       contextRef.current.stroke();
     }
-    if (tool == "rectangle") {
-      contextRef.current.rect(x, y, offsetX - x, offsetY - y);
-    }
-    if (tool == "circle") {
-      contextRef.current.arc(
-        x,
-        y,
-        Math.sqrt(
-          (offsetX - x) * (offsetX - x) + (offsetY - y) * (offsetY - y)
-        ),
-        0,
-        2 * Math.PI
-      );
-    }
-    if (tool2 == "full") {
-      contextRef.current.fillStyle = tool1;
-      contextRef.current.fill();
-    } else contextRef.current.stroke();
     contextRef.current.closePath();
     setIsDrawing(false);
   };
@@ -118,7 +100,15 @@ export const Canvas = (props) => {
       return;
     }
     const { offsetX, offsetY } = nativeEvent;
-    console.log(offsetX, offsetY);
+    if(tool2 == "Thin"){
+      contextRef.current.lineWidth = 1;
+    }
+    if(tool2 == "Medium"){
+      contextRef.current.lineWidth = 2;
+    }
+    if(tool2 == "Thick"){
+      contextRef.current.lineWidth = 3;
+    }
     if (tool == "handdrawn") {
       contextRef.current.lineTo(offsetX, offsetY);
       contextRef.current.stroke();
@@ -126,10 +116,6 @@ export const Canvas = (props) => {
   };
 
   const clearCanvas = () => {
-    // const canvas = canvasRef.current;
-    // const context = canvas.getContext("2d");
-    // context.fillStyle = "lightblue";
-    // context.fillRect(0, 0, 500, 500);
     prepareCanvas();
   };
 
@@ -212,37 +198,32 @@ export const Canvas = (props) => {
                   control={<Radio />}
                   label="Linija"
                 />
-                <FormControlLabel
-                  value="rectangle"
-                  control={<Radio />}
-                  label="Pravougaonik"
-                />
-                <FormControlLabel
-                  value="circle"
-                  control={<Radio />}
-                  label="Kružnica"
-                />
               </RadioGroup>
             </FormControl>
           </Grid>
           <Grid item xs={6} md={6} sx={{}}>
             <FormControl>
-              <FormLabel id="demo-radio-buttons-group-label">Stil:</FormLabel>
+              <FormLabel id="demo-radio-buttons-group-label">Debljina linije:</FormLabel>
               <RadioGroup
                 aria-labelledby="demo-radio-buttons-group-label"
-                defaultValue="empty"
+                defaultValue="Medium"
                 name="radio-buttons-group"
                 onChange={handleChangeStyle}
               >
-                <FormControlLabel
-                  value="empty"
+            <FormControlLabel
+                  value="Thin"
                   control={<Radio />}
-                  label="Prazno"
+                  label="Tanka"
                 />
                 <FormControlLabel
-                  value="full"
+                  value="Medium"
                   control={<Radio />}
-                  label="Popunjeno"
+                  label="Srednja"
+                />
+                <FormControlLabel
+                  value="Thick"
+                  control={<Radio />}
+                  label="Deblja"
                 />
               </RadioGroup>
             </FormControl>
@@ -256,6 +237,7 @@ export const Canvas = (props) => {
               rows={4}
               defaultValue={comment ? comment : ""}
             />
+            
           </Grid>
           <Grid item xs={12} md={12}>
             <Button variant="outlined">Spasi komentar</Button>

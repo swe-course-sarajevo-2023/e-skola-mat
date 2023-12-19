@@ -125,6 +125,7 @@ class HomeworkUser(Base):
     )
     grade: Mapped[Integer] = mapped_column(Integer, nullable=True)
     note: Mapped[String] = mapped_column(String(255), nullable=True)
+    note_student: Mapped[String] = mapped_column(String(255), nullable=True)
 
     User: Mapped[User] = relationship("User", backref="homework_users")
     Homework: Mapped[Homework] = relationship("Homework", backref="homework_users")

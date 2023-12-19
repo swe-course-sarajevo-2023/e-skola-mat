@@ -130,3 +130,29 @@ export const getAllStudentsSubmittedHomeworks = async (id) => {
   console.log(data);
   return data;
 };
+
+export const getAllStudentsForSpecificGroup = async (id) => {
+  const { data } = await axiosInstanceWithAuthToken.get(
+    `/professors/list_students/${id}`
+  );
+  return data;
+};
+
+export const deleteStudent = async (data) => {
+  await axiosInstanceWithAuthToken.delete("/professors/delete_student", {
+    data,
+  });
+};
+
+export const addStudent = async (data) => {
+  const { group_id, new_student } = data;
+  await axiosInstanceWithAuthToken.post(
+    `/professors/register_student/`,
+    data.new_student,
+    {
+      params: {
+        group_id: data.group_id,
+      },
+    }
+  );
+};
