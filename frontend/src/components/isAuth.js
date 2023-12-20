@@ -26,6 +26,7 @@ export default function isAuth(Component, route) {
       "professor-group-view",
       "professor-homepage-view",
       "groups-homework-view",
+      "student-view",
       "group-student-view",
       "student-view",
     ];
