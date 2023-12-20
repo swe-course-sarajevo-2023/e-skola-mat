@@ -119,7 +119,7 @@ export const deleteStudent = async (data) => {
 
 export const addStudent = async (data) => {
   const { group_id, new_student } = data;
-  await axiosInstanceWithAuthToken.post(`/professors/register_student/`, 
+  await axiosInstanceWithAuthToken.post(`/professors/register_student`, 
   data.new_student,  
   {
     params: {
@@ -133,15 +133,15 @@ export const gradeStudent = async (data) => {
   console.log(data)
 
   const { homework_id, user_id, grade, note } = data;
-  await axiosInstanceWithAuthToken.post(`/professors/grade_homework/`, data)
+  await axiosInstanceWithAuthToken.post(`/professors/grade_homework`, data)
 };
 
 export const commentTask = async (data) => {
   const { id, comment } = data;
-  await axiosInstanceWithAuthToken.post(`/professors/comment_homework/`,
+  await axiosInstanceWithAuthToken.post(`/professors/comment_homework`,
       data)
 };
 
 export const ResetPassword = async (data) => {
-  await axiosInstanceWithAuthToken.post("/users/reset-password/", data);
+  await axiosInstanceWithAuthToken.post("/users/reset-password", data);
 };
