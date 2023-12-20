@@ -1,14 +1,17 @@
-"""Added fk to user on role
+"""added_img_path_to_upload_img
 
-Revision ID: b42c93be23ba
-Revises: 9fc8addecf06
-Create Date: 2023-10-24 00:00:02.068184
+Revision ID: a9649e03b9dc
+Revises: fe47e467978a
+Create Date: 2023-12-12 22:05:32.335673
+
 """
+from alembic import op
+import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "b42c93be23ba"
-down_revision = "9fc8addecf06"
+revision = "a9649e03b9dc"
+down_revision = "fe47e467978a"
 branch_labels = None
 depends_on = None
 

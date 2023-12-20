@@ -159,6 +159,7 @@ class Image(Base):
     filename = mapped_column(String, nullable=False)
     file_path = mapped_column(String, nullable=False)
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
+    originalImageID = Column(UUID(as_uuid=True), nullable=True)
 
 
 class taskUserHomeworkImage(Base):
@@ -170,6 +171,7 @@ class taskUserHomeworkImage(Base):
     task_user_homework_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), ForeignKey("task-user-homework.id"), nullable=True
     )
+    image_path: Mapped[str] = mapped_column(String, nullable=True)
     image_id = mapped_column(UUID(as_uuid=True), ForeignKey("images.id"), nullable=True)
     comment_professor: Mapped[str] = mapped_column(String(255), nullable=True)
     comment_student: Mapped[str] = mapped_column(String(255), nullable=True)

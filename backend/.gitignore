@@ -115,9 +115,13 @@ celerybeat.pid
 env/
 venv/
 new-venv/
+venv1/
 ENV/
 env.bak/
 venv.bak/
+
+#images
+app/images/*
 
 # Spyder project settings
 .spyderproject
