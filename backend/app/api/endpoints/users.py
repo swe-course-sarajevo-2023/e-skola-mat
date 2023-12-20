@@ -19,6 +19,18 @@ async def read_current_user(
     """Get current user"""
     return current_user
 
+@router.get("/user_role", response_model=UserResponse)
+async def read_current_user(
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """Get current user"""
+    user_role = await session.execute(
+        select(Role).where(Role.id == current_user.role_id))
+    user_role = user_role.scalar()
+    
+    return JSONResponse(content={"user": current_user.id, "user_role": user_role.role.name},
+                        status_code=200)
 
 @router.delete("/me", status_code=204)
 async def delete_current_user(

@@ -186,3 +186,9 @@ export const commentTask = async (data) => {
 export const ResetPassword = async (data) => {
   await axiosInstanceWithAuthToken.post("/users/reset-password/", data);
 };
+
+export const GetLoggedUser = async () => {
+  const data = await axiosInstanceWithAuthToken.get("/users/user_role");
+  
+  return data.data;
+};
