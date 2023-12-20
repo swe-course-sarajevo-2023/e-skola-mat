@@ -9,11 +9,13 @@ import {
   Grid,
   Paper,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import SubmitModal from "./submit-homework";
 import isAuth from "@/components/isAuth";
+import { useQuery } from "react-query";
+import { getAllStudentsSubmittedHomeworks } from "@/api";
 
 const currentDate = new Date();
 
@@ -66,6 +68,7 @@ const UcenikView = () => {
   const [selectedHomework, setSelectedHomeworkNumb] = useState(0);
   const [expired, setDate] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [homeworkId, setHomeworkId] = useState(1);
 
   const handleClose = () => setModalOpenPostavka(false);
 
@@ -81,6 +84,16 @@ const UcenikView = () => {
     setModalOpenDodaj(true);
     setDate(expired);
   };
+
+  const student_id = "f47ac13b-58cc-4372-a567-0e02b2c3d479";
+
+  const { data, isLoading, isRefetching, error, isError } = useQuery(
+    ["getAllStudentsSubmittedHomeworks"],
+    () => getAllStudentsSubmittedHomeworks(student_id)
+  );
+  useEffect(() => {
+    console.log("data", data);
+  }, [data]);
 
   return (
     <>
@@ -211,6 +224,7 @@ const UcenikView = () => {
               open={showSubmitModal}
               onClose={() => setShowSubmitModal(false)}
               brojZadace={selectedHomework}
+              homework_id={homeworkId}
             />
           </Box>
         </Modal>

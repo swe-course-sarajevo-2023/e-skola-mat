@@ -26,9 +26,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
 
 router = APIRouter()
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-IMAGES_DIR = BASE_DIR / "images"
+# #naredne dvije linije nigdje se ne koriste pa cemo ih zakomentraisat da ne prave gresku  
+# BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# IMAGES_DIR = BASE_DIR / "images"
 
 
 def is_valid_uuid(uuid_str):
@@ -140,7 +140,6 @@ async def get_homeworks(
         select(taskUserHomework).where(taskUserHomework.homework_id == homework_id)
     )
     user_homeworks = user_homeworks.scalars().all()
-    print(user_homeworks)
     if len(user_homeworks) == 0:
         raise HTTPException(status_code=400, detail="id does not exist")
     response_data = []
@@ -198,7 +197,6 @@ async def get_homework(
         session: AsyncSession = Depends(deps.get_session),
         _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
-    print("USAO")
     if not is_valid_uuid(task_user_homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
 

@@ -58,7 +58,7 @@ async def register_new_user(
     user = User(
         email=new_user.email,
         hashed_password=get_password_hash(new_user.password),
-        role_id=select(Role.id).where(Role.role == "admin"),
+        role_id=select(Role.id).where(Role.role == "ADMINISTRATOR"),
     )
     session.add(user)
     await session.commit()

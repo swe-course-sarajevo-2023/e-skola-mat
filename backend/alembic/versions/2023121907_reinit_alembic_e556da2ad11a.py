@@ -1,8 +1,8 @@
-"""initial
+"""Reinit alembic 
 
-Revision ID: b6c3c400a403
+Revision ID: e556da2ad11a
 Revises: 
-Create Date: 2023-12-04 14:41:36.236753
+Create Date: 2023-12-19 21:07:58.149490
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "b6c3c400a403"
+revision = "e556da2ad11a"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -49,6 +49,7 @@ def upgrade():
             server_default=sa.text("now()"),
             nullable=True,
         ),
+        sa.Column("originalImageID", sa.UUID(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_images_id"), "images", ["id"], unique=False)
@@ -155,6 +156,7 @@ def upgrade():
         "task-user-homework-image",
         sa.Column("id", sa.UUID(as_uuid=False), nullable=False),
         sa.Column("task_user_homework_id", sa.UUID(as_uuid=False), nullable=True),
+        sa.Column("image_path", sa.String(), nullable=True),
         sa.Column("image_id", sa.UUID(), nullable=True),
         sa.Column("comment_professor", sa.String(length=255), nullable=True),
         sa.Column("comment_student", sa.String(length=255), nullable=True),
