@@ -30,10 +30,10 @@ const UsersView = () => {
 
   return (
     <Container
-      sx={{ p: 5, background: "silver", height: "100vh", overflowY: "auto" }}
+      sx={{ p: 5, height: "100vh", overflowY: "auto" }}
     >
       <Box sx={{ pt: 3 }}>
-        <Typography variant="h3">Korisnici</Typography>
+        <Typography variant="h4">Korisnici</Typography>
         <Button onClick={handleOpen}>Dodaj korisnika</Button>
 
         {isLoading && <CircularProgress size="xl" />}

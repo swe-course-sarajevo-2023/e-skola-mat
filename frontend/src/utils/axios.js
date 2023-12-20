@@ -1,9 +1,10 @@
 import axios from "axios";
 
 // ----------------------------------------------------------------------
+const API_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://sample-zeaqndbcnq-oa.a.run.app/' : 'http://localhost:8000'; 
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: API_BASE_URL,
 });
 
 axiosInstance.interceptors.response.use(
@@ -17,8 +18,10 @@ axiosInstance.interceptors.response.use(
 // ----------------------------------------------------------------------
 
 const axiosInstanceWithAuthToken = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: API_BASE_URL,
 });
+
+console.log(API_BASE_URL);
 
 axiosInstanceWithAuthToken.interceptors.request.use(
   (request) => {

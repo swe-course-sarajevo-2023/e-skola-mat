@@ -23,6 +23,8 @@ const GroupsHomeworkView = (props) => {
     ["professorAllSubmitedHomeworks"],
     () => getProfessorAllSubmitedHomeworks(props.zadaca)
   );
+  console.log("HELLOOO")
+  console.log(data?.data)
   return (
     <Container>
       <Grid container spacing={1} sx={{ marginTop: 5 }}>
@@ -33,7 +35,7 @@ const GroupsHomeworkView = (props) => {
                 <Typography variant="h5" sx={{ marginLeft: 2 }}>
                   {" "}
                   Zadaća: {!(isLoading || isRefetching) &&
-                  !isError && data?.homework.name}
+                  !isError && data?.data?.homework?.name}
                 </Typography>
               </Grid>
               <Grid item xs={12} md={4} lg={4}>
@@ -58,7 +60,7 @@ const GroupsHomeworkView = (props) => {
         <Grid item xs={12}>
           <Grid container spacing={2}>
             {!(isLoading || isRefetching) &&
-            !isError && data?.data.map((element) => (
+            !isError && data?.data?.students.map((element) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={element.id}>
                 <Card sx={{ maxWidth: 345, backgroundColor: element.grade === null ? "#ffd6d6" : "#b5ffb3"}}>
                   <CardContent>

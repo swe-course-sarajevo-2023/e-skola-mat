@@ -12,7 +12,7 @@ import { DeleteOutlineOutlined } from "@mui/icons-material";
 
 const UserCard = () => {
   return (
-    <Card sx={{ minWidth: 300 }}>
+    <Card sx={{ minWidth: 300, backgroundColor: 'whitesmoke' }}>
       <CardContent>
         <Box display="flex" justifyContent="space-between">
           <Typography gutterBottom variant="h5" component="div">
