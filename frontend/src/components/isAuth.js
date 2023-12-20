@@ -28,6 +28,7 @@ export default function isAuth(Component, route) {
       "groups-homework-view",
       "student-view",
       "group-student-view",
+      "student-view",
     ];
 
     useEffect(() => {

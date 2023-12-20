@@ -112,7 +112,6 @@ export const getHomeworkDataForReview = async (id) => {
   const { data } = await axiosInstanceWithAuthToken.get(
     `/homeworks/get_homework_data/${id}`
   );
-  console.log(data);
   return data;
 };
 
@@ -158,6 +157,19 @@ export const addStudent = async (data) => {
   );
 };
 
+export const submitTask = async (data) => {
+  await axiosInstanceWithAuthToken.post(
+    `/homeworks/submit-task/${data.homework_id}/task/${data.task_number}`,
+    data
+  );
+};
+
+export const submitHomeworkGeneralComment = async (data) => {
+  await axiosInstanceWithAuthToken.post(
+    `/homeworks/submit-general-comment/${data.homework_id}`,
+    data
+  );
+};
 export const gradeStudent = async (data) => {
   console.log("BITNO");
   console.log(data);
