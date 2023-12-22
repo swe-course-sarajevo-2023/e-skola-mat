@@ -519,7 +519,7 @@ async def submit_comment(
 
     # Setovanje generalnog komentara komentara
     homework_user.note = comment
-    session.commit()
+    await session.commit()
     return {"message": "General comment submitted successfully"}
 
 
