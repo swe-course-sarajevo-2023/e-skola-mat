@@ -279,7 +279,7 @@ async def get_homework_user_details(
         user_id=homework_user.user_id,
         grade=homework_user.grade,
         note=homework_user.note,
-        note_user=homework_user.note_user,
+        note_user=homework_user.note_student,
         tasks=task_user_homework_responses,
     )
 
