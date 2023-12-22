@@ -465,8 +465,8 @@ async def submit_task(
 
         # with open(file_path, "wb") as buffer:
         #   shutil.copyfileobj(image.file, buffer)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
+        # with open(file_path, "wb") as buffer:
+        #     shutil.copyfileobj(image.file, buffer)
 
         single_image = Image(
             filename=image.filename,
