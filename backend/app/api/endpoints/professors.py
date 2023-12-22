@@ -140,7 +140,6 @@ async def get_homeworks(
         select(taskUserHomework).where(taskUserHomework.homework_id == homework_id)
     )
     user_homeworks = user_homeworks.scalars().all()
-    print(user_homeworks)
     if len(user_homeworks) == 0:
         raise HTTPException(status_code=400, detail="id does not exist")
     response_data = []
@@ -198,7 +197,6 @@ async def get_homework(
         session: AsyncSession = Depends(deps.get_session),
         _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
-    print("USAO")
     if not is_valid_uuid(task_user_homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
 

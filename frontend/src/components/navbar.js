@@ -1,13 +1,22 @@
 "use client"
 
 import * as React from 'react';
+import { useRouter } from "next/navigation";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
+
 export default function ButtonAppBar() {
+
+  const router = useRouter(); 
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push('/login');
+  };
 
     return (
       <Box sx={{ flexGrow: 1 }}>
@@ -43,9 +52,8 @@ export default function ButtonAppBar() {
           <Link href="/users" passHref>
             <Button color="inherit">Korisnici</Button>
           </Link>
-            <Button color="inherit">LOGOUT</Button>
-            
-    
+            <Button color="inherit" onClick={handleLogout}>LOGOUT</Button>
+
           </Toolbar>
         </AppBar>
       </Box>
