@@ -1,4 +1,5 @@
 from datetime import datetime
+import shutil
 from typing import List, Optional
 from uuid import uuid4
 
@@ -195,7 +196,7 @@ async def get_homework_user_details(
     if current_user.Role is None:
         raise HTTPException(status_code=403, detail="Nemate pravo pristupa")
 
-    query = select(HomeworkUser).where(HomeworkUser.id == homework_user_id)
+    query = select(HomeworkUser).where(HomeworkUser.user_id == homework_user_id)
     result = await session.execute(query)
     homework_user = result.scalar()
     if not homework_user:
@@ -424,9 +425,12 @@ async def submit_homework(
     for image in images:
         unique_filename = f"{uuid4()}_{image.filename}"
         file_path = f"images/{unique_filename}"
+        print(file_path)
 
         # with open(file_path, "wb") as buffer:
         #   shutil.copyfileobj(image.file, buffer)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
 
         single_image = Image(
             filename=image.filename,
@@ -460,11 +464,11 @@ async def submit_comment(
     task_query = await session.execute(
         select(taskUserHomework).where(taskUserHomework.id == task_id)
     )
-    task = task_query.first()
+    task = task_query.scalars().first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-
+    
     # Setovanje tog komentara
     task.commentStudent = comment
-    session.commit()
+    await session.commit()
     return {"message": "Comment submitted successfully"}
