@@ -1,8 +1,10 @@
 from datetime import datetime
+import shutil
 from typing import List, Optional
 from uuid import uuid4
 
 from app.api import deps
+from app.core.storage import Client
 from app.models import (
     Class,
     ClassHomework,
@@ -25,7 +27,7 @@ from app.schemas.responses import (
     taskUserHomeworkResponse,
 )
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy import and_, delete, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -82,30 +84,71 @@ async def get_homework_data(
                 "file_path": image.file_path
             })
 
-        tasks_data.append({
-            "id": task.id,
-            "order_num": task.order_number_of_the_task,
-            "teacher_comment": task.commentProfessor,
-            "student_comment": task.commentStudent,
-            "images": images2
+
+@router.get("/get_student_homework_data/{student_id}", response_model=list[HomeworkResponse]) 
+async def get_homework_data(
+        student_id,
+        session: AsyncSession = Depends(deps.get_session),
+        _: User = Depends(deps.RoleCheck([UserRole.STUDENT, UserRole.PROFESSOR])),
+):
+    student_homeworks = await session.execute(
+        select(HomeworkUser).where(HomeworkUser.user_id == student_id))
+    student_homeworks = student_homeworks.scalars().all()
+
+    if not student_homeworks:
+        raise HTTPException(status_code=204, detail="Homeworks not found")
+    
+    student_homeworks2 = []
+    for homework in student_homeworks:
+        homework2 = await session.execute(select(Homework).where(Homework.id == homework.homework_id))
+        homework2 = homework2.scalar()
+        student_homeworks2.append({
+            "id": homework2.id, "name": homework2.name,"grade": homework.grade,"note": homework.note, "number_of_tasks": homework2.maxNumbersOfTasks, "deadline": homework2.deadline, "status": homework2.status
         })
+    
+    # user = await session.execute(select(User).where(User.id == student_id))
+    # user = user.scalar()
+    student_homeworks3 = []
+    for homework in student_homeworks2:
+        print(homework, "hw loop")
+        tasks = await session.execute(select(taskUserHomework).where(and_(
+            taskUserHomework.user_id == student_id,
+            taskUserHomework.homework_id == homework['id']
+        )).order_by(taskUserHomework.order_number_of_the_task))
+        tasks = tasks.scalars().all()
+        student_homeworks3.append({
+            "id": homework['id'], "name": homework['name'],"grade": homework['grade'],"note": homework['note'], "number_of_tasks": homework['number_of_tasks'], "deadline": homework['deadline'], "status": homework['status'].value, "tasks":tasks
+        })    
 
-    if user_homework_temp is None:
-        return JSONResponse(content={
-            "homework": {"id": homework2.id, "name": homework2.name, "number_of_tasks": homework2.maxNumbersOfTasks},
-            "user": {"id": user.id, "name": user.name, "surname": user.surname},
-            "problems": tasks_data,
-            "grade": None,
-            "comment_proffesor": None,
-            "comment": False}, status_code=200)
-
-    return JSONResponse(content={
-        "homework": {"id": homework2.id, "name": homework2.name, "number_of_tasks": homework2.maxNumbersOfTasks},
-        "user": {"id": user.id, "name": user.name, "surname": user.surname},
-        "problems": tasks_data,
-        "grade": user_homework_temp.grade,
-        "comment_proffesor": user_homework_temp.note,
-        "comment": user_homework_temp.note is None}, status_code=200)
+    tasks_data = []
+    student_homeworks4 = []
+    for homework in student_homeworks3:
+        for task in tasks:
+            images = await session.execute(select(taskUserHomeworkImage).where(taskUserHomeworkImage.task_user_homework_id == task.id))
+            images = images.scalars().all()
+            images2 = []
+            for i in images:
+                image = await session.execute(select(Image).where(Image.id == i.image_id))
+                image = image.scalar()
+                images2.append({
+                    "id": i.id,
+                    "comment_professor": i.comment_professor,
+                    "comment_student": i.comment_student,
+                    "file_path": image.file_path
+                })
+            tasks_data.append({
+                "id": task.id,
+                "order_num": task.order_number_of_the_task,
+                "teacher_comment": task.commentProfessor,
+                "student_comment": task.commentStudent,
+                "images": images2
+            })
+        student_homeworks4.append({
+            "id": homework['id'], "name": homework['name'],"grade": homework['grade'],"note": homework['note'], "number_of_tasks": homework['number_of_tasks'], "deadline": homework['deadline'], "status": homework['status'], "tasks":tasks_data
+        })
+        tasks_data = []
+        
+    return JSONResponse(content={"data": student_homeworks4}, status_code=200)
 
 
 @router.get("/get_homeworks/{homework_id}",
@@ -161,7 +204,6 @@ async def get_homeworks(
         )
         student_class_result = await session.execute(student_class_query)
         student_class_id = student_class_result.scalars().one()
-        print(student_class_id)
         # Modify query to filter homeworks based on these class IDs
         query = query.join(ClassHomework).where(
             ClassHomework.class_id == student_class_id
@@ -184,18 +226,11 @@ async def get_homeworks(
 )
 async def get_homework_user_details(
         homework_user_id: str,
-        # _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR]))
-        # trenutno radi kad treba jednu rolu prepoznat ali daje 403 kad su dvije
-        current_user: User = Depends(
-            deps.get_current_user
-        ),  # ova linija je neophodna radi koriscenja ispod, sve i ako gornju zadrzimo
+        current_user: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR, UserRole.STUDENT])),
         session: AsyncSession = Depends(deps.get_session),
 ):
-    # Nakon osposobljavanja komentara iznad, ovaj uslov mozemo uklonit
-    if current_user.Role is None:
-        raise HTTPException(status_code=403, detail="Nemate pravo pristupa")
 
-    query = select(HomeworkUser).where(HomeworkUser.id == homework_user_id)
+    query = select(HomeworkUser).where(HomeworkUser.user_id == homework_user_id)
     result = await session.execute(query)
     homework_user = result.scalar()
     if not homework_user:
@@ -245,6 +280,7 @@ async def get_homework_user_details(
         user_id=homework_user.user_id,
         grade=homework_user.grade,
         note=homework_user.note,
+        note_user=homework_user.note_student,
         tasks=task_user_homework_responses,
     )
 
@@ -342,32 +378,35 @@ async def update_homework_status(
     homework_query = await session.execute(
         select(Homework).where(Homework.id == homework_id)
     )
-    homework = homework_query.first()
+    
+    homework = homework_query.scalar()
 
     if not homework:
         raise HTTPException(status_code=404, detail="Homework not found")
-
+    
     if status == "not_started":
-        homework.status = HomeworkStatus.NOT_STARTED
+        homework.status = HomeworkStatus.NOT_STARTED.name
     elif status == "in_progress":
-        homework.status = HomeworkStatus.IN_PROGRESS
+        homework.status = HomeworkStatus.IN_PROGRESS.name
     else:
-        homework.status = HomeworkStatus.FINISHED
+        homework.status = HomeworkStatus.FINISHED.name
+    
 
     # Spasimo promjene
     await session.commit()
 
-    return {"message": "Homework status updated successfully"}
+    # return {"message": "Homework status updated successfully"}
 
 
-@router.post("/submit-homework/{homework_id}/task/{task_number}")
-async def submit_homework(
-        homework_id: str,
-        task_number: int,
-        task_comment: str,
-        images: List[UploadFile],
-        session: AsyncSession = Depends(deps.get_session),
-        current_user: User = Depends(deps.get_current_user),
+@router.post("/submit-task/{homework_id}/task/{task_number}")
+async def submit_task(
+    homework_id: str,
+    task_number: int,
+    task_comment: str,
+    images: List[UploadFile],
+    session: AsyncSession = Depends(deps.get_session),
+    storage_client: Client = Depends(Client),
+    current_user: User = Depends(deps.get_current_user),
 ):
     homework_query = await session.execute(
         select(Homework).where(Homework.id == homework_id)
@@ -422,15 +461,11 @@ async def submit_homework(
         task_user_homework_id = new_task_submission.id
 
     for image in images:
-        unique_filename = f"{uuid4()}_{image.filename}"
-        file_path = f"images/{unique_filename}"
-
-        # with open(file_path, "wb") as buffer:
-        #   shutil.copyfileobj(image.file, buffer)
+        filename = storage_client.save_image(image)
 
         single_image = Image(
-            filename=image.filename,
-            file_path=file_path,
+            filename=filename,
+            file_path=filename,
             created_at=datetime.now(),
         )
         session.add(single_image)
@@ -449,6 +484,63 @@ async def submit_homework(
     await session.commit()
     return {"message": "Homework task submitted successfully"}
 
+@router.get("/homeworks/{homework_id}/task/{task_number}/image/{image_id}")
+async def get_task_image(
+    homework_id: str,
+    task_number: int,
+    image_id: str,
+    session: AsyncSession = Depends(deps.get_session),
+    storage_client: Client = Depends(Client),
+    current_user: User = Depends(deps.get_current_user),
+):
+    image_query = await session.execute(
+        select(Image).where(Image.id == image_id)
+    )
+    image: Image = image_query.scalar()
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    # Vracanje slike kopirano sa https://github.com/TrueFaces/fastapi-test/blob/f5b25291d04b5f1dcf740404b48d5b2055199ee9/app/utils/storage.py#L41
+    return StreamingResponse(
+        storage_client.get_image(image.file_path),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename={image.file_path}"})
+
+
+
+@router.post("/submit-general-comment/{homework_id}")
+async def submit_comment(
+    homework_id: str,
+    comment: str,
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user),
+
+):
+    
+    print(homework_id, comment, "submit general comment")
+    
+    homework_user_query = await session.execute(
+        select(HomeworkUser).where(
+            HomeworkUser.user_id == current_user.id,
+            HomeworkUser.homework_id == homework_id,
+        )
+    )
+    homework_user = homework_user_query.scalars().first()
+    if not homework_user:
+        new_homework_submission = HomeworkUser(
+            user_id=current_user.id,
+            homework_id=homework_id,
+        )
+        session.add(new_homework_submission)
+        session.flush()
+
+
+
+    # Setovanje generalnog komentara komentara
+    homework_user.note = comment
+    await session.commit()
+    return {"message": "General comment submitted successfully"}
+
 
 @router.post("/submit-comment")
 async def submit_comment(
@@ -456,15 +548,17 @@ async def submit_comment(
         comment: str,
         session: AsyncSession = Depends(deps.get_session),
 ):
-    # Provjeriti ako task postoji
-    task_query = await session.execute(
-        select(taskUserHomework).where(taskUserHomework.id == task_id)
-    )
-    task = task_query.first()
+    # Query for the task
+    task_query = select(taskUserHomework).where(taskUserHomework.id == task_id)
+    result = await session.execute(task_query)
+    task = result.scalar()
+
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-
-    # Setovanje tog komentara
     task.commentStudent = comment
-    session.commit()
+
+    await session.commit()
+
     return {"message": "Comment submitted successfully"}
+
+

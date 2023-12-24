@@ -73,6 +73,9 @@ class Settings(BaseSettings):
     @computed_field
     @cached_property
     def DEFAULT_SQLALCHEMY_DATABASE_URI(self) -> str:
+        # We can't use PostgresDsn for Cloud env until https://github.com/pydantic/pydantic-core/issues/378 is fixed
+        if self.ENVIRONMENT == "PRD":
+            return f"postgresql+asyncpg://{self.DEFAULT_DATABASE_USER}:{self.DEFAULT_DATABASE_PASSWORD}@/{self.DEFAULT_DATABASE_DB}?host={self.DEFAULT_DATABASE_HOSTNAME}"
         return str(
             PostgresDsn.build(
                 scheme="postgresql+asyncpg",
