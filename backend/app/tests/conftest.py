@@ -62,6 +62,16 @@ homework_user_test_id = "8dfdac55-37ec-42d3-9605-638ca228e75e"
 test_homework_id="845cf571-d71c-4088-8c20-f5084ee1c06e"
 task_id="07e5f413-2ef8-41f2-860e-e8c2035c7fd1"
 
+test_image_id = str(uuid4())  
+test_image_filename = "test_image.jpg"
+test_image_file_path = "backend/images/test_image.png"
+test_image_created_at = datetime.now() - timedelta(days=1)
+
+test_image_id_for_deletion = str(uuid4())
+test_image_filename_for_deletion = "delete_test_image.jpg"
+test_image_file_path_for_deletion = "backend/images/delete_test_image.png"
+
+
 roles = {
     "ADMINISTRATOR": "5ce5b10d-3910-4ad0-87ad-362aa177fac6",
     "PROFESSOR": "cd531696-90f7-4819-a197-001242917651",
@@ -232,6 +242,49 @@ async def task(homework, professor_user):
             await session.refresh(new_task_submission)
             return new_task_submission
         return homework
+
+@pytest.fixture
+async def test_image(create_test_database):
+    async with async_session() as session:
+        result = await session.execute(select(Image).where(Image.id == test_image_id))
+        image = result.scalars().first()
+        if image is None:
+            new_image = Image(
+                id=test_image_id,
+                filename=test_image_filename,
+                file_path=test_image_file_path
+                created_at=test_image_created_at,
+                originalImageID=test_image_id
+            )
+            session.add(new_image)
+            await session.commit()
+            await session.refresh(new_image)
+            return new_image
+        return image
+
+@pytest.fixture
+async def image_for_deletion(create_test_database):
+    async with async_session() as session:
+        new_image = Image(
+            id=test_image_id_for_deletion,
+            filename=test_image_filename_for_deletion,
+            file_path=test_image_file_path_for_deletion,
+            created_at=test_image_created_at,
+            originalImageID=test_image_id_for_deletion
+        )
+        session.add(new_image)
+        await session.commit()
+        await session.refresh(new_image)
+        return new_image
+
+@pytest.mark.asyncio
+async def test_delete_image(image_for_deletion):
+    async with async_session() as session:
+        await session.execute(delete(Image).where(Image.id == image_for_deletion.id))
+        await session.commit()
+        result = await session.execute(select(Image).where(Image.id == image_for_deletion.id))
+        deleted_image = result.scalars().first()
+        assert deleted_image is None
 
 
 @pytest_asyncio.fixture(autouse=True)
