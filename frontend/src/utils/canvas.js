@@ -14,6 +14,7 @@ import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
+import { saveEditedImg } from "@/api";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -25,13 +26,14 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export const Canvas = (props) => {
 
-  const { source, comment } = props;
+  const { imageId, source, comment } = props;
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState("handdrawn");
   const [tool1, setTool1] = useState("#000000");
   const [tool2, setTool2] = useState("Medium");
   const [img, setImg] = useState();
+  const [imgId, setImgId] = useState();
   const [name, setName] = useState("");
   const [name1, setName1] = useState("");
   const [[x, y], coordinates] = useState([0, 0]);
@@ -40,6 +42,31 @@ export const Canvas = (props) => {
   const [imgComment, setImgComment] = useState("");
 
   console.log(source, "source");
+  function postCanvasToURL(snap) {
+    // Convert canvas image to Base64
+    var img = snap.toDataURL();
+    // Convert Base64 image to binary
+    var file = dataURItoBlob(img);
+
+    return file;
+  }
+  
+  function dataURItoBlob(dataURI) {
+    // convert base64/URLEncoded data component to raw binary data held in a string
+    var byteString;
+    if (dataURI.split(',')[0].indexOf('base64') >= 0)
+        byteString = atob(dataURI.split(',')[1]);
+    else
+        byteString = unescape(dataURI.split(',')[1]);
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    // write the bytes of the string to a typed array
+    var ia = new Uint8Array(byteString.length);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ia], {type:mimeString});
+  }
 
   const saveImage = (event) => {
     console.log("save");
@@ -66,6 +93,7 @@ export const Canvas = (props) => {
     contextRef.current = context;
     const image = new Image();
     image.src = img;
+    image.id = imageId;
     image.onload = () => {
       context.drawImage(image, 0, 0, 500, 500);
     };
@@ -159,6 +187,7 @@ export const Canvas = (props) => {
     prepareCanvas();
   }, [img]);
   useEffect(() => {
+    setImgId(imageId);
     setImg(source);
   }, []);
 
@@ -264,14 +293,17 @@ export const Canvas = (props) => {
           >
             Očisti
           </button>
-          <a
+          {/* <a
             className="form-control"
             onClick={saveImage}
             href="download_image"
             style={{ marginLeft: "8px", textAlign: "center" }}
           >
             Spremi
-          </a>
+          </a> */}
+          <Button variant="outlined" size="small" onClick={()=>saveEditedImg({"image": postCanvasToURL(canvasRef.current), "original_image_id":imgId})}>
+              Spremi
+          </Button>
         </div>
       </Box>
     </div>
