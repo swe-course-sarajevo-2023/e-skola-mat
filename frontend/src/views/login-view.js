@@ -9,17 +9,20 @@ import {
   Card,
   Alert,
 } from "@mui/material";
-import React from "react";
+import React, { useContext } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "react-query";
 import { loginUser } from "@/api";
+import { jwtDecode } from "jwt-decode";
 import styles from "./page.module.css";
+import AuthContext from "@/context/authContext";
 
 export default function LoginView() {
   const [user, setUser] = React.useState({
     username: "",
     password: "",
   });
+  const { loggedUser, setLoggedUser, role, setRole } = useContext(AuthContext);
   const { mutateAsync, error, isLoading } = useMutation(loginUser);
   const router = useRouter();
 
@@ -28,15 +31,21 @@ export default function LoginView() {
     try {
       const data = await mutateAsync(user);
       localStorage.setItem("token", data.access_token);
-      router.push("/");
+      const decodedToken = jwtDecode(data.access_token);
+      setRole(decodedToken.role);
+      if (decodedToken.role == "profesor") {
+        router.push("/profiles/profesor");
+      } else if (decodedToken.role == "student") {
+        router.push("/profiles/student");
+      } else {
+        router.push("/");
+      }
     } catch (error) {}
   };
 
   return (
     <main className={styles.main}>
-    
       <div className={styles.description}>
-        
         <div>
           <a
             href="https://pmf.unsa.ba"
@@ -54,7 +63,6 @@ export default function LoginView() {
       >
         <Grid item>
           <div
-            
             style={{
               marginLeft: 100,
               backgroundImage: "url('/logo.png')",
@@ -82,15 +90,15 @@ export default function LoginView() {
           <Card sx={{ maxWidth: 345, backgroundColor: "white", padding: 2 }}>
             <CardContent>
               <Grid container spacing={1}>
-              <Grid item xs={12}>
-              <Typography
-                variant="h6"
-                sx={{textAlign: "center", color: "gray" }}
-              >
-                eŠkola matematike
-              </Typography>
+                <Grid item xs={12}>
+                  <Typography
+                    variant="h6"
+                    sx={{ textAlign: "center", color: "gray" }}
+                  >
+                    eŠkola matematike
+                  </Typography>
                 </Grid>
-              
+
                 <Grid item xs={12} mb={2}>
                   {error && (
                     <Alert severity="error">
@@ -99,7 +107,6 @@ export default function LoginView() {
                   )}
                 </Grid>
                 <Grid item xs={12}>
-                
                   <TextField
                     id="email"
                     label="Email"

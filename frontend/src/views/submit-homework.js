@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import {
   Box,
@@ -69,6 +69,7 @@ export default function SubmitModal(props) {
       alert("Došlo je do greške!", error);
     },
   });
+  console.log(props.homework_id.data[0]);
 
   const handleSubmit = (taskNum) => {
     let data = {

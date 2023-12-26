@@ -6,20 +6,14 @@ import { GetLoggedUser } from "@/api";
 import { useQuery } from "react-query";
 
 export default function isAuth(Component, route) {
-
   return function IsAuth(props) {
     const { authenticated, role } = useContext(AuthContext);
-     //console.log(role);
-     //console.log(authenticated);
-     
-    const { data } = useQuery(
-      ["getLoggedUser"],
-      () => GetLoggedUser()
-    );
+    //console.log(role);
+    //console.log(authenticated);
 
-    const student_routes = [
-      "student-view"
-    ];
+    const { data } = useQuery(["getLoggedUser"], () => GetLoggedUser());
+
+    const student_routes = ["student-view"];
     const professor_routes = [
       "homework-view",
       "professor-homework-view",
@@ -43,13 +37,25 @@ export default function isAuth(Component, route) {
         alert("not authenticated!");
         return redirect("/");
       } else {
-        if (data?.user_role == "ADMINISTRATOR" && !admin_routes.includes(route)) {
+        if (
+          data?.user_role == "ADMINISTRATOR" &&
+          role == "administrator" &&
+          !admin_routes.includes(route)
+        ) {
           alert("not authorised to see this page!");
           return redirect("/");
-        } else if (data?.user_role == "PROFESSOR" && !professor_routes.includes(route)) {
+        } else if (
+          data?.user_role == "PROFESSOR" &&
+          role == "profesor" &&
+          !professor_routes.includes(route)
+        ) {
           alert("not authorised to see this page!");
           return redirect("/");
-        } else if (data?.user_role == "STUDENT" && !student_routes.includes(route)) {
+        } else if (
+          data?.user_role == "STUDENT" &&
+          role == "student" &&
+          !student_routes.includes(route)
+        ) {
           alert("not authorised to see this page!");
           return redirect("/");
         }
