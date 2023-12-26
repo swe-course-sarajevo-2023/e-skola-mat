@@ -70,11 +70,13 @@ const HomeworkView = (props) => {
   const [selectedComment, setSelectedComment] = useState("");
   const [commentProfessor, setCommentProfessor] = useState(data?.comment_proffesor);
   const [grade, setGrade] = useState(data?.grade);
+  const [selectedImgId, setSelectedImgId] = useState();
 
   const handleClose = () => setModalOpen(false);
 
-  const handleImageButton = (taskNumber, imageSource, commnet) => {
+  const handleImageButton = (taskNumber, imageId, imageSource, commnet) => {
     setSelectedTaskNumber(taskNumber);
+    setSelectedImgId(imageId);
     setSelectedImgSource(imageSource);
     setSelectedComment(commnet);
     setModalOpen(true);
@@ -172,7 +174,7 @@ const HomeworkView = (props) => {
             <Grid container spacing={1}>
               {element.images.map((image) => (
                 <Grid item xs={4} lg={4} md={4}>
-                <Button onClick={() => handleImageButton(element.order_num, image.file_path, image.comment_professor)}>
+                <Button onClick={() => handleImageButton(element.order_num, image.id, image.file_path, image.comment_professor)}>
                   <div
                   style={{
                     backgroundImage: `url('${image.file_path}')`,
@@ -211,7 +213,7 @@ const HomeworkView = (props) => {
           <Typography variant="h5" id="modal-modal-description" sx={{ mt: 2 }}>
             Zadatak {selectedTaskNumber}
           </Typography>
-          <Canvas source={selectedImgSource} comment={selectedComment}/>
+          <Canvas imageId = {selectedImgId} source={selectedImgSource} comment={selectedComment}/>
         </Box>
       </Modal>
 
