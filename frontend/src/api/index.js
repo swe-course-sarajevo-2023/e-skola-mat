@@ -146,15 +146,13 @@ export const deleteStudent = async (data) => {
 
 export const addStudent = async (data) => {
   const { group_id, new_student } = data;
-  await axiosInstanceWithAuthToken.post(
-    `/professors/register_student/`,
-    data.new_student,
-    {
-      params: {
-        group_id: data.group_id,
-      },
-    }
-  );
+  await axiosInstanceWithAuthToken.post(`/professors/register_student`, 
+  data.new_student,  
+  {
+    params: {
+      group_id: data.group_id,
+    },
+  });
 };
 
 export const submitTask = async (data) => {
@@ -175,14 +173,20 @@ export const gradeStudent = async (data) => {
   console.log(data);
 
   const { homework_id, user_id, grade, note } = data;
-  await axiosInstanceWithAuthToken.post(`/professors/grade_homework/`, data);
+  await axiosInstanceWithAuthToken.post(`/professors/grade_homework`, data)
 };
 
 export const commentTask = async (data) => {
   const { id, comment } = data;
-  await axiosInstanceWithAuthToken.post(`/professors/comment_homework/`, data);
+  await axiosInstanceWithAuthToken.post(`/professors/comment_homework`, data);
 };
 
 export const ResetPassword = async (data) => {
-  await axiosInstanceWithAuthToken.post("/users/reset-password/", data);
+  await axiosInstanceWithAuthToken.post("/users/reset-password", data);
+};
+
+export const GetLoggedUser = async () => {
+  const data = await axiosInstanceWithAuthToken.get("/users/user_role");
+  
+  return data.data;
 };

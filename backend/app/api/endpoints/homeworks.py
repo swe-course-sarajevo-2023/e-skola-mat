@@ -1,4 +1,5 @@
 from datetime import datetime
+import shutil
 from typing import List, Optional
 from uuid import uuid4
 
@@ -202,7 +203,6 @@ async def get_homeworks(
         )
         student_class_result = await session.execute(student_class_query)
         student_class_id = student_class_result.scalars().one()
-        print(student_class_id)
         # Modify query to filter homeworks based on these class IDs
         query = query.join(ClassHomework).where(
             ClassHomework.class_id == student_class_id
@@ -225,18 +225,11 @@ async def get_homeworks(
 )
 async def get_homework_user_details(
         homework_user_id: str,
-        # _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR]))
-        # trenutno radi kad treba jednu rolu prepoznat ali daje 403 kad su dvije
-        current_user: User = Depends(
-            deps.get_current_user
-        ),  # ova linija je neophodna radi koriscenja ispod, sve i ako gornju zadrzimo
+        current_user: User = Depends(deps.RoleCheck([UserRole.PROFESSOR,UserRole.ADMINISTRATOR, UserRole.STUDENT])),
         session: AsyncSession = Depends(deps.get_session),
 ):
-    # Nakon osposobljavanja komentara iznad, ovaj uslov mozemo uklonit
-    if current_user.Role is None:
-        raise HTTPException(status_code=403, detail="Nemate pravo pristupa")
 
-    query = select(HomeworkUser).where(HomeworkUser.id == homework_user_id)
+    query = select(HomeworkUser).where(HomeworkUser.user_id == homework_user_id)
     result = await session.execute(query)
     homework_user = result.scalar()
     if not homework_user:
@@ -286,6 +279,7 @@ async def get_homework_user_details(
         user_id=homework_user.user_id,
         grade=homework_user.grade,
         note=homework_user.note,
+        note_user=homework_user.note_student,
         tasks=task_user_homework_responses,
     )
 
@@ -383,22 +377,24 @@ async def update_homework_status(
     homework_query = await session.execute(
         select(Homework).where(Homework.id == homework_id)
     )
-    homework = homework_query.first()
+    
+    homework = homework_query.scalar()
 
     if not homework:
         raise HTTPException(status_code=404, detail="Homework not found")
-
+    
     if status == "not_started":
-        homework.status = HomeworkStatus.NOT_STARTED
+        homework.status = HomeworkStatus.NOT_STARTED.name
     elif status == "in_progress":
-        homework.status = HomeworkStatus.IN_PROGRESS
+        homework.status = HomeworkStatus.IN_PROGRESS.name
     else:
-        homework.status = HomeworkStatus.FINISHED
+        homework.status = HomeworkStatus.FINISHED.name
+    
 
     # Spasimo promjene
     await session.commit()
 
-    return {"message": "Homework status updated successfully"}
+    # return {"message": "Homework status updated successfully"}
 
 
 @router.post("/submit-task/{homework_id}/task/{task_number}")
@@ -465,9 +461,12 @@ async def submit_task(
     for image in images:
         unique_filename = f"{uuid4()}_{image.filename}"
         file_path = f"images/{unique_filename}"
+        print(file_path)
 
         # with open(file_path, "wb") as buffer:
         #   shutil.copyfileobj(image.file, buffer)
+        # with open(file_path, "wb") as buffer:
+        #     shutil.copyfileobj(image.file, buffer)
 
         single_image = Image(
             filename=image.filename,
@@ -520,7 +519,7 @@ async def submit_comment(
 
     # Setovanje generalnog komentara komentara
     homework_user.note = comment
-    session.commit()
+    await session.commit()
     return {"message": "General comment submitted successfully"}
 
 
@@ -530,17 +529,17 @@ async def submit_comment(
         comment: str,
         session: AsyncSession = Depends(deps.get_session),
 ):
-    # Provjeriti ako task postoji
-    task_query = await session.execute(
-        select(taskUserHomework).where(taskUserHomework.id == task_id)
-    )
-    task = task_query.first()
+    # Query for the task
+    task_query = select(taskUserHomework).where(taskUserHomework.id == task_id)
+    result = await session.execute(task_query)
+    task = result.scalar()
+
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-
-    # Setovanje tog komentara
     task.commentStudent = comment
-    session.commit()
+
+    await session.commit()
+
     return {"message": "Comment submitted successfully"}
 
 
