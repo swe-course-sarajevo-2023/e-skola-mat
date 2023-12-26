@@ -110,7 +110,7 @@ export const getProfessorAllSubmitedHomeworks = async id => {
 
 export const getHomeworkDataForReview = async id => {
 	const { data } = await axiosInstanceWithAuthToken.get(
-		`/homeworks/get_homework_data/${id}`
+		`/homeworks/get_homework/${id}`
 	);
 	return data;
 };
@@ -191,4 +191,13 @@ export const GetLoggedUser = async () => {
 	const data = await axiosInstanceWithAuthToken.get('/users/user_role');
 
 	return data.data;
+};
+
+export const saveEditedImg = async ({ image, original_image_id }) => {
+	console.log(image);
+	var data = new FormData();
+	var file = new File([image], 'image.png', { type: 'image/png' });
+	data.append('file', file);
+	data.append('original_image_id', original_image_id);
+	await axiosInstanceWithAuthToken.post(`/files/edit-image/`, data);
 };
