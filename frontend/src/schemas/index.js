@@ -1,1 +1,1 @@
-export { default as homeworkSchema } from "./homework";
+export { default as homeworkSchema } from './homework';

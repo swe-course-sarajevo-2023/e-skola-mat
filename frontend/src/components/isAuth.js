@@ -1,65 +1,68 @@
-"use client";
-import { useEffect, useContext } from "react";
-import { redirect } from "next/navigation";
-import AuthContext from "@/context/authContext";
-import { GetLoggedUser } from "@/api";
-import { useQuery } from "react-query";
+'use client';
+import { useEffect, useContext } from 'react';
+import { redirect } from 'next/navigation';
+import AuthContext from '@/context/authContext';
+import { GetLoggedUser } from '@/api';
+import { useQuery } from 'react-query';
 
 export default function isAuth(Component, route) {
+	return function IsAuth(props) {
+		const { authenticated, role } = useContext(AuthContext);
+		//console.log(role);
+		//console.log(authenticated);
 
-  return function IsAuth(props) {
-    const { authenticated, role } = useContext(AuthContext);
-     //console.log(role);
-     //console.log(authenticated);
-     
-    const { data } = useQuery(
-      ["getLoggedUser"],
-      () => GetLoggedUser()
-    );
+		const { data } = useQuery(['getLoggedUser'], () => GetLoggedUser());
 
-    const student_routes = [
-      "student-view"
-    ];
-    const professor_routes = [
-      "homework-view",
-      "professor-homework-view",
-      "professor-group-view",
-      "professor-homepage-view",
-      "groups-homework-view",
-      "group-student-view",
-    ];
-    const admin_routes = [
-      "users-view",
-      "homework-view",
-      "professor-homework-view",
-      "professor-group-view",
-      "professor-homepage-view",
-      "groups-homework-view",
-      "group-student-view",
-    ];
+		const student_routes = ['student-view'];
+		const professor_routes = [
+			'homework-view',
+			'professor-homework-view',
+			'professor-group-view',
+			'professor-homepage-view',
+			'groups-homework-view',
+			'group-student-view',
+		];
+		const admin_routes = [
+			'users-view',
+			'homework-view',
+			'professor-homework-view',
+			'professor-group-view',
+			'professor-homepage-view',
+			'groups-homework-view',
+			'group-student-view',
+		];
 
-    useEffect(() => {
-      if (!authenticated) {
-        alert("not authenticated!");
-        return redirect("/");
-      } else {
-        if (data?.user_role == "ADMINISTRATOR" && !admin_routes.includes(route)) {
-          alert("not authorised to see this page!");
-          return redirect("/");
-        } else if (data?.user_role == "PROFESSOR" && !professor_routes.includes(route)) {
-          alert("not authorised to see this page!");
-          return redirect("/");
-        } else if (data?.user_role == "STUDENT" && !student_routes.includes(route)) {
-          alert("not authorised to see this page!");
-          return redirect("/");
-        }
-      }
-    }, [data]);
+		useEffect(() => {
+			if (!authenticated) {
+				alert('not authenticated!');
+				return redirect('/');
+			} else {
+				if (
+					data?.user_role == 'ADMINISTRATOR' &&
+					!admin_routes.includes(route)
+				) {
+					alert('not authorised to see this page!');
+					return redirect('/');
+				} else if (
+					data?.user_role == 'PROFESSOR' &&
+					!professor_routes.includes(route)
+				) {
+					alert('not authorised to see this page!');
+					return redirect('/');
+				} else if (
+					data?.user_role == 'STUDENT' &&
+					!student_routes.includes(route)
+				) {
+					alert('not authorised to see this page!');
+					return redirect('/');
+				}
+			}
+		}, [data]);
 
-    if (!authenticated) {
-      return null;
-    }
+		if (!authenticated) {
+			return null;
+		}
 
-    return <Component {...props} />;
-  };
+		return <Component {...props} />;
+	};
 }
