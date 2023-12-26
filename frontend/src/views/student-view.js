@@ -69,6 +69,7 @@ const UcenikView = () => {
   const [expired, setDate] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [homeworkId, setHomeworkId] = useState(1);
+  const [homeworks, setHomeworks] = useState([]);
 
   const handleClose = () => setModalOpenPostavka(false);
 
@@ -93,7 +94,9 @@ const UcenikView = () => {
   );
   useEffect(() => {
     console.log("data", data);
+    setHomeworks(data);
   }, [data]);
+  console.log(homeworks);
 
   return (
     <>
@@ -224,7 +227,7 @@ const UcenikView = () => {
               open={showSubmitModal}
               onClose={() => setShowSubmitModal(false)}
               brojZadace={selectedHomework}
-              homework_id={homeworkId}
+              homework_id={homeworks}
             />
           </Box>
         </Modal>

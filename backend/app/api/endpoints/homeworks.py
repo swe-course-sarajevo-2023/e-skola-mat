@@ -87,7 +87,7 @@ async def get_homework_data(
 async def get_homework_data(
         student_id,
         session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.STUDENT, UserRole.PROFESSOR])),
+        # _: User = Depends(deps.RoleCheck([UserRole.STUDENT, UserRole.PROFESSOR])),
 ):
     student_homeworks = await session.execute(
         select(HomeworkUser).where(HomeworkUser.user_id == student_id))
