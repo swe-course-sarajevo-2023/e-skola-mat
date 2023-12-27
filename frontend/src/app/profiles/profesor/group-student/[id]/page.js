@@ -6,4 +6,7 @@ const Ucenik = ({ params }) => {
   return <StudentGroupView grupa={params.id} />;
 };
 
-export default useProtectedRoute(Ucenik);
+// Wrap the component with useProtectedRoute
+const ProtectedUcenik = useProtectedRoute(Ucenik);
+
+export default ProtectedUcenik;
