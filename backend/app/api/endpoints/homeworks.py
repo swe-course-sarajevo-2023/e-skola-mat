@@ -407,17 +407,18 @@ async def get_homeworks(
 
 
 @router.get(
-    "/homework-user/{homework_user_id}",
+    "/{homework_id}/homework-user/{homework_user_id}",
     response_model=Optional[HomeworkUserDetailsResponse],
 )
 async def get_homework_user_details(
+    homework_id: str,
     homework_user_id: str,
     current_user: User = Depends(
         deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR, UserRole.STUDENT])
     ),
     session: AsyncSession = Depends(deps.get_session),
 ):
-    query = select(HomeworkUser).where(HomeworkUser.user_id == homework_user_id)
+    query = select(HomeworkUser).where(HomeworkUser.user_id == homework_user_id, HomeworkUser.homework_id == homework_id)
     result = await session.execute(query)
     homework_user = result.scalar()
     if not homework_user:
@@ -433,7 +434,7 @@ async def get_homework_user_details(
 
     query = (
         select(taskUserHomework)
-        .where(taskUserHomework.user_id == homework_user.user_id)
+        .where(taskUserHomework.user_id == homework_user.user_id, taskUserHomework.homework_id == homework_id)
         .options(selectinload(taskUserHomework.images))
     )
 
