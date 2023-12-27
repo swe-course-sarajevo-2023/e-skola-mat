@@ -56,6 +56,18 @@ Make sure you have the following installed on your machine:
 The FastAPI application should now be accessible at `http://localhost:8000`.
 
 
+6. You can test the backend by running these commands:
+
+    ```bash
+    pytest
+    ```
+The database needs to be running for pytest to work.
+
+
+The FastAPI application should now be accessible at `http://localhost:8000`.
+
+
+
 ## Docker Configuration
 
 The `Dockerfile` contains the necessary instructions to build the Docker image for your FastAPI application. The `docker-compose.yml` file is used to configure the Docker services.

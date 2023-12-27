@@ -1,9 +1,9 @@
-"use client";
-import { useProtectedRoute } from "@/hooks";
-import StudentView from "@/views/student-view";
+'use client';
+import { useProtectedRoute } from '@/hooks';
+import StudentView from '@/views/student-view';
 
 const Ucenik = () => {
-  return <StudentView />;
+	return <StudentView />;
 };
 
 export default useProtectedRoute(StudentView);
