@@ -22,6 +22,7 @@ from app.schemas.responses import (
     ClassHomeworkResponse,
     HomeworkResponse,
     HomeworkUserDetailsResponse,
+    ReviewedHomeworkResponse,
     taskUserHomeworkImageResponse,
     taskUserHomeworkResponse,
 )
@@ -724,3 +725,35 @@ async def submit_comment(
     await session.commit()
 
     return {"message": "Comment submitted successfully"}
+
+@router.get("/reviewed", response_model=List[ReviewedHomeworkResponse])
+async def reviewed_homework(session: AsyncSession = Depends(deps.get_session), current_user: User = Depends(deps.get_current_user)):
+    
+    results = await session.execute(
+        select(HomeworkUser, Homework)
+        .join(Homework, HomeworkUser.homework_id == Homework.id)
+        .where(
+            HomeworkUser.user_id == current_user.id,
+            HomeworkUser.grade.isnot(None)
+        )
+    )
+    
+    reviewed_homeworks = results.fetchall()
+
+    response_data = []
+    for homework_user, homework in reviewed_homeworks:
+        response_data.append({
+            "id": homework_user.id,
+            "homework_id": homework.id,
+            "name": homework.name,
+            "maxNumbersOfTasks": homework.maxNumbersOfTasks,
+            "grade": homework_user.grade,
+            "note": homework_user.note,
+            "note_student": homework_user.note_student,
+            "deadline": homework.deadline.date(),
+            "dateOfCreation": homework.dateOfCreation.date(),
+            "status": homework.status 
+        })
+
+
+    return response_data
