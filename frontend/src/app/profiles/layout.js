@@ -1,11 +1,10 @@
-import ButtonAppBar from "@/components/navbar"
+import ButtonAppBar from '@/components/navbar';
 
 export default function ProfilesProfesorLayout({ children }) {
-    
-    return (
-        <div>
-        <ButtonAppBar/>
-        {children}
-        </div>
-    )
-  }
+	return (
+		<div>
+			<ButtonAppBar />
+			{children}
+		</div>
+	);
+}
