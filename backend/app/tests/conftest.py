@@ -1,9 +1,11 @@
 import asyncio
+from unittest.mock import Mock
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from app.core.storage import Client, get_storage_client
 from main import app 
 from app.models import Base, User, Role, Class, Homework, HomeworkStatus ,taskUserHomework, HomeworkUser
 import os
@@ -69,6 +71,14 @@ roles = {
     "TA": "301baadb-6eec-40c5-bc96-fcfc5f657fc7",
     "GUEST": "6a0d7933-e24b-4526-9347-02430bfe108b"
 }
+
+
+def storage_client():
+    storage_client = Client()
+    storage_client.save_image = Mock(return_value="blob_name")
+    return storage_client
+
+app.dependency_overrides[get_storage_client] = storage_client
 
 
 @pytest.fixture(scope="session")

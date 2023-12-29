@@ -4,6 +4,7 @@ from typing import List, Optional
 from uuid import uuid4
 
 from app.api import deps
+from app.core.storage import Client, get_storage_client
 from app.models import (
     Class,
     ClassHomework,
@@ -27,7 +28,7 @@ from app.schemas.responses import (
     taskUserHomeworkResponse,
 )
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy import and_, delete, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -592,6 +593,7 @@ async def submit_task(
     task_comment: str,
     images: List[UploadFile],
     session: AsyncSession = Depends(deps.get_session),
+    storage_client: Client = Depends(get_storage_client),
     current_user: User = Depends(deps.get_current_user),
 ):
     homework_query = await session.execute(
@@ -647,18 +649,11 @@ async def submit_task(
         task_user_homework_id = new_task_submission.id
 
     for image in images:
-        unique_filename = f"{uuid4()}_{image.filename}"
-        file_path = f"images/{unique_filename}"
-        print(file_path)
-
-        # with open(file_path, "wb") as buffer:
-        #   shutil.copyfileobj(image.file, buffer)
-        # with open(file_path, "wb") as buffer:
-        #     shutil.copyfileobj(image.file, buffer)
+        filename = storage_client.save_image(image)
 
         single_image = Image(
-            filename=image.filename,
-            file_path=file_path,
+            filename=filename,
+            file_path=filename,
             created_at=datetime.now(),
         )
         session.add(single_image)
@@ -676,6 +671,29 @@ async def submit_task(
 
     await session.commit()
     return {"message": "Homework task submitted successfully"}
+
+
+@router.get("/homeworks/{homework_id}/task/{task_number}/image/{image_id}")
+async def get_task_image(
+    homework_id: str,
+    task_number: int,
+    image_id: str,
+    session: AsyncSession = Depends(deps.get_session),
+    storage_client: Client = Depends(Client),
+    current_user: User = Depends(deps.get_current_user),
+):
+    image_query = await session.execute(
+        select(Image).where(Image.id == image_id)
+    )
+    image: Image = image_query.scalar()
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    # Vracanje slike kopirano sa https://github.com/TrueFaces/fastapi-test/blob/f5b25291d04b5f1dcf740404b48d5b2055199ee9/app/utils/storage.py#L41
+    return StreamingResponse(
+        storage_client.get_image(image.file_path),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename={image.file_path}"})
 
 
 @router.post("/submit-general-comment/{homework_id}")
