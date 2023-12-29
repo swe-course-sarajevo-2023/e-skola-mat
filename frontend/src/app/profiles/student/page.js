@@ -6,4 +6,4 @@ const Ucenik = () => {
 	return <StudentView />;
 };
 
-export default useProtectedRoute(StudentView);
+export default StudentView;
