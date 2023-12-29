@@ -3,7 +3,9 @@ import { useProtectedRoute } from '@/hooks';
 import ProfesorHomepageView from '@/views/professor-homepage-view';
 
 const ProfesorHomepage = () => {
-	return <ProfesorHomepageView />;
+	const ProtectedStudentView = useProtectedRoute(ProfesorHomepageView);
+
+	return <ProtectedStudentView />;
 };
 
-export default useProtectedRoute(ProfesorHomepage);
+export default ProfesorHomepage;

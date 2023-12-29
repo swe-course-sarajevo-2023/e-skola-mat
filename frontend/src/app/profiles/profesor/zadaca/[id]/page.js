@@ -3,7 +3,9 @@ import { useProtectedRoute } from '@/hooks';
 import GroupsHomeworkView from '@/views/groups-homework-view';
 
 const GroupsHomework = ({ params }) => {
-	return <GroupsHomeworkView zadaca={params.id} />;
+	const ProtectedStudentView = useProtectedRoute(GroupsHomeworkView);
+
+	return <ProtectedStudentView zadaca={params.id} />;
 };
 
-export default useProtectedRoute(GroupsHomework);
+export default GroupsHomework;
