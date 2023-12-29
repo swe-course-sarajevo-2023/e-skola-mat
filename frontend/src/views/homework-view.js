@@ -202,51 +202,52 @@ const HomeworkView = props => {
 				</Grid>
 
 				{data &&
-					data.problems.map(element => (
-						<Grid item xs={12} md={3} lg={3}>
-							<Card fullWidth>
-								<CardContent>
-									<Grid container spacing={1}>
-										{element.images.map(image => (
-											<Grid item xs={4} lg={4} md={4}>
-												<Button
-													onClick={() =>
-														handleImageButton(
-															element.order_num,
-															image.id,
-															image.file_path,
-															image.comment_professor
-														)
-													}
-												>
-													<div
-														style={{
-															backgroundImage: `url('${image.file_path}')`,
-															backgroundRepeat: 'no-repeat',
-															height: '0',
-															paddingTop: '200%',
-															width: '500%',
-														}}
-													></div>
-												</Button>
-											</Grid>
-										))}
-									</Grid>
-									<Typography gutterBottom variant="h6" component="div">
-										Zadatak {element.order_num}
-									</Typography>
-									<Typography variant="body2" color="text.secondary">
-										{element.student_comment}
-									</Typography>
-								</CardContent>
-								<Comment
-									element={element}
-									isLoading={isLoading}
-									isRefetching={isRefetching}
-								/>
-							</Card>
-						</Grid>
-					))}
+  data.problems.map(element => (
+    <Grid item xs={12} md={3} lg={3} key={element.order_num}>
+      <Card fullWidth>
+        <CardContent>
+          <Grid container spacing={1}>
+            {element.images.map(image => (
+              <Grid item xs={4} lg={4} md={4} key={image.id}>
+                <Button
+                  onClick={() =>
+                    handleImageButton(
+                      element.order_num,
+                      image.id,
+                      image.file_path,
+                      image.comment_professor
+                    )
+                  }
+                >
+                  <div
+                    style={{
+                      backgroundImage: `url('${image.file_path}')`,
+                      backgroundRepeat: 'no-repeat',
+                      height: '0',
+                      paddingTop: '200%',
+                      width: '500%',
+                    }}
+                  ></div>
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+          <Typography gutterBottom variant="h6" component="div">
+            Zadatak {element.order_num}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {element.student_comment}
+          </Typography>
+        </CardContent>
+        <Comment
+          element={element}
+          isLoading={isLoading}
+          isRefetching={isRefetching}
+        />
+      </Card>
+    </Grid>
+  ))}
+
 			</Grid>
 
 			<Modal

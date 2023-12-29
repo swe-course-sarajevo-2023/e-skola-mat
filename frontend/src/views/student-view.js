@@ -114,56 +114,57 @@ const UcenikView = () => {
 						sx={{ display: 'flex' }}
 					></Grid>
 					{homework.map((currHomework, index) => {
-						const currDate = date[index].toDateString();
-						const currComment = comment[index];
+  const currDate = date[index].toDateString();
+  const currComment = comment[index];
 
-						return (
-							<Grid item xs={3}>
-								<Card sx={{ maxWidth: 345 }}>
-									<CardContent>
-										<Typography gutterBottom variant="h5" component="div">
-											Zadaća {index + 1}
-										</Typography>
-										{currComment != '' && (
-											<Typography variant="body2" color="text.secondary">
-												{currComment}
-											</Typography>
-										)}
-										{currComment == '' && (
-											<Typography variant="body2" color="text.secondary">
-												Zadaća nije pregledana
-											</Typography>
-										)}
-										{date[index].getTime() < currentDate.getTime() && (
-											<Typography>Istekao rok.</Typography>
-										)}
-										{date[index].getTime() > currentDate.getTime() && (
-											<Typography>Rok do {currDate}.</Typography>
-										)}
-									</CardContent>
-									<CardActions>
-										<Button
-											size="small"
-											onClick={() => handleImageButtonPostavka(index)}
-										>
-											Postavka
-										</Button>
-										<Button
-											size="small"
-											onClick={() =>
-												handleImageButtonDodaj(
-													index,
-													date[index].getTime() < currentDate.getTime()
-												)
-											}
-										>
-											Pregledaj
-										</Button>
-									</CardActions>
-								</Card>
-							</Grid>
-						);
-					})}
+  return (
+    <Grid item xs={3} key={index}>
+      <Card sx={{ maxWidth: 345 }}>
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="div">
+            Zadaća {index + 1}
+          </Typography>
+          {currComment !== '' && (
+            <Typography variant="body2" color="text.secondary">
+              {currComment}
+            </Typography>
+          )}
+          {currComment === '' && (
+            <Typography variant="body2" color="text.secondary">
+              Zadaća nije pregledana
+            </Typography>
+          )}
+          {date[index].getTime() < currentDate.getTime() && (
+            <Typography>Istekao rok.</Typography>
+          )}
+          {date[index].getTime() > currentDate.getTime() && (
+            <Typography>Rok do {currDate}.</Typography>
+          )}
+        </CardContent>
+        <CardActions>
+          <Button
+            size="small"
+            onClick={() => handleImageButtonPostavka(index)}
+          >
+            Postavka
+          </Button>
+          <Button
+            size="small"
+            onClick={() =>
+              handleImageButtonDodaj(
+                index,
+                date[index].getTime() < currentDate.getTime()
+              )
+            }
+          >
+            Pregledaj
+          </Button>
+        </CardActions>
+      </Card>
+    </Grid>
+  );
+})}
+
 				</Grid>
 
 				<Modal
