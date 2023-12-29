@@ -45,14 +45,14 @@ const UsersView = () => {
 						flexWrap="wrap"
 					>
 						{[...Array(5)].map((_, index) => (
-  <Box
-    key={index} // Add key prop here
-    sx={{ py: 2 }}
-    flex={{ xs: '1 100%', md: '1 45%', lg: '1 20%' }}
-  >
-    <UserCard />
-  </Box>
-))}
+							<Box
+								key={index} // Add key prop here
+								sx={{ py: 2 }}
+								flex={{ xs: '1 100%', md: '1 45%', lg: '1 20%' }}
+							>
+								<UserCard />
+							</Box>
+						))}
 					</Box>
 				)}
 			</Box>
