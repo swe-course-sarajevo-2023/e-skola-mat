@@ -78,7 +78,7 @@ class VerifyTokenResponse(BaseModel):
     id: str
 
 class ReviewedHomeworkResponse(HomeworkResponse):
-    id: str
+    homework_id: str
     grade: int
     note: Optional[str]
     note_student: Optional[str]
