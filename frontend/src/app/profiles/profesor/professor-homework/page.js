@@ -3,7 +3,9 @@ import { useProtectedRoute } from '@/hooks';
 import ProfessorHomeworkView from '@/views/professor-homework-view';
 
 const Homework = () => {
-	return <ProfessorHomeworkView />;
+	const ProtectedStudentView = useProtectedRoute(ProfessorHomeworkView);
+
+	return <ProtectedStudentView />;
 };
 
-export default useProtectedRoute(Homework);
+export default Homework;

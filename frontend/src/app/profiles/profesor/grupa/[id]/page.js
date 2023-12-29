@@ -3,7 +3,9 @@ import ProfessorGroupView from '@/views/professor-group-view';
 import { useProtectedRoute } from '@/hooks';
 
 const ProfessorGroup = ({ params }) => {
-	return <ProfessorGroupView grupa={params.id} />;
+	const ProtectedStudentView = useProtectedRoute(ProfessorGroupView);
+
+	return <ProtectedStudentView grupa={params.id} />;
 };
 
-export default useProtectedRoute(ProfessorGroup);
+export default ProfessorGroup;

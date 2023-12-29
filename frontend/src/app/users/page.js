@@ -3,7 +3,9 @@ import { useProtectedRoute } from '@/hooks';
 import UsersView from '@/views/users-view';
 
 const Users = () => {
-	return <UsersView />;
+	const ProtectedStudentView = useProtectedRoute(UsersView);
+
+	return <ProtectedStudentView />;
 };
 
-export default useProtectedRoute(UsersView);
+export default Users;
