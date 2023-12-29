@@ -15,13 +15,19 @@ class Client:
 
     local_directory: Optional[Path]
 
-    def __init__(self) -> None:
-        self.save_on_cloud = True
+    @classmethod
+    def from_google_project(cls, project=config.settings.GCP_PROJECT_ID, bucket_name=config.settings.GCP_BUCKET):
+        gcs_client = GCSClient(project=config.settings.GCP_PROJECT_ID)
+        images_bucket = gcs_client.get_bucket(config.settings.GCP_BUCKET)
+        return cls(gcs_client=gcs_client, images_bucket=images_bucket)
+
+    def __init__(self, save_on_cloud=True, gcs_client=None, images_bucket=None, local_directory=None) -> None:
+        self.save_on_cloud = save_on_cloud
         if (self.save_on_cloud):
-            self.gcs_client = GCSClient(project=config.settings.GCP_PROJECT_ID)
-            self.images_bucket = self.gcs_client.get_bucket(config.settings.GCP_BUCKET)
+            self.gcs_client = gcs_client
+            self.images_bucket = images_bucket
         else:
-            self.local_directory = Path(__file__).resolve().parent.parent.parent
+            self.local_directory = local_directory
     
     def save_image(self, file: UploadFile):
         if (self.save_on_cloud):
@@ -41,3 +47,7 @@ class Client:
             blob.download_to_file(file_stream)
             file_stream.seek(0)
             return file_stream
+
+
+def get_storage_client():
+    return Client.from_google_project()

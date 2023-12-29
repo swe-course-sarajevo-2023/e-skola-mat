@@ -1,9 +1,14 @@
 
+from unittest.mock import Mock
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from io import BytesIO
 from starlette.datastructures import UploadFile
 from tempfile import SpooledTemporaryFile
+
+from google.cloud.storage import Blob
+
+from app.core.storage import Client
 
 from app.models import Homework, User, HomeworkStatus, Class, taskUserHomework
 from main import app

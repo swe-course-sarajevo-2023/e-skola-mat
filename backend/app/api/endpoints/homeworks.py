@@ -4,7 +4,7 @@ from typing import List, Optional
 from uuid import uuid4
 
 from app.api import deps
-from app.core.storage import Client
+from app.core.storage import Client, get_storage_client
 from app.models import (
     Class,
     ClassHomework,
@@ -593,7 +593,7 @@ async def submit_task(
     task_comment: str,
     images: List[UploadFile],
     session: AsyncSession = Depends(deps.get_session),
-    storage_client: Client = Depends(Client),
+    storage_client: Client = Depends(get_storage_client),
     current_user: User = Depends(deps.get_current_user),
 ):
     homework_query = await session.execute(
