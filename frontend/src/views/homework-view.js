@@ -203,12 +203,12 @@ const HomeworkView = props => {
 
 				{data &&
 					data.problems.map(element => (
-						<Grid item xs={12} md={3} lg={3}>
+						<Grid item xs={12} md={3} lg={3} key={element.order_num}>
 							<Card fullWidth>
 								<CardContent>
 									<Grid container spacing={1}>
 										{element.images.map(image => (
-											<Grid item xs={4} lg={4} md={4}>
+											<Grid item xs={4} lg={4} md={4} key={image.id}>
 												<Button
 													onClick={() =>
 														handleImageButton(

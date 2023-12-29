@@ -118,18 +118,18 @@ const UcenikView = () => {
 						const currComment = comment[index];
 
 						return (
-							<Grid item xs={3}>
+							<Grid item xs={3} key={index}>
 								<Card sx={{ maxWidth: 345 }}>
 									<CardContent>
 										<Typography gutterBottom variant="h5" component="div">
 											Zadaća {index + 1}
 										</Typography>
-										{currComment != '' && (
+										{currComment !== '' && (
 											<Typography variant="body2" color="text.secondary">
 												{currComment}
 											</Typography>
 										)}
-										{currComment == '' && (
+										{currComment === '' && (
 											<Typography variant="body2" color="text.secondary">
 												Zadaća nije pregledana
 											</Typography>

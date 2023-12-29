@@ -776,3 +776,29 @@ async def reviewed_homework(session: AsyncSession = Depends(deps.get_session), c
 
 
     return response_data
+
+@router.post("/submit-general-student-comment/{homework_id}")
+async def submit_comment(
+    homework_id: str,
+    comment: str,
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user),
+):
+    homework_user_query = await session.execute(
+        select(HomeworkUser).where(
+            HomeworkUser.user_id == current_user.id,
+            HomeworkUser.homework_id == homework_id,
+        )
+    )
+    homework_user = homework_user_query.scalars().first()
+    if not homework_user:
+        new_homework_submission = HomeworkUser(
+            user_id=current_user.id,
+            homework_id=homework_id,
+        )
+        session.add(new_homework_submission)
+        session.flush()
+
+    homework_user.note_student = comment
+    await session.commit()
+    return {"message": "General comment submitted successfully"}
