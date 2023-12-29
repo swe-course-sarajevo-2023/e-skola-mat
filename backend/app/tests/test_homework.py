@@ -93,14 +93,14 @@ async def test_submit_comment(client: AsyncClient, professor_user_headers,task, 
 
 async def test_get_homework_user_details(client: AsyncClient, professor_user_headers,homeworkUser , session: AsyncSession):
     response = await client.get(
-        app.url_path_for("get_homework_user_details", homework_user_id=homeworkUser.id),
+        app.url_path_for("get_homework_user_details", homework_user_id=homeworkUser.id, homework_id=homeworkUser.homework_id),
         headers=professor_user_headers
     )
     assert response.status_code ==200
 
 async def test_get_homework_user_details_403(client: AsyncClient, generic_user_headers, session: AsyncSession):
     response = await client.get(
-        app.url_path_for("get_homework_user_details", homework_user_id="e7854775-67ae-43c4-a1c4-64d806569f22​​"),
+        app.url_path_for("get_homework_user_details", homework_user_id="e7854775-67ae-43c4-a1c4-64d806569f22​​", homework_id="f7854224-67ae-43c4-a1c4-64d806569f22"),
         headers=generic_user_headers
     )
     assert response.status_code ==403
