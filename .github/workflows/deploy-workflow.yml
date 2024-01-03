@@ -1,0 +1,36 @@
+name: Deploy to Google Cloud
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Google Cloud
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
+
+      - name: Build and Deploy Backend
+        run: |
+          gcloud builds submit --config cloudbuild-backend.yaml --substitutions=_REGION="europe-west6",_CLOUDSQL_INSTANCES="${{ secrets.GCP_PROJECT_ID }}:europe-west6:e-skola-mat",
+          _DEFAULT_DATABASE_PASSWORD="${{ secrets.DEFAULT_DATABASE_PASSWORD }}",_FIRST_SUPERUSER_PASSWORD="${{ secrets.FIRST_SUPERUSER_PASSWORD }}",
+          _SECRET_KEY="${{ secrets.SECRET_KEY }}",_TEST_DATABASE_PASSWORD="${{ secrets.TEST_DATABASE_PASSWORD }}",_ACCESS_TOKEN_EXPIRE_MINUTES="${{ env.ACCESS_TOKEN_EXPIRE_MINUTES }}"
+          ,_ALLOWED_HOSTS="${{ env.ALLOWED_HOSTS }}",_BACKEND_CORS_ORIGINS="${{ env.BACKEND_CORS_ORIGINS }}",_DEFAULT_DATABASE_DB="${{ env.DEFAULT_DATABASE_DB }}",
+          _DEFAULT_DATABASE_HOSTNAME="${{ env.DEFAULT_DATABASE_HOSTNAME }}",_DEFAULT_DATABASE_PORT="${{ env.DEFAULT_DATABASE_PORT }}",
+          _DEFAULT_DATABASE_USER="${{ env.DEFAULT_DATABASE_USER }}",_ENVIRONMENT="${{ env.ENVIRONMENT }}",_FIRST_SUPERUSER_EMAIL="${{ env.FIRST_SUPERUSER_EMAIL }}",
+          _GCP_BUCKET="${{ env.GCP_BUCKET }}",_GCP_PROJECT_ID="${{ env.GCP_PROJECT_ID }}",_REFRESH_TOKEN_EXPIRE_MINUTES="${{ env.REFRESH_TOKEN_EXPIRE_MINUTES }}",
+          _TEST_DATABASE_DB="${{ env.TEST_DATABASE_DB }}",_TEST_DATABASE_HOSTNAME="${{ env.TEST_DATABASE_HOSTNAME }}",_TEST_DATABASE_PORT="${{ env.TEST_DATABASE_PORT }}",
+          _TEST_DATABASE_USER="${{ env.TEST_DATABASE_USER }}"
+
+      - name: Check Deployment Status
+        run: |
+          gcloud run services describe sample --platform managed --region europe-west6 --format="value(status.url)"
