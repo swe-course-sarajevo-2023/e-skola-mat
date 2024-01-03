@@ -18,7 +18,7 @@ from app.models import (
     taskUserHomework,
     taskUserHomeworkImage,
 )
-from app.schemas.requests import ClassHomeworkCreateRequest
+from app.schemas.requests import ClassHomeworkCreateRequest, SubmitTaskRequest
 from app.schemas.responses import (
     ClassHomeworkResponse,
     HomeworkResponse,
@@ -590,8 +590,7 @@ async def update_homework_status(
 async def submit_task(
     homework_id: str,
     task_number: int,
-    task_comment: str,
-    images: List[UploadFile],
+    submit_task_request: SubmitTaskRequest,
     session: AsyncSession = Depends(deps.get_session),
     storage_client: Client = Depends(get_storage_client),
     current_user: User = Depends(deps.get_current_user),
@@ -635,20 +634,20 @@ async def submit_task(
     task = task_query.scalar()
     # Ako smo nasli trazeni task, postaviti da
     if task:
-        task.commentStudent = task_comment
+        task.commentStudent = submit_task_request.task_comment
         task_user_homework_id = task.id
     else:
         new_task_submission = taskUserHomework(
             user_id=current_user.id,
             homework_id=homework_id,
             order_number_of_the_task=task_number,
-            commentStudent=task_comment,
+            commentStudent=submit_task_request.task_comment,
         )
         session.add(new_task_submission)
         await session.flush()
         task_user_homework_id = new_task_submission.id
 
-    for image in images:
+    for image in submit_task_request.images:
         filename = storage_client.save_image(image)
 
         single_image = Image(
