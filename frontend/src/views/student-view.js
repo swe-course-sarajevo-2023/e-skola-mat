@@ -69,6 +69,7 @@ const UcenikView = () => {
 	const [expired, setDate] = useState(false);
 	const [showSubmitModal, setShowSubmitModal] = useState(false);
 	const [homeworkId, setHomeworkId] = useState(1);
+	const [fetchedData, setFetchedData] = useState([]);
 
 	const handleClose = () => setModalOpenPostavka(false);
 
@@ -91,11 +92,183 @@ const UcenikView = () => {
 		['getAllStudentsSubmittedHomeworks'],
 		() => getAllStudentsSubmittedHomeworks(student_id)
 	);
-	useEffect(() => {
-		console.log('data', data);
-	}, [data]);
+	console.log(data, data?.data);
+
+	/*
+{
+  "data": [
+    {
+      "id": "f47ac13b-58cc-4372-a567-0e02b2c3d111",
+      "name": "zadaca 1",
+      "grade": 5,
+      "note": "test",
+      "number_of_tasks": null,
+      "deadline": null,
+      "status": "in progress",
+      "tasks": []
+    },
+    {
+      "id": "f47ac19b-58cc-4372-a567-0e02b2c3d111",
+      "name": "zadaca 2",
+      "grade": 3,
+      "note": "test 2",
+      "number_of_tasks": null,
+      "deadline": null,
+      "status": "finished",
+      "tasks": []
+    }
+  ]
+}
+
+
+*/
 
 	return (
+		<>
+			<Container>
+				<Grid item xs={12} style={{ marginTop: '10%' }}>
+					<Paper>
+						<Typography variant="h6">Pregled zadaća</Typography>
+					</Paper>
+				</Grid>
+				<Grid container spacing={2} sx={{ marginTop: 5 }}>
+					<Grid item xs={8}></Grid>
+					<Grid
+						item
+						xs={12}
+						sm={6}
+						md={4}
+						lg={3}
+						sx={{ display: 'flex' }}
+					></Grid>
+					{data?.data &&
+						data?.data.map((currHomework, index) => {
+							const currDate = date[index].toDateString();
+							const currComment = comment[index];
+
+							return (
+								<Grid item xs={3} key={index}>
+									<Card sx={{ maxWidth: 345 }}>
+										<CardContent>
+											<Typography gutterBottom variant="h5" component="div">
+												{currHomework.name}
+											</Typography>
+											{currHomework.note !== '' && (
+												<Typography variant="body2" color="text.secondary">
+													{currHomework.note}
+												</Typography>
+											)}
+											{currHomework.deadline &&
+												currHomework.deadline.getTime() <
+													currentDate.getTime() && (
+													<Typography>Istekao rok.</Typography>
+												)}
+											{currHomework.deadline &&
+												currHomework.deadline.getTime() >
+													currentDate.getTime() && (
+													<Typography>
+														Rok do {currHomework.deadline}.
+													</Typography>
+												)}
+										</CardContent>
+										<CardActions>
+											<Button
+												size="small"
+												onClick={() => handleImageButtonPostavka(index)}
+											>
+												Postavka
+											</Button>
+											<Button
+												size="small"
+												onClick={() =>
+													handleImageButtonDodaj(
+														index,
+														currHomework.deadline &&
+															currHomework.deadline.getTime() <
+																currentDate.getTime()
+													)
+												}
+											>
+												Pregledaj
+											</Button>
+										</CardActions>
+									</Card>
+								</Grid>
+							);
+						})}
+				</Grid>
+
+				<Modal
+					open={modalOpen}
+					onClose={handleClose}
+					sx={{ width: 'auto' }}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<Box sx={style}>
+						<Typography id="modal-modal-title" variant="h5" component="h2">
+							Zadaća {selectedHomework + 1}
+						</Typography>
+						<img src={homework[selectedHomework]} loading="lazy" />
+					</Box>
+				</Modal>
+
+				<Modal
+					open={modalOpen1}
+					onClose={handleClose1}
+					sx={{ width: 'auto' }}
+					aria-labelledby="modal-modal-title"
+					aria-describedby="modal-modal-description"
+				>
+					<Box sx={style}>
+						<Typography id="modal-modal-title" variant="h5" component="h2">
+							Zadaća {selectedHomework + 1} - Tvoje rješenje
+						</Typography>
+						{student.homeworks[selectedHomework] &&
+							student.homeworks[selectedHomework].map((zadaca, index) => (
+								<>
+									<img src={zadaca} loading="lazy" />
+									<Typography
+										id="modal-modal-title"
+										variant="h5"
+										component="h2"
+									>
+										{homeworkComment[selectedHomework][index]}
+									</Typography>
+								</>
+							))}
+						{!student.homeworks[selectedHomework] && (
+							<Typography id="modal-modal-title" variant="h5" component="h2">
+								Nije predana.
+							</Typography>
+						)}
+						{!expired && (
+							<Button
+								xs={12}
+								sx={{ display: 'flex' }}
+								size="small"
+								onClick={() => setShowSubmitModal(true)}
+							>
+								Dodaj
+							</Button>
+						)}
+						<SubmitModal
+							open={showSubmitModal}
+							onClose={() => setShowSubmitModal(false)}
+							brojZadace={selectedHomework}
+							homework_id={homeworkId}
+						/>
+					</Box>
+				</Modal>
+			</Container>
+		</>
+	);
+};
+
+export default isAuth(UcenikView, 'student-view');
+
+/*
+return (
 		<>
 			<Container>
 				<Grid item xs={12} style={{ marginTop: '10%' }}>
@@ -231,6 +404,6 @@ const UcenikView = () => {
 			</Container>
 		</>
 	);
-};
 
-export default isAuth(UcenikView, 'student-view');
+
+*/
