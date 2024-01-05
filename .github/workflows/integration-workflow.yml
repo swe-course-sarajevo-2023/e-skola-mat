@@ -1,8 +1,8 @@
 name: Run Tests
 
 on:
-    pull_request:
-      types: [opened, synchronize]
+  pull_request:
+    types: [opened, synchronize]
 jobs:
   backend-tests:
     environment: preview
@@ -35,21 +35,21 @@ jobs:
 
       - name: Install Docker Compose
         run: |
-            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            echo "/usr/local/bin" >> $GITHUB_PATH
-          
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          echo "/usr/local/bin" >> $GITHUB_PATH
+
       - name: Docker Compose run
         run: |
-            cd backend
-            docker-compose -f docker-compose-ci.yml build
-            docker-compose -f docker-compose-ci.yml up -d
+          cd backend
+          docker-compose -f docker-compose-ci.yml build
+          docker-compose -f docker-compose-ci.yml up -d
 
       - name: Install Python
-        uses:  actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: "pip"
 
       - name: Install Dependencies
         run: |
@@ -63,17 +63,17 @@ jobs:
           uvicorn main:app --port 8000 &
           sleep 10 
           curl --fail http://localhost:8000/
-          kill $! 
+          kill $!
 
       - name: Run migration script
         run: |
-              cd backend
-              export PYTHONPATH=$PWD
-              echo "Run migrations"
-              alembic upgrade head
-              
-              echo "Create initial data in DB"
-              python3 -m app.initial_data
+          cd backend
+          export PYTHONPATH=$PWD
+          echo "Run migrations"
+          alembic upgrade head
+
+          echo "Create initial data in DB"
+          python3 -m app.initial_data
 
       - name: Run Pytest
         run: |
@@ -90,13 +90,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install Frontend Dependencies
         run: |
           cd frontend
           npm install
-      
+
       - name: Cache npm packages
         uses: actions/cache@v2
         with:

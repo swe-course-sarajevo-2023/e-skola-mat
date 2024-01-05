@@ -49,17 +49,16 @@ class UserDeleteRequest(BaseRequest):
     email: EmailStr
 
 
-class ProfessorCommentsHomework(BaseRequest):
-    id: str
-    comment: str
-
-
 class ProfessorGradesHomework(BaseRequest):
     homework_id: str
     user_id: str
     grade: int
+    
+    
+class ProfessorCommentsHomework(BaseRequest):
+    homework_id: str
+    user_id: str
     note: str
-
 
 class ClassCreateRequest(BaseModel):
     name: str

@@ -1,4 +1,5 @@
 from typing import List
+import uuid
 
 from app.models import Class, User, UserRole
 from app.schemas.requests import ClassCreateRequest
@@ -11,6 +12,12 @@ from app.api import deps
 
 router = APIRouter()
 
+def is_valid_uuid(uuid_str):
+    try:
+        uuid.UUID(uuid_str)
+        return True
+    except ValueError:
+        return False
 
 @router.get("/class", response_model=ClassResponse)
 async def get_group(
@@ -18,8 +25,12 @@ async def get_group(
     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
 ):
+    if not is_valid_uuid(class_id):
+        raise HTTPException(status_code=400, detail="id is not valid")
+    
     result = await session.execute(select(Class).where(Class.id == class_id))
     class_ = result.scalars().one()
+    
     if not class_:
         raise HTTPException(status_code=204, detail="Class not found")
     return class_
@@ -45,6 +56,13 @@ async def create_group(
     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
 ):
+    class1 = await session.execute(
+        select(Class).where(Class.name == class_data.name))
+    class1 = class1.scalar()
+
+    if class1:
+        raise HTTPException(status_code=409, detail="Class of that name already exists!")
+    
     new_class = Class(name=class_data.name)
     session.add(new_class)
     await session.commit()

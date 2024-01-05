@@ -44,7 +44,6 @@ async def delete_current_user(
         content={"detail": "Professor deleted successfully"}, status_code=200
     )
 
-
 @router.post("/reset-password", response_model=UserResponse)
 async def reset_current_user_password(
     user_update_password: UserUpdatePasswordRequest,
@@ -56,7 +55,6 @@ async def reset_current_user_password(
     session.add(current_user)
     await session.commit()
     return current_user
-
 
 @router.post("/register", response_model=UserResponse)
 async def register_new_user(
