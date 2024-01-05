@@ -1,0 +1,71 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "gcr.io/$PROJECT_ID/sample:$COMMIT_SHA",
+        ".",
+        "--build-arg",
+        "DEFAULT_DATABASE_PASSWORD=$_DEFAULT_DATABASE_PASSWORD",
+        "--build-arg",
+        "FIRST_SUPERUSER_PASSWORD=$_FIRST_SUPERUSER_PASSWORD",
+        "--build-arg",
+        "SECRET_KEY=$_SECRET_KEY",
+        "--build-arg",
+        "TEST_DATABASE_PASSWORD=$_TEST_DATABASE_PASSWORD",
+        "--build-arg",
+        "ACCESS_TOKEN_EXPIRE_MINUTES=$_ACCESS_TOKEN_EXPIRE_MINUTES",
+        "--build-arg",
+        "ALLOWED_HOSTS=$_ALLOWED_HOSTS",
+        "--build-arg",
+        "BACKEND_CORS_ORIGINS=$_BACKEND_CORS_ORIGINS",
+        "--build-arg",
+        "DEFAULT_DATABASE_DB=$_DEFAULT_DATABASE_DB",
+        "--build-arg",
+        "DEFAULT_DATABASE_HOSTNAME=$_DEFAULT_DATABASE_HOSTNAME",
+        "--build-arg",
+        "DEFAULT_DATABASE_PORT=$_DEFAULT_DATABASE_PORT",
+        "--build-arg",
+        "DEFAULT_DATABASE_USER=$_DEFAULT_DATABASE_USER",
+        "--build-arg",
+        "ENVIRONMENT=$_ENVIRONMENT",
+        "--build-arg",
+        "FIRST_SUPERUSER_EMAIL=$_FIRST_SUPERUSER_EMAIL",
+        "--build-arg",
+        "GCP_BUCKET=$_GCP_BUCKET",
+        "--build-arg",
+        "GCP_PROJECT_ID=$_GCP_PROJECT_ID",
+        "--build-arg",
+        "REFRESH_TOKEN_EXPIRE_MINUTES=$_REFRESH_TOKEN_EXPIRE_MINUTES",
+        "--build-arg",
+        "TEST_DATABASE_DB=$_TEST_DATABASE_DB",
+        "--build-arg",
+        "TEST_DATABASE_HOSTNAME=$_TEST_DATABASE_HOSTNAME",
+        "--build-arg",
+        "TEST_DATABASE_PORT=$_TEST_DATABASE_PORT",
+        "--build-arg",
+        "TEST_DATABASE_USER=$_TEST_DATABASE_USER",
+      ]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/sample:$COMMIT_SHA"]
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "run",
+        "deploy",
+        "sample",
+        "--image",
+        "gcr.io/$PROJECT_ID/sample:$COMMIT_SHA",
+        "--platform",
+        "managed",
+        "--region",
+        "${_REGION}",
+        "--allow-unauthenticated",
+        "--set-cloudsql-instances",
+        "${_CLOUDSQL_INSTANCES}",
+        "--port",
+        "8080",
+      ]
