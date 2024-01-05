@@ -274,9 +274,11 @@ export const Canvas = props => {
 						/>
 					</Grid>
 					<Grid item xs={12} md={12}>
-						<Button variant="outlined" onClick={() => {
-							commentImageTask({ task_id: imageId, comment: commentValue });
-						}}
+						<Button
+							variant="outlined"
+							onClick={() => {
+								commentImageTask({ task_id: imageId, comment: commentValue });
+							}}
 						>
 							Spasi komentar
 						</Button>

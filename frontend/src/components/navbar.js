@@ -12,7 +12,6 @@ import { GetLoggedUser } from '@/api';
 import { useQuery } from 'react-query';
 
 export default function ButtonAppBar() {
-
 	const { data } = useQuery(['getLoggedUser'], () => GetLoggedUser());
 
 	const router = useRouter();
@@ -50,7 +49,14 @@ export default function ButtonAppBar() {
 						eŠkola matematike
 					</Typography>
 
-					<Link href={data?.user_role === 'PROFESSOR' ? "/profiles/profesor" : "/profiles/student"} passHref>
+					<Link
+						href={
+							data?.user_role === 'PROFESSOR'
+								? '/profiles/profesor'
+								: '/profiles/student'
+						}
+						passHref
+					>
 						<Button color="inherit">Početna</Button>
 					</Link>
 

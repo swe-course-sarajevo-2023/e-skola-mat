@@ -18,7 +18,6 @@ import { useQuery, useQueryClient, useMutation } from 'react-query';
 import { getProfessorAllSubmitedHomeworks, sendHomeworkResults } from '@/api';
 
 const GroupsHomeworkView = props => {
-
 	const { data, isLoading, isRefetching, error, isError } = useQuery(
 		['professorAllSubmitedHomeworks'],
 		() => getProfessorAllSubmitedHomeworks(props.zadaca)
@@ -34,8 +33,8 @@ const GroupsHomeworkView = props => {
 			console.log(error);
 		},
 	});
-	
-	const handleSendHomework = (data) => {
+
+	const handleSendHomework = data => {
 		mutation.mutate(data);
 	};
 
@@ -58,17 +57,26 @@ const GroupsHomeworkView = props => {
 							<Grid item xs={12} md={4} lg={4}>
 								<Typography variant="h7" sx={{ marginLeft: 2 }}>
 									{' '}
-									Status:{' '}
-									{(data?.homework.status == 'NOT_STARTED') && 'OTVORENA'}
-									{(data?.homework.status == 'IN_PROGRESS') && 'ZA PREGLEDATI'}
-									{(data?.homework.status == 'FINISHED') && 'PREGLEDANA'}
+									Status: {data?.homework.status == 'NOT_STARTED' && 'OTVORENA'}
+									{data?.homework.status == 'IN_PROGRESS' && 'ZA PREGLEDATI'}
+									{data?.homework.status == 'FINISHED' && 'PREGLEDANA'}
 								</Typography>
 							</Grid>
 
 							<Grid item xs={12} md={4} lg={4}>
-								<Button disabled={data?.homework.status == 'NOT_STARTED' ? true : false} 
-								onClick={() => handleSendHomework({id: data?.homework.id, status: 'FINISHED'})}
-								>POSTAVI REZULTATE</Button>
+								<Button
+									disabled={
+										data?.homework.status == 'NOT_STARTED' ? true : false
+									}
+									onClick={() =>
+										handleSendHomework({
+											id: data?.homework.id,
+											status: 'FINISHED',
+										})
+									}
+								>
+									POSTAVI REZULTATE
+								</Button>
 							</Grid>
 						</Grid>
 					</Paper>

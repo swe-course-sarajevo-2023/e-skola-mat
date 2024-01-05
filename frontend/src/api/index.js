@@ -172,23 +172,25 @@ export const submitHomeworkGeneralComment = async data => {
 };
 
 export const gradeHomework = async data => {
-	await axiosInstanceWithAuthToken.post(
-		`/professors/grade_homework`, data);
+	await axiosInstanceWithAuthToken.post(`/professors/grade_homework`, data);
 };
 
 export const commentHomework = async data => {
-	await axiosInstanceWithAuthToken.post(
-		`/professors/comment_homework`, data);
+	await axiosInstanceWithAuthToken.post(`/professors/comment_homework`, data);
 };
 
 export const commentTask = async data => {
 	await axiosInstanceWithAuthToken.post(
-		`/professors/comment_homework_task`, data);
+		`/professors/comment_homework_task`,
+		data
+	);
 };
 
 export const commentImageTask = async data => {
 	await axiosInstanceWithAuthToken.post(
-		`/professors/comment_homework_task_image`, data);
+		`/professors/comment_homework_task_image`,
+		data
+	);
 };
 
 export const sendHomeworkResults = async data => {

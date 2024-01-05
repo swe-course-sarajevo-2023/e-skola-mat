@@ -17,7 +17,12 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import isAuth from '@/components/isAuth';
 import { useQuery, useMutation, queryClient } from 'react-query';
-import { commentTask, getHomeworkDataForReview, gradeHomework, commentHomework } from '@/api';
+import {
+	commentTask,
+	getHomeworkDataForReview,
+	gradeHomework,
+	commentHomework,
+} from '@/api';
 
 const style = {
 	position: 'absolute',
@@ -109,7 +114,7 @@ const HomeworkView = props => {
 		},
 		onError: () => {
 			setGradeInputColor('error');
-			setGradeHelperText('Spašena ocjena mora biti validan broj!')
+			setGradeHelperText('Spašena ocjena mora biti validan broj!');
 		},
 	});
 
@@ -170,7 +175,9 @@ const HomeworkView = props => {
 						label="Unesite ocjenu"
 						color={gradeInputColor}
 						helperText={gradeHelperText}
-						focused={!(isLoading || isRefetching) || data?.data.grade ? true : false}
+						focused={
+							!(isLoading || isRefetching) || data?.data.grade ? true : false
+						}
 						defaultValue={data?.data.grade}
 						value={grade}
 						onChange={e => {
@@ -180,12 +187,8 @@ const HomeworkView = props => {
 				</Grid>
 
 				<Grid item xs={12} md={1} lg={1}>
-					<Button
-						variant="outlined"
-						size="small"
-						onClick={() => gradeH()}
-					>
-						SPASI OCJENU 
+					<Button variant="outlined" size="small" onClick={() => gradeH()}>
+						SPASI OCJENU
 					</Button>
 				</Grid>
 
@@ -210,11 +213,7 @@ const HomeworkView = props => {
 				</Grid>
 
 				<Grid item xs={12} md={1} lg={1}>
-					<Button
-						variant="outlined"
-						size="small"
-						onClick={() => commentH()}
-					>
+					<Button variant="outlined" size="small" onClick={() => commentH()}>
 						SPASI KOMENTAR
 					</Button>
 				</Grid>
