@@ -8,8 +8,13 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
+import { GetLoggedUser } from '@/api';
+import { useQuery } from 'react-query';
 
 export default function ButtonAppBar() {
+
+	const { data } = useQuery(['getLoggedUser'], () => GetLoggedUser());
+
 	const router = useRouter();
 
 	const handleLogout = () => {
@@ -44,17 +49,15 @@ export default function ButtonAppBar() {
 					>
 						eŠkola matematike
 					</Typography>
-					<Link href="/profiles/profesor" passHref>
-						<Button color="inherit">Profesori</Button>
+
+					<Link href={data?.user_role === 'PROFESSOR' ? "/profiles/profesor" : "/profiles/student"} passHref>
+						<Button color="inherit">Početna</Button>
 					</Link>
 
-					<Link href="/profiles/student" passHref>
-						<Button color="inherit">Učenici</Button>
+					<Link href="/profiles/resetpassword" passHref>
+						<Button color="inherit">Promijeni lozinku</Button>
 					</Link>
 
-					<Link href="/users" passHref>
-						<Button color="inherit">Korisnici</Button>
-					</Link>
 					<Button color="inherit" onClick={handleLogout}>
 						LOGOUT
 					</Button>

@@ -14,33 +14,61 @@ import {
 	CircularProgress,
 } from '@mui/material';
 import isAuth from '@/components/isAuth';
-import { useQuery } from 'react-query';
-import { getProfessorAllSubmitedHomeworks } from '@/api';
+import { useQuery, useQueryClient, useMutation } from 'react-query';
+import { getProfessorAllSubmitedHomeworks, sendHomeworkResults } from '@/api';
 
 const GroupsHomeworkView = props => {
+
 	const { data, isLoading, isRefetching, error, isError } = useQuery(
 		['professorAllSubmitedHomeworks'],
 		() => getProfessorAllSubmitedHomeworks(props.zadaca)
 	);
-	console.log('HELLOOO');
-	console.log(data?.data);
+
+	const queryClient = useQueryClient();
+
+	const mutation = useMutation(sendHomeworkResults, {
+		onSuccess: () => {
+			queryClient.invalidateQueries(['professorAllSubmitedHomeworks']);
+		},
+		onError: error => {
+			console.log(error);
+		},
+	});
+	
+	const handleSendHomework = (data) => {
+		mutation.mutate(data);
+	};
+
 	return (
 		<Container>
 			<Grid container spacing={1} sx={{ marginTop: 5 }}>
 				<Grid item xs={12} sx={{ marginBottom: 5 }}>
 					<Paper>
 						<Grid container spacing={2}>
-							<Grid item xs={12} md={8} lg={8}>
+							<Grid item xs={12} md={4} lg={4}>
 								<Typography variant="h5" sx={{ marginLeft: 2 }}>
 									{' '}
 									Zadaća:{' '}
 									{!(isLoading || isRefetching) &&
 										!isError &&
-										data?.data?.homework?.name}
+										data?.homework.name}
 								</Typography>
 							</Grid>
+
 							<Grid item xs={12} md={4} lg={4}>
-								<Button>POSTAVI REZULTATE</Button>
+								<Typography variant="h7" sx={{ marginLeft: 2 }}>
+									{' '}
+									Status:{' '}
+									{(data?.homework.status == 'NOT_STARTED') && 'OTVORENA'}
+									{(data?.homework.status == 'IN_PROGRESS') && 'ZA PREGLEDATI'}
+									{(data?.homework.status == 'FINISHED') && 'PREGLEDANA'}
+								</Typography>
+							</Grid>
+
+							<Grid item xs={12} md={4} lg={4}>
+								<Button disabled={data?.homework.status == 'NOT_STARTED' ? true : false} 
+								onClick={() => handleSendHomework({id: data?.homework.id, status: 'FINISHED'})}
+								>POSTAVI REZULTATE</Button>
 							</Grid>
 						</Grid>
 					</Paper>
@@ -62,7 +90,7 @@ const GroupsHomeworkView = props => {
 					<Grid container spacing={2}>
 						{!(isLoading || isRefetching) &&
 							!isError &&
-							data?.data?.students.map(element => (
+							data?.data.map(element => (
 								<Grid item xs={12} sm={6} md={4} lg={3} key={element.id}>
 									<Card
 										sx={{

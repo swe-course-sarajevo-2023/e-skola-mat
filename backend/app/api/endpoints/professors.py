@@ -10,14 +10,16 @@ from app.models import (
     UserClass,
     UserRole,
     taskUserHomework,
+    taskUserHomeworkImage
 )
 from app.schemas.requests import (
     ProfessorCommentsHomework,
+    TaskComment,
     ProfessorGradesHomework,
     UserCreateRequest,
     UserDeleteRequest,
 )
-from app.schemas.responses import GradeResponse, UserResponse
+from app.schemas.responses import GradeResponse, CommentResponse, UserResponse, TaskCommentResponse
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy import delete, select, update
@@ -101,7 +103,7 @@ async def list_students(
         _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(class_id):
-        raise HTTPException(status_code=204, detail="id is not valid")
+        raise HTTPException(status_code=400, detail="id is not valid")
 
     class_users = await session.execute(
         select(UserClass).where(UserClass.class_id == class_id)
@@ -236,35 +238,6 @@ async def get_homework(
     return JSONResponse(content={"data": response_data}, status_code=200)
 
 
-@router.post("/comment_homework", response_model=UserResponse)
-async def comment_homework(
-        comment: ProfessorCommentsHomework,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
-):
-    if not is_valid_uuid(comment.id):
-        raise HTTPException(status_code=400, detail="id is not valid")
-
-    task_user_homework = await session.execute(
-        select(taskUserHomework).where(taskUserHomework.id == comment.id)
-    )
-    task_user_homework = task_user_homework.scalar()
-    if not task_user_homework:
-        raise HTTPException(status_code=400, detail="That homework does not exist")
-
-    await session.execute(
-        update(taskUserHomework)
-        .where(taskUserHomework.id == comment.id)
-        .values(commentProfessor=comment.comment)
-    )
-
-    await session.commit()
-
-    return JSONResponse(
-        content={"detail": "Successfully added a comment"}, status_code=200
-    )
-
-
 @router.post("/grade_homework", response_model=GradeResponse)
 async def grade_homework(
         grade: ProfessorGradesHomework,
@@ -272,23 +245,90 @@ async def grade_homework(
         _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(grade.user_id) or not is_valid_uuid(grade.homework_id):
-        raise HTTPException(status_code=400, detail="id is not valid")
+        raise HTTPException(status_code=400, detail="ids are not valid")
+    
+    homework_user = await session.execute(
+            select(HomeworkUser)
+            .where(HomeworkUser.user_id == grade.user_id)
+            .where(HomeworkUser.homework_id == grade.homework_id)
+        )
+    homework_user = homework_user.scalar()
 
-    homework = await session.execute(
-        select(Homework).where(Homework.id == grade.homework_id)
-    )
-    homework = homework.scalar()
-    if not homework:
-        raise HTTPException(status_code=400, detail="That homework does not exist")
+    if not homework_user:
+        raise HTTPException(status_code=400, detail="The user doesn't have that homework")
 
-    user = await session.execute(select(User).where(User.id == grade.user_id))
-    user = user.scalar()
-    if not user:
-        raise HTTPException(status_code=400, detail="That user does not exist")
-
-    homework_user = HomeworkUser(
-        user_id=user.id, homework_id=homework.id, grade=grade.grade, note=grade.note
-    )
-    session.add(homework_user)
+    homework_user.grade = grade.grade
+    
     await session.commit()
     return homework_user
+
+
+@router.post("/comment_homework", response_model=CommentResponse)
+async def comment_homework(
+        comment: ProfessorCommentsHomework,
+        session: AsyncSession = Depends(deps.get_session),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+):
+    if not is_valid_uuid(comment.user_id) or not is_valid_uuid(comment.homework_id):
+        raise HTTPException(status_code=400, detail="ids are not valid")
+    
+    homework_user = await session.execute(
+            select(HomeworkUser)
+            .where(HomeworkUser.user_id == comment.user_id)
+            .where(HomeworkUser.homework_id == comment.homework_id)
+        )
+    homework_user = homework_user.scalar()
+
+    if not homework_user:
+        raise HTTPException(status_code=400, detail="The user doesn't have that homework")
+
+    homework_user.note = comment.note
+    
+    await session.commit()
+    return homework_user
+
+@router.post("/comment_homework_task", response_model=TaskCommentResponse)
+async def comment_homework_task(
+        comment: TaskComment,
+        session: AsyncSession = Depends(deps.get_session),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+):
+    if not is_valid_uuid(comment.task_id):
+        raise HTTPException(status_code=400, detail="id is not valid")
+    
+    homework_task = await session.execute(
+            select(taskUserHomework)
+            .where(taskUserHomework.id == comment.task_id)
+        )
+    homework_task = homework_task.scalar()
+
+    if not homework_task:
+        raise HTTPException(status_code=400, detail="The user doesn't have that task in that homework")
+
+    homework_task.commentProfessor = comment.comment
+    
+    await session.commit()
+    return homework_task
+
+@router.post("/comment_homework_task_image", response_model=TaskCommentResponse)
+async def comment_homework_task_image(
+        comment: TaskComment,
+        session: AsyncSession = Depends(deps.get_session),
+        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+):
+    if not is_valid_uuid(comment.task_id):
+        raise HTTPException(status_code=400, detail="id is not valid")
+    
+    homework_task_image = await session.execute(
+            select(taskUserHomeworkImage)
+            .where(taskUserHomeworkImage.id == comment.task_id)
+        )
+    homework_task_image = homework_task_image.scalar()
+
+    if not homework_task_image:
+        raise HTTPException(status_code=400, detail="The user doesn't have that image for that task")
+
+    homework_task_image.comment_professor = comment.comment
+    
+    await session.commit()
+    return homework_task_image

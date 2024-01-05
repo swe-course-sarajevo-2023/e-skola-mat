@@ -103,14 +103,14 @@ export const getProfessorHomeworksForSpecificGroup = async id => {
 
 export const getProfessorAllSubmitedHomeworks = async id => {
 	const { data } = await axiosInstanceWithAuthToken.get(
-		`/professors/get_homeworks/${id}`
+		`/homeworks/get_homeworks/${id}`
 	);
 	return data;
 };
 
 export const getHomeworkDataForReview = async id => {
 	const { data } = await axiosInstanceWithAuthToken.get(
-		`/homeworks/get_homework/${id}`
+		`/homeworks/get_homework_data/${id}`
 	);
 	return data;
 };
@@ -170,17 +170,31 @@ export const submitHomeworkGeneralComment = async data => {
 		data
 	);
 };
-export const gradeStudent = async data => {
-	console.log('BITNO');
-	console.log(data);
 
-	const { homework_id, user_id, grade, note } = data;
-	await axiosInstanceWithAuthToken.post(`/professors/grade_homework`, data);
+export const gradeHomework = async data => {
+	await axiosInstanceWithAuthToken.post(
+		`/professors/grade_homework`, data);
+};
+
+export const commentHomework = async data => {
+	await axiosInstanceWithAuthToken.post(
+		`/professors/comment_homework`, data);
 };
 
 export const commentTask = async data => {
-	const { id, comment } = data;
-	await axiosInstanceWithAuthToken.post(`/professors/comment_homework`, data);
+	await axiosInstanceWithAuthToken.post(
+		`/professors/comment_homework_task`, data);
+};
+
+export const commentImageTask = async data => {
+	await axiosInstanceWithAuthToken.post(
+		`/professors/comment_homework_task_image`, data);
+};
+
+export const sendHomeworkResults = async data => {
+	await axiosInstanceWithAuthToken.patch(
+		`/homeworks/update-homework-status/` + data.id + `/` + data.status
+	);
 };
 
 export const ResetPassword = async data => {

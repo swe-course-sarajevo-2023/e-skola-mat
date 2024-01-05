@@ -14,7 +14,7 @@ import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import { saveEditedImg } from '@/api';
+import { saveEditedImg, commentImageTask } from '@/api';
 
 const Item = styled(Paper)(({ theme }) => ({
 	backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -27,14 +27,18 @@ const Item = styled(Paper)(({ theme }) => ({
 export const Canvas = props => {
 	const { imageId, source, comment } = props;
 
+	const [commentValue, setCommentValue] = useState(comment);
+
+	const handleChange2 = event => {
+		setCommentValue(event.target.value);
+	};
+
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [tool, setTool] = useState('handdrawn');
 	const [tool1, setTool1] = useState('#000000');
 	const [tool2, setTool2] = useState('Medium');
 	const [img, setImg] = useState();
 	const [imgId, setImgId] = useState();
-	const [name, setName] = useState('');
-	const [name1, setName1] = useState('');
 	const [[x, y], coordinates] = useState([0, 0]);
 	const canvasRef = useRef();
 	const contextRef = useRef();
@@ -265,10 +269,17 @@ export const Canvas = props => {
 							fullWidth
 							rows={4}
 							defaultValue={comment ? comment : ''}
+							value={commentValue}
+							onChange={handleChange2}
 						/>
 					</Grid>
 					<Grid item xs={12} md={12}>
-						<Button variant="outlined">Spasi komentar</Button>
+						<Button variant="outlined" onClick={() => {
+							commentImageTask({ task_id: imageId, comment: commentValue });
+						}}
+						>
+							Spasi komentar
+						</Button>
 					</Grid>
 				</Grid>
 			</Box>
