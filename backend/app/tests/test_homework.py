@@ -19,7 +19,7 @@ async def test_get_all_homeworks(
     client: AsyncClient, professor_user_headers: User, session: AsyncSession
 ):
     response = await client.get(
-        "/homeworks/",
+        "/homeworks",
         headers=professor_user_headers,
     )
     assert response.status_code == 200
@@ -40,7 +40,7 @@ async def test_add_homework(client: AsyncClient, professor_user_headers, session
         "deadline": "2023-12-31",
         "groups": "all"
     }
-    response = await client.post("/homeworks/",
+    response = await client.post("/homeworks",
         headers=professor_user_headers,
         json=new_homework_data
     )
@@ -77,7 +77,7 @@ async def test_submit_task(client: AsyncClient, professor_user_headers, homework
         response = await client.post(
             url,
             headers=professor_user_headers,
-            submit_task_request=submit_task_request
+            data=submit_task_request
         )
 
         assert response.status_code == 200
