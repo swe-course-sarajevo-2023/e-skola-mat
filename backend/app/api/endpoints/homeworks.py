@@ -476,7 +476,7 @@ async def get_homework_user_details(
     return homework_user_response
 
 
-@router.get("/", response_model=List[ClassHomeworkResponse])
+@router.get("", response_model=List[ClassHomeworkResponse])
 async def list_all_homeworks(
     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
@@ -499,7 +499,7 @@ async def list_all_homeworks(
     return [ClassHomeworkResponse(**data) for data in homeworks_map.values()]
 
 
-@router.post("/", response_model=ClassHomeworkResponse)
+@router.post("", response_model=ClassHomeworkResponse)
 async def add_homework(
     new_homework: ClassHomeworkCreateRequest,
     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
