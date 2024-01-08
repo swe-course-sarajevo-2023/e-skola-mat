@@ -13,7 +13,7 @@ async def test_get_all_groups(client: AsyncClient, professor_user_headers, sessi
     assert response.status_code == 200
 
 async def test_get_group(client: AsyncClient, professor_user_headers: dict):
-    class_id = "class_id" 
+    class_id = "bd65600d-8669-4903-8a14-af88203add38" 
     response = await client.get(
         f"/class?class_id={class_id}",
         headers=professor_user_headers,
