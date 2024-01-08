@@ -8,7 +8,7 @@ from main import app
 
 async def test_get_all_groups(client: AsyncClient, professor_user_headers, session: AsyncSession):
     response = await client.get(
-        "/groups",
+        "/groups/groups",
         headers=professor_user_headers,
     )
     assert response.status_code == 200
@@ -16,7 +16,7 @@ async def test_get_all_groups(client: AsyncClient, professor_user_headers, sessi
 async def test_get_group(client: AsyncClient, professor_user_headers: dict):
     class_id = "bd65600d-8669-4903-8a14-af88203add38" 
     response = await client.get(
-        f"/class?class_id={class_id}",
+        f"/groups/class?class_id={class_id}",
         headers=professor_user_headers,
     )
     assert response.status_code == 200    
@@ -24,7 +24,7 @@ async def test_get_group(client: AsyncClient, professor_user_headers: dict):
 async def test_create_group(client: AsyncClient, professor_user_headers, session: AsyncSession):
     class_data = {"name": "New Test Group"} 
     response = await client.post(
-        "/groups",
+        "/groups/groups",
         json=class_data,
         headers=professor_user_headers,
     )
