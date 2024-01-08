@@ -14,7 +14,7 @@ async def test_get_all_groups(client: AsyncClient, professor_user_headers, sessi
     assert response.status_code == 200 
 
 async def test_create_group(client: AsyncClient, professor_user_headers, session: AsyncSession):
-    class_data = {"name": "New Test Group"} 
+    class_data = {"name": "New test group"} 
     response = await client.post(
         "/groups/groups",
         json=class_data,
@@ -30,8 +30,7 @@ async def test_create_group(client: AsyncClient, professor_user_headers, session
     assert group_in_db.name == class_data['name']
 
 async def test_create_and_get_group(client: AsyncClient, professor_user_headers, session: AsyncSession):
-    # Kreiranje grupe
-    class_data = {"name": "New Test Group"} 
+    class_data = {"name": "New test group for GET"} 
     response = await client.post(
         "/groups/groups",
         json=class_data,
