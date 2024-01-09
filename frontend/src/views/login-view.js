@@ -16,7 +16,11 @@ import styles from './page.module.css';
 
 export default function LoginView() {
 	const [user, setUser] = useState({ username: '', password: '' });
-	const [errors, setErrors] = useState({ username: '', password: '' });
+	const [errors, setErrors] = useState({
+		username: '',
+		password: '',
+		form: '',
+	});
 	const { mutateAsync, error, isLoading } = useMutation(loginUser);
 	const router = useRouter();
 
@@ -45,7 +49,7 @@ export default function LoginView() {
 				localStorage.setItem('token', data.access_token);
 				router.push('/');
 			} catch (error) {
-				console.error('Login error:', error);
+				setErrors({ ...errors, form: error });
 			}
 		}
 	};
@@ -105,6 +109,13 @@ export default function LoginView() {
 									</Button>
 								</Grid>
 							</Grid>
+							{errors.form && (
+								<Alert severity="error">
+									{typeof errors.form === 'string'
+										? errors.form
+										: errors.form.message}
+								</Alert>
+							)}
 						</CardContent>
 					</Card>
 				</Grid>
