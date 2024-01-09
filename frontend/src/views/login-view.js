@@ -27,7 +27,7 @@ export default function LoginView() {
 	const validate = () => {
 		let tempErrors = { username: '', password: '' };
 
-		if (user.username == '' && !user.password == '') {
+		if (user.username == '' && user.password == '') {
 			tempErrors.username = 'Email is required';
 			tempErrors.password = 'Password is required';
 			setErrors(tempErrors);
