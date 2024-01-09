@@ -23,7 +23,7 @@ export default function LoginView() {
 	});
 	const { mutateAsync, error, isLoading } = useMutation(loginUser);
 	const router = useRouter();
-
+	/*validacija praznog unosa */
 	const validate = () => {
 		let tempErrors = { username: '', password: '' };
 		let isValid = true;
