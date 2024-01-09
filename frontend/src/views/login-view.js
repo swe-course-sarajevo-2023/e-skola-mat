@@ -51,7 +51,7 @@ export default function LoginView() {
 
 	return (
 		<main className={styles.main}>
-			{/* Other components */}
+			{/* Other component s */}
 			<Grid
 				container
 				sx={{ alignContent: 'center', marginTop: 1 }}
