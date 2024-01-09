@@ -44,8 +44,8 @@ export default function LoginView() {
                 localStorage.setItem('token', data.access_token);
                 router.push('/');
             } catch (error) {
-                // Handle login error
-            }
+				console.error("Login error:", error);				
+			}
         }
     };
 
