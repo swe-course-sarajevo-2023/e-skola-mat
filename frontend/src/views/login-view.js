@@ -23,26 +23,22 @@ export default function LoginView() {
 	});
 	const { mutateAsync, error, isLoading } = useMutation(loginUser);
 	const router = useRouter();
-
+	/*validacija praznog unosa */
 	const validate = () => {
 		let tempErrors = { username: '', password: '' };
+		let isValid = true;
 
-		if (user.username == '' && user.password == '') {
+		if (!user.username) {
 			tempErrors.username = 'Email is required';
+			isValid = false;
+		}
+		if (!user.password) {
 			tempErrors.password = 'Password is required';
-			setErrors(tempErrors);
-			return false;
-		} else if (user.username == '') {
-			tempErrors.username = 'Email is required';
-			setErrors(tempErrors);
-			return false;
-		} else if (user.password == '') {
-			tempErrors.password = 'Password is required';
-			setErrors(tempErrors);
-			return false;
+			isValid = false;
 		}
 
-		return true;
+		setErrors(tempErrors);
+		return isValid;
 	};
 
 	const onLogin = async e => {
