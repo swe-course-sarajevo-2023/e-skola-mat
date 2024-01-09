@@ -19,7 +19,7 @@ async def test_get_all_homeworks(
     client: AsyncClient, professor_user_headers: User, session: AsyncSession
 ):
     response = await client.get(
-        "/homeworks/",
+        "/homeworks",
         headers=professor_user_headers,
     )
     assert response.status_code == 200
@@ -40,7 +40,7 @@ async def test_add_homework(client: AsyncClient, professor_user_headers, session
         "deadline": "2023-12-31",
         "groups": "all"
     }
-    response = await client.post("/homeworks/",
+    response = await client.post("/homeworks",
         headers=professor_user_headers,
         json=new_homework_data
     )
@@ -69,15 +69,15 @@ async def test_submit_task(client: AsyncClient, professor_user_headers, homework
         url = app.url_path_for("submit_task", homework_id=str(homework.id), task_number=task_number)
 
         # Prepare multipart form data
-        files = {
-            "images": ("test.png", file, "image/png")
+        submit_task_request = {
+            "images": [("test.png", file, "image/png")],
+            "task_comment": task_comment,
         }
 
         response = await client.post(
             url,
             headers=professor_user_headers,
-            params={"task_comment": task_comment}, 
-            files=files
+            data=submit_task_request
         )
 
         assert response.status_code == 200
