@@ -26,19 +26,23 @@ export default function LoginView() {
 
 	const validate = () => {
 		let tempErrors = { username: '', password: '' };
-		let isValid = true;
 
-		if (!user.username) {
+		if (user.username == '' && !user.password == '') {
 			tempErrors.username = 'Email is required';
-			isValid = false;
-		}
-		if (!user.password) {
 			tempErrors.password = 'Password is required';
-			isValid = false;
+			setErrors(tempErrors);
+			return false;
+		} else if (user.username == '') {
+			tempErrors.username = 'Email is required';
+			setErrors(tempErrors);
+			return false;
+		} else if (user.password == '') {
+			tempErrors.password = 'Password is required';
+			setErrors(tempErrors);
+			return false;
 		}
 
-		setErrors(tempErrors);
-		return isValid;
+		return true;
 	};
 
 	const onLogin = async e => {
