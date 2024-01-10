@@ -4,7 +4,7 @@ steps:
       [
         "build",
         "--file",
-        "backend/Dockerfile",
+        "backend/Dockerfile.prod",
         "-t",
         "gcr.io/$_PROJECT_ID/sample:$_COMMIT_SHA",
         "backend",
