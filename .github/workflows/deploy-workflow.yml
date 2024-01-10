@@ -29,7 +29,6 @@ jobs:
             _CLOUDSQL_INSTANCES=":europe-west6:e-skola-mat",\
             _DEFAULT_DATABASE_PASSWORD="${{ secrets.DEFAULT_DATABASE_PASSWORD }}",\
             _FIRST_SUPERUSER_PASSWORD="${{ secrets.FIRST_SUPERUSER_PASSWORD }}",\
-            _SECRET_KEY="${{ secrets.SECRET_KEY }}",\
             _TEST_DATABASE_PASSWORD="${{ secrets.TEST_DATABASE_PASSWORD }}",\
             _ACCESS_TOKEN_EXPIRE_MINUTES="11520",\
             _ALLOWED_HOSTS="^;^localhost,127.0.0.1,sample-zeaqndbcnq-oa.a.run.app"
