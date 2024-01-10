@@ -32,8 +32,8 @@ jobs:
             _SECRET_KEY="${{ secrets.SECRET_KEY }}",\
             _TEST_DATABASE_PASSWORD="${{ secrets.TEST_DATABASE_PASSWORD }}",\
             _ACCESS_TOKEN_EXPIRE_MINUTES="11520",\
-            _ALLOWED_HOSTS="[\"localhost\",\"127.0.0.1\",\"sample-zeaqndbcnq-oa.a.run.app\"]",\
-            _BACKEND_CORS_ORIGINS="[\"http://localhost:3000\",\"http://localhost:8001\",\"https://e-skola-mat.vercel.app\"]",\                       
+            _ALLOWED_HOSTS="^;^localhost,127.0.0.1,sample-zeaqndbcnq-oa.a.run.app"
+            _BACKEND_CORS_ORIGINS="^;^http://localhost:3000,http://localhost:8001,https://e-skola-mat.vercel.app"
             _DEFAULT_DATABASE_DB="default_db",\
             _DEFAULT_DATABASE_HOSTNAME="/cloudsql/e-skola-mat:europe-west6:e-skola-mat",\
             _DEFAULT_DATABASE_PORT="5432",\
