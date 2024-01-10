@@ -4,7 +4,7 @@ steps:
       [
         "build",
         "-t",
-        "gcr.io/$PROJECT_ID/sample:$COMMIT_SHA",
+        "gcr.io/$_PROJECT_ID/sample:$_COMMIT_SHA",
         ".",
         "--build-arg",
         "DEFAULT_DATABASE_PASSWORD=$_DEFAULT_DATABASE_PASSWORD",
@@ -47,7 +47,7 @@ steps:
       ]
 
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/$PROJECT_ID/sample:$COMMIT_SHA"]
+    args: ["push", "gcr.io/${_PROJECT_ID}/sample:${_COMMIT_SHA}"]
 
   - name: "gcr.io/cloud-builders/gcloud"
     args:
@@ -56,7 +56,7 @@ steps:
         "deploy",
         "sample",
         "--image",
-        "gcr.io/$PROJECT_ID/sample:$COMMIT_SHA",
+        "gcr.io/$_PROJECT_ID/sample:$_COMMIT_SHA",
         "--platform",
         "managed",
         "--region",

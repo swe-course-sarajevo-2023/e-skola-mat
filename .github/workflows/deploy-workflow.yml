@@ -43,7 +43,9 @@ jobs:
             _TEST_DATABASE_DB="test_db",\
             _TEST_DATABASE_HOSTNAME="localhost",\
             _TEST_DATABASE_PORT="37270",\
-            _TEST_DATABASE_USER="test"
+            _TEST_DATABASE_USER="test",\
+            _PROJECT_ID="${{ secrets.GCP_PROJECT_ID }}",\
+            _COMMIT_SHA="${{ github.sha }}",
 
       - name: Check Deployment Status
         run: |
