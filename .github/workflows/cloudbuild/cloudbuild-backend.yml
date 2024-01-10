@@ -6,9 +6,9 @@ steps:
         "-f"
         "-t",
         "gcr.io/$_PROJECT_ID/sample:$_COMMIT_SHA",
-        - "--file"
-        - "backend/Dockerfile"
-        - "backend",
+        "--file",
+        "backend/Dockerfile",
+        "backend",
         "--build-arg",
         "DEFAULT_DATABASE_PASSWORD=$_DEFAULT_DATABASE_PASSWORD",
         "--build-arg",
