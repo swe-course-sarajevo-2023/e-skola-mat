@@ -43,13 +43,19 @@ class GradeResponse(BaseResponse):
     user_id: str
     homework_id: str
     grade: int
+    
+class CommentResponse(BaseResponse):
+    id: str
+    user_id: str
+    homework_id: str
     note: str
-
-
+    
+class TaskCommentResponse(BaseResponse):
+    id: str
+    
 class ClassResponse(BaseModel):
     id: str
     name: str
-
 
 class taskUserHomeworkImageResponse(BaseModel):
     id: str
@@ -76,3 +82,9 @@ class HomeworkUserDetailsResponse(BaseModel):
 
 class VerifyTokenResponse(BaseModel):
     id: str
+
+class ReviewedHomeworkResponse(HomeworkResponse):
+    homework_id: str
+    grade: int
+    note: Optional[str]
+    note_student: Optional[str]

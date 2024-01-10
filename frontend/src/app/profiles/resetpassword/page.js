@@ -3,6 +3,8 @@ import ResetPasswordView from '@/views/reset-password-view';
 import { useProtectedRoute } from '@/hooks';
 
 const ResetPassword = () => {
-	return <ResetPasswordView />;
+	const ProtectedStudentView = useProtectedRoute(ResetPasswordView);
+
+	return <ProtectedStudentView />;
 };
-export default useProtectedRoute(ResetPassword);
+export default ResetPassword;

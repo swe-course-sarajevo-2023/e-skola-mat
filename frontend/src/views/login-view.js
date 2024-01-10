@@ -1,35 +1,57 @@
 'use client';
+import React, { useState } from 'react';
 import {
 	Button,
 	Typography,
-	Container,
 	Grid,
 	TextField,
 	CardContent,
 	Card,
 	Alert,
 } from '@mui/material';
-import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from 'react-query';
 import { loginUser } from '@/api';
 import styles from './page.module.css';
 
 export default function LoginView() {
-	const [user, setUser] = React.useState({
+	const [user, setUser] = useState({ username: '', password: '' });
+	const [errors, setErrors] = useState({
 		username: '',
 		password: '',
+		form: '',
 	});
 	const { mutateAsync, error, isLoading } = useMutation(loginUser);
 	const router = useRouter();
 
+	const validate = () => {
+		let tempErrors = { username: '', password: '' };
+		let isValid = true;
+
+		if (!user.username) {
+			tempErrors.username = 'Email is required';
+			isValid = false;
+		}
+		if (!user.password) {
+			tempErrors.password = 'Password is required';
+			isValid = false;
+		}
+
+		setErrors(tempErrors);
+		return isValid;
+	};
+
 	const onLogin = async e => {
 		e.preventDefault();
-		try {
-			const data = await mutateAsync(user);
-			localStorage.setItem('token', data.access_token);
-			router.push('/');
-		} catch (error) {}
+		if (validate()) {
+			try {
+				const data = await mutateAsync(user);
+				localStorage.setItem('token', data.access_token);
+				router.push('/');
+			} catch (error) {
+				setErrors({ ...errors, form: error });
+			}
+		}
 	};
 
 	return (
@@ -106,9 +128,10 @@ export default function LoginView() {
 										onChange={e =>
 											setUser({ ...user, username: e.target.value })
 										}
+										error={!!errors.username}
+										helperText={errors.username}
 									/>
 								</Grid>
-								<Grid item xs={12}></Grid>
 								<Grid item xs={12}>
 									<TextField
 										id="password"
@@ -120,9 +143,10 @@ export default function LoginView() {
 										onChange={e =>
 											setUser({ ...user, password: e.target.value })
 										}
+										error={!!errors.password}
+										helperText={errors.password}
 									/>
 								</Grid>
-								<Grid item xs={12}></Grid>
 								<Grid item xs={12}>
 									<Button
 										variant="contained"
@@ -134,6 +158,13 @@ export default function LoginView() {
 									</Button>
 								</Grid>
 							</Grid>
+							{errors.form && (
+								<Alert severity="error">
+									{typeof errors.form === 'string'
+										? errors.form
+										: errors.form.message}
+								</Alert>
+							)}
 						</CardContent>
 					</Card>
 				</Grid>

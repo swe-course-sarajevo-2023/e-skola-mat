@@ -101,8 +101,10 @@ export default function SubmitModal(props) {
 					Pošalji zadaću {props.brojZadace + 1}
 				</Typography>
 				{numOfTasks[props.brojZadace].map((zadatak, index) => (
-					<Box>
-						<ListItem key={index} disableGutters>
+					<Box key={index}>
+						{' '}
+						{/* Add key prop here */}
+						<ListItem disableGutters>
 							<ListItemText
 								primary={`Zadatak ${index + 1}`}
 								sx={{ marginRight: 3 }}
@@ -130,6 +132,7 @@ export default function SubmitModal(props) {
 						</Button>
 					</Box>
 				))}
+
 				<br></br>
 				<Typography id="modal-modal-title" variant="h5" component="h2">
 					Dodaj komentar na zadaću {props.brojZadace + 1}

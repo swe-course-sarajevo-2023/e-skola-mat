@@ -24,7 +24,7 @@ Note, complex types like lists are read as json-encoded strings.
 import tomllib
 from functools import cached_property
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     # FIRST SUPERUSER
     FIRST_SUPERUSER_EMAIL: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+
+    GCP_PROJECT_ID: Optional[str] = None
+    GCP_BUCKET: Optional[str] = None
 
     @computed_field
     @cached_property

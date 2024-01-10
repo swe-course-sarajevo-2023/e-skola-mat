@@ -3,7 +3,7 @@ import axios from 'axios';
 // ----------------------------------------------------------------------
 const API_BASE_URL =
 	process.env.NODE_ENV === 'production'
-		? 'https://sample-zeaqndbcnq-oa.a.run.app/'
+		? 'https://sample-zeaqndbcnq-oa.a.run.app'
 		: 'http://localhost:8000';
 
 const axiosInstance = axios.create({

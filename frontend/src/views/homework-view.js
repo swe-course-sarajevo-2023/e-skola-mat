@@ -16,8 +16,13 @@ import Canvas from '../utils/canvas';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import isAuth from '@/components/isAuth';
-import { useQuery } from 'react-query';
-import { commentTask, getHomeworkDataForReview, gradeStudent } from '@/api';
+import { useQuery, useMutation, queryClient } from 'react-query';
+import {
+	commentTask,
+	getHomeworkDataForReview,
+	gradeHomework,
+	commentHomework,
+} from '@/api';
 
 const style = {
 	position: 'absolute',
@@ -66,7 +71,7 @@ const Comment = ({ element, isLoading, isRefetching }) => {
 				variant="outlined"
 				size="small"
 				onClick={() => {
-					commentTask({ id: element?.id, comment: commentValue });
+					commentTask({ task_id: element?.id, comment: commentValue });
 				}}
 			>
 				SPASI KOMENTAR
@@ -76,7 +81,7 @@ const Comment = ({ element, isLoading, isRefetching }) => {
 };
 
 const HomeworkView = props => {
-	const { data, isLoading, isRefetching, error, isError } = useQuery(
+	const { data, isLoading, isRefetching } = useQuery(
 		['getHomeworkDataForReview'],
 		() => getHomeworkDataForReview(props.id)
 	);
@@ -84,23 +89,54 @@ const HomeworkView = props => {
 	const [selectedTaskNumber, setSelectedTaskNumber] = useState(0);
 	const [selectedImgSource, setSelectedImgSource] = useState('');
 	const [selectedComment, setSelectedComment] = useState('');
-	const [commentProfessor, setCommentProfessor] = useState(
-		data?.comment_proffesor
-	);
-	const [grade, setGrade] = useState(data?.grade);
+
+	const [commentProfessor, setCommentProfessor] = useState(data?.data.comment);
+	const [grade, setGrade] = useState(data?.data.grade);
+	const [gradeInputColor, setGradeInputColor] = useState('primary');
+	const [gradeHelperText, setGradeHelperText] = useState('');
+
 	const [selectedImgId, setSelectedImgId] = useState();
 
 	const handleClose = () => setModalOpen(false);
 
-	const handleImageButton = (taskNumber, imageId, imageSource, commnet) => {
+	const handleImageButton = (taskNumber, imageId, imageSource, comment) => {
 		setSelectedTaskNumber(taskNumber);
 		setSelectedImgId(imageId);
 		setSelectedImgSource(imageSource);
-		setSelectedComment(commnet);
+		setSelectedComment(comment);
 		setModalOpen(true);
 	};
 
-	console.log(data);
+	const mutation = useMutation(gradeHomework, {
+		onSuccess: () => {
+			setGradeInputColor('primary');
+			setGradeHelperText('');
+		},
+		onError: () => {
+			setGradeInputColor('error');
+			setGradeHelperText('Spašena ocjena mora biti validan broj!');
+		},
+	});
+
+	const mutation2 = useMutation(commentHomework);
+
+	const gradeH = () => {
+		let data2 = {
+			homework_id: data?.homework.id,
+			user_id: data?.user.id,
+			grade: grade,
+		};
+		mutation.mutate(data2);
+	};
+
+	const commentH = () => {
+		let data2 = {
+			homework_id: data?.homework.id,
+			user_id: data?.user.id,
+			note: commentProfessor,
+		};
+		mutation2.mutate(data2);
+	};
 
 	return (
 		<Container>
@@ -137,13 +173,23 @@ const HomeworkView = props => {
 						id="outlined-multiline-static"
 						size="small"
 						label="Unesite ocjenu"
-						focused={!(isLoading || isRefetching) || data?.grade ? true : false}
-						defaultValue={data?.grade}
+						color={gradeInputColor}
+						helperText={gradeHelperText}
+						focused={
+							!(isLoading || isRefetching) || data?.data.grade ? true : false
+						}
+						defaultValue={data?.data.grade}
 						value={grade}
 						onChange={e => {
 							setGrade(e.target.value);
 						}}
 					/>
+				</Grid>
+
+				<Grid item xs={12} md={1} lg={1}>
+					<Button variant="outlined" size="small" onClick={() => gradeH()}>
+						SPASI OCJENU
+					</Button>
 				</Grid>
 
 				<Grid item xs={12} md={8} lg={8}>
@@ -153,10 +199,10 @@ const HomeworkView = props => {
 						fullWidth
 						label="Unesite generalni komentar"
 						focused={
-							!(isLoading || isRefetching) || data?.comment ? true : false
+							!(isLoading || isRefetching) || data?.data.comment ? true : false
 						}
 						variant="outlined"
-						defaultValue={data?.comment_proffesor}
+						defaultValue={data?.data.comment}
 						value={commentProfessor}
 						onChange={e => {
 							setCommentProfessor(e.target.value);
@@ -166,20 +212,9 @@ const HomeworkView = props => {
 					/>
 				</Grid>
 
-				<Grid item xs={12} md={2} lg={2}>
-					<Button
-						variant="outlined"
-						size="small"
-						onClick={() =>
-							gradeStudent({
-								homework_id: data?.homework.id,
-								user_id: data?.user.id,
-								grade: grade,
-								note: commentProfessor,
-							})
-						}
-					>
-						SPASI OCJENU I KOMENTAR
+				<Grid item xs={12} md={1} lg={1}>
+					<Button variant="outlined" size="small" onClick={() => commentH()}>
+						SPASI KOMENTAR
 					</Button>
 				</Grid>
 
@@ -196,19 +231,19 @@ const HomeworkView = props => {
 						<Typography variant="h7">
 							{' '}
 							<b>Komentar učenika: </b>
-							{data?.comment_student}
+							{data?.data.comment_student}
 						</Typography>
 					</Paper>
 				</Grid>
 
 				{data &&
 					data.problems.map(element => (
-						<Grid item xs={12} md={3} lg={3}>
+						<Grid item xs={12} md={3} lg={3} key={element.order_num}>
 							<Card fullWidth>
 								<CardContent>
 									<Grid container spacing={1}>
 										{element.images.map(image => (
-											<Grid item xs={4} lg={4} md={4}>
+											<Grid item xs={4} lg={4} md={4} key={image.id}>
 												<Button
 													onClick={() =>
 														handleImageButton(

@@ -17,56 +17,53 @@ Make sure you have the following installed on your machine:
 
 1. Clone the repository:
 
-    ```bash
-    git clone https://github.com/yourusername/your-project.git
-    cd your-project
-    ```
+   ```bash
+   git clone https://github.com/yourusername/your-project.git
+   cd your-project
+   ```
 
 2. Set up Python environment using Pyenv:
 
-    ```bash
-    pyenv install $(cat .python-version)
-    pyenv local $(cat .python-version)
-    ```
+   ```bash
+   pyenv install $(cat .python-version)
+   pyenv local $(cat .python-version)
+   ```
 
 3. Install dependencies:
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 4. Install Uvicorn:
 
-    ```bash
-    pip install uvicorn
-    ```
+   ```bash
+   pip install uvicorn
+   ```
 
 5. Build and run the Docker container:
 
-    ```bash
-    docker-compose up --build
-    ```
+   ```bash
+   docker-compose up --build
+   ```
 
 6. Start the FastAPI application using Uvicorn:
 
-    ```bash
-    uvicorn main:app --reload
-    ```
+   ```bash
+   uvicorn main:app --reload
+   ```
 
 The FastAPI application should now be accessible at `http://localhost:8000`.
 
+6.  You can test the backend by running these commands:
 
-6. You can test the backend by running these commands:
+        ```bash
+        pytest
+        ```
 
-    ```bash
-    pytest
-    ```
-The database needs to be running for pytest to work.
-
+    The database needs to be running for pytest to work.
 
 The FastAPI application should now be accessible at `http://localhost:8000`.
-
-
 
 ## Docker Configuration
 
