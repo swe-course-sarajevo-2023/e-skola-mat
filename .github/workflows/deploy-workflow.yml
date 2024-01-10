@@ -24,15 +24,29 @@ jobs:
 
       - name: Build and Deploy Backend
         run: |
-          gcloud builds submit --config .github/workflows/cloudbuild/cloudbuild-backend.yml --substitutions=_REGION="europe-west6",_CLOUDSQL_INSTANCES="${{ secrets.GCP_PROJECT_ID }}:europe-west6:e-skola-mat",
-          _DEFAULT_DATABASE_PASSWORD="${{ secrets.DEFAULT_DATABASE_PASSWORD }}",_FIRST_SUPERUSER_PASSWORD="${{ secrets.FIRST_SUPERUSER_PASSWORD }}",
-          _SECRET_KEY="${{ secrets.SECRET_KEY }}",_TEST_DATABASE_PASSWORD="${{ secrets.TEST_DATABASE_PASSWORD }}",_ACCESS_TOKEN_EXPIRE_MINUTES="${{ vars.ACCESS_TOKEN_EXPIRE_MINUTES }}"
-          ,_ALLOWED_HOSTS="${{ vars.ALLOWED_HOSTS }}",_BACKEND_CORS_ORIGINS="${{ vars.BACKEND_CORS_ORIGINS }}",_DEFAULT_DATABASE_DB="${{ vars.DEFAULT_DATABASE_DB }}",
-          _DEFAULT_DATABASE_HOSTNAME="${{ vars.DEFAULT_DATABASE_HOSTNAME }}",_DEFAULT_DATABASE_PORT="${{ vars.DEFAULT_DATABASE_PORT }}",
-          _DEFAULT_DATABASE_USER="${{ vars.DEFAULT_DATABASE_USER }}",_varsIRONMENT="${{ vars.varsIRONMENT }}",_FIRST_SUPERUSER_EMAIL="${{ vars.FIRST_SUPERUSER_EMAIL }}",
-          _GCP_BUCKET="${{ vars.GCP_BUCKET }}",_GCP_PROJECT_ID="${{ vars.GCP_PROJECT_ID }}",_REFRESH_TOKEN_EXPIRE_MINUTES="${{ vars.REFRESH_TOKEN_EXPIRE_MINUTES }}",
-          _TEST_DATABASE_DB="${{ vars.TEST_DATABASE_DB }}",_TEST_DATABASE_HOSTNAME="${{ vars.TEST_DATABASE_HOSTNAME }}",_TEST_DATABASE_PORT="${{ vars.TEST_DATABASE_PORT }}",
-          _TEST_DATABASE_USER="${{ vars.TEST_DATABASE_USER }}"
+            gcloud builds submit --config .github/workflows/cloudbuild/cloudbuild-backend.yml --substitutions=\
+            _REGION="europe-west6",\
+            _CLOUDSQL_INSTANCES=":europe-west6:e-skola-mat",\
+            _DEFAULT_DATABASE_PASSWORD="${{ secrets.DEFAULT_DATABASE_PASSWORD }}",\
+            _FIRST_SUPERUSER_PASSWORD="${{ secrets.FIRST_SUPERUSER_PASSWORD }}",\
+            _SECRET_KEY="${{ secrets.SECRET_KEY }}",\
+            _TEST_DATABASE_PASSWORD="${{ secrets.TEST_DATABASE_PASSWORD }}",\
+            _ACCESS_TOKEN_EXPIRE_MINUTES="11520",\
+            _ALLOWED_HOSTS='["localhost","127.0.0.1","sample-zeaqndbcnq-oa.a.run.app"]',\
+            _BACKEND_CORS_ORIGINS='["http://localhost:3000","http://localhost:8001","https://e-skola-mat.vercel.app"]',\
+            _DEFAULT_DATABASE_DB="default_db",\
+            _DEFAULT_DATABASE_HOSTNAME="/cloudsql/e-skola-mat:europe-west6:e-skola-mat",\
+            _DEFAULT_DATABASE_PORT="5432",\
+            _DEFAULT_DATABASE_USER="rDGJeEDqAz",\
+            _ENVIRONMENT="${{ vars.ENVIRONMENT }}",\
+            _FIRST_SUPERUSER_EMAIL="example@example.com",\
+            _GCP_BUCKET="e-skola-mat-images",\
+            _GCP_PROJECT_ID="e-skola-mat",\
+            _REFRESH_TOKEN_EXPIRE_MINUTES="40320",\
+            _TEST_DATABASE_DB="test_db",\
+            _TEST_DATABASE_HOSTNAME="localhost",\
+            _TEST_DATABASE_PORT="37270",\
+            _TEST_DATABASE_USER="test"
 
       - name: Check Deployment Status
         run: |

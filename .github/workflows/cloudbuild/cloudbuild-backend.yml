@@ -11,8 +11,6 @@ steps:
         "--build-arg",
         "FIRST_SUPERUSER_PASSWORD=$_FIRST_SUPERUSER_PASSWORD",
         "--build-arg",
-        "SECRET_KEY=$_SECRET_KEY",
-        "--build-arg",
         "TEST_DATABASE_PASSWORD=$_TEST_DATABASE_PASSWORD",
         "--build-arg",
         "ACCESS_TOKEN_EXPIRE_MINUTES=$_ACCESS_TOKEN_EXPIRE_MINUTES",
