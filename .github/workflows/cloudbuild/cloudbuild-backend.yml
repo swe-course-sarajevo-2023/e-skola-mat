@@ -53,20 +53,20 @@ steps:
 
   - name: "gcr.io/cloud-builders/gcloud"
     args:
-      [
-        "run",
-        "deploy",
-        "sample",
-        "--image",
-        "gcr.io/$_PROJECT_ID/sample:$_COMMIT_SHA",
-        "--platform",
-        "managed",
-        "--region",
-        "${_REGION}",
-        "--allow-unauthenticated",
-        "--set-cloudsql-instances",
-        "${_CLOUDSQL_INSTANCES}",
-        - >
+      - "run"
+      - "deploy"
+      - "sample"
+      - "--image"
+      - "gcr.io/$_PROJECT_ID/sample:$_COMMIT_SHA"
+      - "--platform"
+      - "managed"
+      - "--region"
+      - "${_REGION}"
+      - "--allow-unauthenticated"
+      - "--set-cloudsql-instances"
+      - "${_CLOUDSQL_INSTANCES}"
+      - "--set-env-vars"
+      - >-
           DEFAULT_DATABASE_PASSWORD=$_DEFAULT_DATABASE_PASSWORD,
           FIRST_SUPERUSER_PASSWORD=$_FIRST_SUPERUSER_PASSWORD,
           TEST_DATABASE_PASSWORD=$_TEST_DATABASE_PASSWORD,
@@ -86,7 +86,5 @@ steps:
           TEST_DATABASE_HOSTNAME=$_TEST_DATABASE_HOSTNAME,
           TEST_DATABASE_PORT=$_TEST_DATABASE_PORT,
           TEST_DATABASE_USER=$_TEST_DATABASE_USER
-      - '--port'
-      - '8080'
-      ]
-  
+      - "--port"
+      - "8080"
