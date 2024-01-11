@@ -1,13 +1,13 @@
-from app.core.security import get_password_hash
-from app.models import Role, User
-from app.schemas.requests import UserCreateRequest, UserUpdatePasswordRequest
-from app.schemas.responses import UserResponse
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
+from app.core.security import get_password_hash
+from app.models import Role, User
+from app.schemas.requests import UserCreateRequest, UserUpdatePasswordRequest
+from app.schemas.responses import UserResponse
 
 router = APIRouter()
 
@@ -19,6 +19,7 @@ async def read_current_user(
     """Get current user"""
     return current_user
 
+
 @router.get("/user_role", response_model=UserResponse)
 async def read_current_user(
     current_user: User = Depends(deps.get_current_user),
@@ -26,11 +27,15 @@ async def read_current_user(
 ):
     """Get current user"""
     user_role = await session.execute(
-        select(Role).where(Role.id == current_user.role_id))
+        select(Role).where(Role.id == current_user.role_id)
+    )
     user_role = user_role.scalar()
-    
-    return JSONResponse(content={"user": current_user.id, "user_role": user_role.role.name},
-                        status_code=200)
+
+    return JSONResponse(
+        content={"user": current_user.id, "user_role": user_role.role.name},
+        status_code=200,
+    )
+
 
 @router.delete("/me", status_code=204)
 async def delete_current_user(
@@ -44,6 +49,7 @@ async def delete_current_user(
         content={"detail": "Professor deleted successfully"}, status_code=200
     )
 
+
 @router.post("/reset-password", response_model=UserResponse)
 async def reset_current_user_password(
     user_update_password: UserUpdatePasswordRequest,
@@ -55,6 +61,7 @@ async def reset_current_user_password(
     session.add(current_user)
     await session.commit()
     return current_user
+
 
 @router.post("/register", response_model=UserResponse)
 async def register_new_user(

@@ -3,8 +3,6 @@ from collections.abc import AsyncGenerator
 from typing import List
 
 import jwt
-from app.core.session import async_session
-from app.models import User, UserRole
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
@@ -12,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.core import config, security
+from app.core.session import async_session
+from app.models import User, UserRole
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="auth/access-token")
 
