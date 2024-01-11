@@ -54,7 +54,18 @@ jobs:
       - name: Install Dependencies
         run: |
           cd backend
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+  
+      - name: Run Black (Check code format)
+        run: |
+            cd backend
+            black --check .
+  
+      - name: Run isort (Check import order)
+        run: |
+            cd backend
+            isort --check-only .
 
       - name: Running service for 10 seconds
         run: |
