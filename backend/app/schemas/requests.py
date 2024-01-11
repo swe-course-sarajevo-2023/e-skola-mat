@@ -1,8 +1,8 @@
 from datetime import date
 from typing import List, Literal, Union
 from uuid import UUID
-from fastapi import UploadFile
 
+from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr
 
 
@@ -54,12 +54,13 @@ class ProfessorGradesHomework(BaseRequest):
     homework_id: str
     user_id: str
     grade: int
-    
-    
+
+
 class ProfessorCommentsHomework(BaseRequest):
     homework_id: str
     user_id: str
     note: str
+
 
 class ClassCreateRequest(BaseModel):
     name: str
