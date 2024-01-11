@@ -3,11 +3,11 @@
 import time
 
 import jwt
-from app.schemas.responses import AccessTokenResponse
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
 from app.core import config
+from app.schemas.responses import AccessTokenResponse
 
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECS = config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60

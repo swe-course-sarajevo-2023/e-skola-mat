@@ -1,13 +1,13 @@
-from app.core.security import get_password_hash
-from app.models import Role, User, UserRole
-from app.schemas.requests import UserCreateRequest, UserDeleteRequest
-from app.schemas.responses import UserResponse
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
+from app.core.security import get_password_hash
+from app.models import Role, User, UserRole
+from app.schemas.requests import UserCreateRequest, UserDeleteRequest
+from app.schemas.responses import UserResponse
 
 router = APIRouter()
 

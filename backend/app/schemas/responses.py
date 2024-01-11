@@ -2,8 +2,9 @@ from datetime import datetime
 from typing import List, Literal, Optional, Union
 from uuid import UUID
 
-from app.models import HomeworkStatus
 from pydantic import BaseModel, ConfigDict, EmailStr
+
+from app.models import HomeworkStatus
 
 
 class BaseResponse(BaseModel):
@@ -43,19 +44,23 @@ class GradeResponse(BaseResponse):
     user_id: str
     homework_id: str
     grade: int
-    
+
+
 class CommentResponse(BaseResponse):
     id: str
     user_id: str
     homework_id: str
     note: str
-    
+
+
 class TaskCommentResponse(BaseResponse):
     id: str
-    
+
+
 class ClassResponse(BaseModel):
     id: str
     name: str
+
 
 class taskUserHomeworkImageResponse(BaseModel):
     id: str
@@ -80,8 +85,10 @@ class HomeworkUserDetailsResponse(BaseModel):
     note_user: Optional[str]
     tasks: List[taskUserHomeworkResponse]
 
+
 class VerifyTokenResponse(BaseModel):
     id: str
+
 
 class ReviewedHomeworkResponse(HomeworkResponse):
     homework_id: str
