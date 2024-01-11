@@ -61,8 +61,6 @@ async def test_delete_homework(
     assert homework is None
 
 
-
-
 async def test_submit_comment(
     client: AsyncClient, professor_user_headers, task, session: AsyncSession
 ):
