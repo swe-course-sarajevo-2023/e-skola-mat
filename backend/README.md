@@ -63,7 +63,9 @@ The FastAPI application should now be accessible at `http://localhost:8000`.
 
     The database needs to be running for pytest to work.
 
-The FastAPI application should now be accessible at `http://localhost:8000`.
+7 Format code running black and isort using these commands:
+black . && isort .
+
 
 ## Docker Configuration
 
