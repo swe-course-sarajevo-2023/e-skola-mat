@@ -92,7 +92,12 @@ const UcenikView = () => {
 		['getAllStudentsSubmittedHomeworks'],
 		() => getAllStudentsSubmittedHomeworks(student_id)
 	);
-	console.log(data, data?.data);
+	console.log(
+		data,
+		Date(data?.data[0].deadline),
+		new Date(data?.data[0].deadline),
+		'deadline'
+	);
 
 	/*
 {
@@ -159,12 +164,12 @@ const UcenikView = () => {
 												</Typography>
 											)}
 											{currHomework.deadline &&
-												currHomework.deadline.getTime() <
+												new Date(currHomework.deadline) <
 													currentDate.getTime() && (
 													<Typography>Istekao rok.</Typography>
 												)}
 											{currHomework.deadline &&
-												currHomework.deadline.getTime() >
+												new Date(currHomework.deadline) >
 													currentDate.getTime() && (
 													<Typography>
 														Rok do {currHomework.deadline}.
@@ -184,7 +189,7 @@ const UcenikView = () => {
 													handleImageButtonDodaj(
 														index,
 														currHomework.deadline &&
-															currHomework.deadline.getTime() <
+															new Date(currHomework.deadline) <
 																currentDate.getTime()
 													)
 												}

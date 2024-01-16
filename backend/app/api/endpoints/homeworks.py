@@ -1,5 +1,6 @@
 import shutil
-from datetime import datetime
+import json
+from datetime import datetime, date
 from typing import List, Optional
 from uuid import uuid4
 import uuid
@@ -42,6 +43,7 @@ def is_valid_uuid(uuid_str):
         return True
     except ValueError:
         return False
+    
 
 ################homework endpointi koje koristi profesor profil
                                                                                
@@ -449,6 +451,8 @@ async def get_homework_data(
             select(Homework).where(Homework.id == homework.homework_id)
         )
         homework2 = homework2.scalar()
+        print(homework2,'hw2')
+        # homework2.deadline = json_serial(homework2.deadline)
         student_homeworks2.append(
             {
                 "id": homework2.id,
@@ -456,7 +460,7 @@ async def get_homework_data(
                 "grade": homework.grade,
                 "note": homework.note,
                 "number_of_tasks": homework2.maxNumbersOfTasks,
-                "deadline": homework2.deadline,
+                "deadline": homework2.deadline.date(),
                 "status": homework2.status,
             }
         )
@@ -523,6 +527,9 @@ async def get_homework_data(
                     "images": images2,
                 }
             )
+        print("TEST")
+        json_str_date = json.dumps(homework["deadline"].isoformat())
+        print(json_str_date)
         student_homeworks4.append(
             {
                 "id": homework["id"],
@@ -530,12 +537,14 @@ async def get_homework_data(
                 "grade": homework["grade"],
                 "note": homework["note"],
                 "number_of_tasks": homework["number_of_tasks"],
-                "deadline": homework["deadline"],
+                "deadline": json_str_date,
                 "status": homework["status"],
                 "tasks": tasks_data,
             }
         )
         tasks_data = []
+
+    print(student_homeworks4, "pred kraj")
 
     return JSONResponse(content={"data": student_homeworks4}, status_code=200)
 
