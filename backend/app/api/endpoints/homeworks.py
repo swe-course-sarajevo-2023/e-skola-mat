@@ -197,7 +197,7 @@ async def get_homeworks(
     current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
-    if not is_valid_uuid(class_id):
+    if class_id is not None and not is_valid_uuid(class_id):
         raise HTTPException(status_code=400, detail="id is not valid")
 
     # Initialize the query
