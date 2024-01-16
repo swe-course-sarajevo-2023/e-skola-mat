@@ -1,4 +1,6 @@
 import shutil
+import json
+from datetime import datetime, date
 import uuid
 from datetime import datetime
 from typing import List, Optional
@@ -44,6 +46,7 @@ def is_valid_uuid(uuid_str):
         return True
     except ValueError:
         return False
+    
 
 
 ################homework endpointi koje koristi profesor profil
@@ -475,6 +478,7 @@ async def get_homework(
     )
 
 
+
 @router.get(
     "/get_student_homework_data/{student_id}", response_model=list[HomeworkResponse]
 )
@@ -483,9 +487,11 @@ async def get_homework_data(
     session: AsyncSession = Depends(deps.get_session),
     _: User = Depends(deps.RoleCheck([UserRole.STUDENT, UserRole.PROFESSOR])),
 ):
+    # print("s id", student_id)
     student_homeworks = await session.execute(
         select(HomeworkUser).where(HomeworkUser.user_id == student_id)
     )
+
     student_homeworks = student_homeworks.scalars().all()
 
     if not student_homeworks:
@@ -497,6 +503,8 @@ async def get_homework_data(
             select(Homework).where(Homework.id == homework.homework_id)
         )
         homework2 = homework2.scalar()
+        # print(homework2,'hw2')
+        # homework2.deadline = json_serial(homework2.deadline)
         student_homeworks2.append(
             {
                 "id": homework2.id,
@@ -504,7 +512,7 @@ async def get_homework_data(
                 "grade": homework.grade,
                 "note": homework.note,
                 "number_of_tasks": homework2.maxNumbersOfTasks,
-                "deadline": homework2.deadline,
+                "deadline": homework2.deadline.date(),
                 "status": homework2.status,
             }
         )
@@ -513,7 +521,7 @@ async def get_homework_data(
     # user = user.scalar()
     student_homeworks3 = []
     for homework in student_homeworks2:
-        print(homework, "hw loop")
+        # print(homework, "hw loop")
         tasks = await session.execute(
             select(taskUserHomework)
             .where(
@@ -571,6 +579,9 @@ async def get_homework_data(
                     "images": images2,
                 }
             )
+        # print("TEST")
+        json_str_date = json.dumps(homework["deadline"].isoformat())
+        # print(json_str_date)
         student_homeworks4.append(
             {
                 "id": homework["id"],
@@ -578,14 +589,44 @@ async def get_homework_data(
                 "grade": homework["grade"],
                 "note": homework["note"],
                 "number_of_tasks": homework["number_of_tasks"],
-                "deadline": homework["deadline"],
+                "deadline": json_str_date,
                 "status": homework["status"],
                 "tasks": tasks_data,
             }
         )
         tasks_data = []
 
+    print(student_homeworks4, "pred kraj")
+
     return JSONResponse(content={"data": student_homeworks4}, status_code=200)
+
+@router.get(
+    "/get_all_student_homework_data", response_model=list[HomeworkResponse]
+)
+async def get_homework_data(
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.STUDENT, UserRole.PROFESSOR])),
+):
+    homeworks = await session.execute(select(Homework))
+    homeworks = homeworks.scalars().all()
+    # print(homeworks)
+
+    homeworks_serialized = []
+    for homework in homeworks:
+        json_str_date = json.dumps(homework.deadline.date().isoformat())
+        homeworks_serialized.append({
+            "id": homework.id,
+            "name": homework.name,
+            "dateOfCreation": homework.dateOfCreation,
+            "number_of_tasks": homework.maxNumbersOfTasks,
+            "deadline": json_str_date,
+            "status": homework.status.value,
+        })
+
+    # print("hws", homeworks_serialized)
+
+    return JSONResponse(content={"data": homeworks_serialized}, status_code=200)
+
 
 
 @router.get(

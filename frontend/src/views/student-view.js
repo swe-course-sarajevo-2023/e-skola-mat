@@ -12,10 +12,17 @@ import {
 import { useState, useEffect } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import SubmitModal from './submit-homework';
 import isAuth from '@/components/isAuth';
-import { useQuery } from 'react-query';
-import { getAllStudentsSubmittedHomeworks } from '@/api';
+import { useQuery, useQueryClient } from 'react-query';
+import {
+	getAllStudentsSubmittedHomeworks,
+	getAllStudentsHomeworks,
+} from '@/api';
 
 const currentDate = new Date();
 
@@ -92,7 +99,28 @@ const UcenikView = () => {
 		['getAllStudentsSubmittedHomeworks'],
 		() => getAllStudentsSubmittedHomeworks(student_id)
 	);
-	console.log(data, data?.data);
+	// console.log(
+	// 	data,
+	// 	Date(data?.data[0].deadline),
+	// 	new Date(data?.data[0].deadline),
+	// 	'deadline'
+	// );
+
+	const {
+		data: allHomeworks,
+		isLoading: isLoadingAll,
+		isRefetching: isRefetchingAll,
+		error: errorAll,
+		isError: isErrorAll,
+	} = useQuery(['getAllStudentsHomeworks'], () => getAllStudentsHomeworks());
+	// console.log(allHomeworks?.data, 'all');
+
+	const [selectedHomeworkView, setSelectedHomeworkView] = useState('all');
+
+	const handleChange = event => {
+		setSelectedHomeworkView(event.target.value);
+		// console.log(event.target.value);
+	};
 
 	/*
 {
@@ -127,9 +155,23 @@ const UcenikView = () => {
 		<>
 			<Container>
 				<Grid item xs={12} style={{ marginTop: '10%' }}>
-					<Paper>
-						<Typography variant="h6">Pregled zadaća</Typography>
-					</Paper>
+					<Box sx={{ minWidth: 120 }}>
+						<FormControl fullWidth>
+							<InputLabel id="dropdown-select">Pregled zadaća</InputLabel>
+							<Select
+								labelId="hw-select"
+								id="hw-select"
+								value={selectedHomeworkView}
+								label="Pregled zadaća"
+								onChange={handleChange}
+							>
+								<MenuItem value={'all'}>Sve zadaće</MenuItem>
+								<MenuItem value={'submitted'}>
+									Moje zadaće (predane zadaće)
+								</MenuItem>
+							</Select>
+						</FormControl>
+					</Box>
 				</Grid>
 				<Grid container spacing={2} sx={{ marginTop: 5 }}>
 					<Grid item xs={8}></Grid>
@@ -141,10 +183,13 @@ const UcenikView = () => {
 						lg={3}
 						sx={{ display: 'flex' }}
 					></Grid>
-					{data?.data &&
-						data?.data.map((currHomework, index) => {
+					{selectedHomeworkView == 'all' &&
+						allHomeworks?.data &&
+						allHomeworks?.data.map((currHomework, index) => {
 							const currDate = date[index].toDateString();
 							const currComment = comment[index];
+							// console.log(currHomework.deadline, 'curr');
+							// console.log(new Date(currHomework.deadline), 'datee');
 
 							return (
 								<Grid item xs={3} key={index}>
@@ -153,18 +198,13 @@ const UcenikView = () => {
 											<Typography gutterBottom variant="h5" component="div">
 												{currHomework.name}
 											</Typography>
-											{currHomework.note !== '' && (
-												<Typography variant="body2" color="text.secondary">
-													{currHomework.note}
-												</Typography>
-											)}
 											{currHomework.deadline &&
-												currHomework.deadline.getTime() <
+												new Date(currHomework.deadline) <
 													currentDate.getTime() && (
 													<Typography>Istekao rok.</Typography>
 												)}
 											{currHomework.deadline &&
-												currHomework.deadline.getTime() >
+												new Date(currHomework.deadline) >
 													currentDate.getTime() && (
 													<Typography>
 														Rok do {currHomework.deadline}.
@@ -184,7 +224,68 @@ const UcenikView = () => {
 													handleImageButtonDodaj(
 														index,
 														currHomework.deadline &&
-															currHomework.deadline.getTime() <
+															new Date(currHomework.deadline) <
+																currentDate.getTime()
+													)
+												}
+											>
+												Pregledaj
+											</Button>
+										</CardActions>
+									</Card>
+								</Grid>
+							);
+						})}
+					{selectedHomeworkView == 'submitted' &&
+						data?.data &&
+						data?.data.map((currHomework, index) => {
+							const currDate = date[index].toDateString();
+							const currComment = comment[index];
+
+							return (
+								<Grid item xs={3} key={index}>
+									<Card sx={{ maxWidth: 345 }}>
+										<CardContent>
+											<Typography gutterBottom variant="h5" component="div">
+												{currHomework.name}
+											</Typography>
+											{currHomework.note !== '' && (
+												<Typography variant="body2" color="text.secondary">
+													Profesorov komentar: {currHomework.note}
+												</Typography>
+											)}
+											{currHomework.grade !== '' && (
+												<Typography variant="body2" color="text.secondary">
+													Ocjena: {currHomework.grade}
+												</Typography>
+											)}
+											{currHomework.deadline &&
+												new Date(currHomework.deadline) <
+													currentDate.getTime() && (
+													<Typography>Istekao rok.</Typography>
+												)}
+											{currHomework.deadline &&
+												new Date(currHomework.deadline) >
+													currentDate.getTime() && (
+													<Typography>
+														Rok do {currHomework.deadline}.
+													</Typography>
+												)}
+										</CardContent>
+										<CardActions>
+											<Button
+												size="small"
+												onClick={() => handleImageButtonPostavka(index)}
+											>
+												Postavka
+											</Button>
+											<Button
+												size="small"
+												onClick={() =>
+													handleImageButtonDodaj(
+														index,
+														currHomework.deadline &&
+															new Date(currHomework.deadline) <
 																currentDate.getTime()
 													)
 												}

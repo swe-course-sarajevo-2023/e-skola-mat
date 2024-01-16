@@ -39,18 +39,21 @@ export default function isAuth(Component, route) {
 			} else {
 				if (
 					data?.user_role == 'ADMINISTRATOR' &&
+					role == 'administrator' &&
 					!admin_routes.includes(route)
 				) {
 					alert('not authorised to see this page!');
 					return redirect('/');
 				} else if (
 					data?.user_role == 'PROFESSOR' &&
+					role == 'profesor' &&
 					!professor_routes.includes(route)
 				) {
 					alert('not authorised to see this page!');
 					return redirect('/');
 				} else if (
 					data?.user_role == 'STUDENT' &&
+					role == 'student' &&
 					!student_routes.includes(route)
 				) {
 					alert('not authorised to see this page!');
