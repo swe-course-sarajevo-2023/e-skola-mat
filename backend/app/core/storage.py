@@ -43,7 +43,7 @@ class Client:
             self.local_directory = local_directory
 
     def save_image(self, file: UploadFile):
-        if (self.save_on_cloud):
+        if self.save_on_cloud:
             blob = self.images_bucket.blob(str(uuid4()) + "_" + file.filename)
             blob.upload_from_file(file.file)
             return (blob.public_url, blob.name)
