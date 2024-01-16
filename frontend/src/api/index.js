@@ -127,7 +127,14 @@ export const getAllStudentsSubmittedHomeworks = async id => {
 	const { data } = await axiosInstanceWithAuthToken.get(
 		`/homeworks/get_student_homework_data/${id}`
 	);
-	console.log(data);
+	// console.log(data);
+	return data;
+};
+export const getAllStudentsHomeworks = async () => {
+	const { data } = await axiosInstanceWithAuthToken.get(
+		`/homeworks/get_all_student_homework_data`
+	);
+	// console.log(data);
 	return data;
 };
 

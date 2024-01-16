@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
 	Button,
 	Typography,
@@ -13,8 +13,11 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from 'react-query';
 import { loginUser } from '@/api';
 import styles from './page.module.css';
+import { jwtDecode } from 'jwt-decode';
+import AuthContext from '@/context/authContext';
 
 export default function LoginView() {
+	const { loggedUser, setLoggedUser, role, setRole } = useContext(AuthContext);
 	const [user, setUser] = useState({ username: '', password: '' });
 	const [errors, setErrors] = useState({
 		username: '',
@@ -42,15 +45,26 @@ export default function LoginView() {
 	};
 
 	const onLogin = async e => {
+		console.log('here');
 		e.preventDefault();
-		if (validate()) {
-			try {
-				const data = await mutateAsync(user);
-				localStorage.setItem('token', data.access_token);
+		try {
+			console.log('here 2');
+			const data = await mutateAsync(user);
+			localStorage.setItem('token', data.access_token);
+			console.log('tokken,', data.access_token);
+
+			const decodedToken = jwtDecode(data.access_token);
+			console.log('LOGGED,', decodedToken);
+			setRole(decodedToken.role);
+			if (decodedToken.role == 'profesor') {
+				router.push('/profiles/profesor');
+			} else if (decodedToken.role == 'student') {
+				router.push('/profiles/student');
+			} else {
 				router.push('/');
-			} catch (error) {
-				setErrors({ ...errors, form: error });
 			}
+		} catch (error) {
+			console.log(error);
 		}
 	};
 
