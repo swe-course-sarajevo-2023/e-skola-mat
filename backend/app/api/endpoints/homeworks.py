@@ -1,9 +1,16 @@
 import shutil
 import json
 from datetime import datetime, date
+import uuid
+from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
-import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi.responses import JSONResponse, StreamingResponse
+from sqlalchemy import and_, delete, desc, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api import deps
 from app.core.storage import Client, get_storage_client
@@ -29,13 +36,9 @@ from app.schemas.responses import (
     taskUserHomeworkImageResponse,
     taskUserHomeworkResponse,
 )
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
-from fastapi.responses import JSONResponse, StreamingResponse
-from sqlalchemy import and_, delete, desc, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 router = APIRouter()
+
 
 def is_valid_uuid(uuid_str):
     try:
@@ -45,74 +48,107 @@ def is_valid_uuid(uuid_str):
         return False
     
 
+
 ################homework endpointi koje koristi profesor profil
-                                                                               
-@router.get("/get_homework_data/{id}", response_model=list[HomeworkResponse])  ##endpoint koji salje podatke za rutu profesor/profiles/homework/homework_id,
-async def get_homework_data(                                                   ##tj. za stranicu gdje profesor pregleda konkretnu zadaću jednog studenta
-        id,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
+
+
+@router.get(
+    "/get_homework_data/{id}", response_model=list[HomeworkResponse]
+)  ##endpoint koji salje podatke za rutu profesor/profiles/homework/homework_id,
+async def get_homework_data(  ##tj. za stranicu gdje profesor pregleda konkretnu zadaću jednog studenta
+    id,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
 ):
     if not is_valid_uuid(id):
         raise HTTPException(status_code=400, detail="id is not valid")
-    
-    homework = await session.execute(
-        select(HomeworkUser).where(HomeworkUser.id == id))
+
+    homework = await session.execute(select(HomeworkUser).where(HomeworkUser.id == id))
     homework = homework.scalar()
-    
+
     if not homework:
         raise HTTPException(status_code=204, detail="Homework not found")
-    
-    homework2 = await session.execute(select(Homework).where(Homework.id == homework.homework_id))
+
+    homework2 = await session.execute(
+        select(Homework).where(Homework.id == homework.homework_id)
+    )
     homework2 = homework2.scalar()
-    
+
     user = await session.execute(select(User).where(User.id == homework.user_id))
     user = user.scalar()
-    
-    tasks = await session.execute(select(taskUserHomework).where(and_(
-            taskUserHomework.user_id == homework.user_id,
-            taskUserHomework.homework_id == homework.homework_id
-        ))
-    .order_by(taskUserHomework.order_number_of_the_task))
+
+    tasks = await session.execute(
+        select(taskUserHomework)
+        .where(
+            and_(
+                taskUserHomework.user_id == homework.user_id,
+                taskUserHomework.homework_id == homework.homework_id,
+            )
+        )
+        .order_by(taskUserHomework.order_number_of_the_task)
+    )
     tasks = tasks.scalars().all()
 
     tasks_data = []
     for task in tasks:
-        images = await session.execute(select(taskUserHomeworkImage).where(taskUserHomeworkImage.task_user_homework_id == task.id))
+        images = await session.execute(
+            select(taskUserHomeworkImage).where(
+                taskUserHomeworkImage.task_user_homework_id == task.id
+            )
+        )
         images = images.scalars().all()
         images2 = []
         for i in images:
             image = await session.execute(select(Image).where(Image.id == i.image_id))
             image = image.scalar()
-            images2.append({
-                "id": i.id,
-                "comment_professor": i.comment_professor,
-                "comment_student": i.comment_student,
-                "file_path": image.file_path
-            })
-        tasks_data.append({
-            "id": task.id,
-            "order_num": task.order_number_of_the_task,
-            "teacher_comment": task.commentProfessor,
-            "student_comment": task.commentStudent,
-            "images": images2
-        })
+            images2.append(
+                {
+                    "id": i.id,
+                    "comment_professor": i.comment_professor,
+                    "comment_student": i.comment_student,
+                    "file_path": image.file_path,
+                }
+            )
+        tasks_data.append(
+            {
+                "id": task.id,
+                "order_num": task.order_number_of_the_task,
+                "teacher_comment": task.commentProfessor,
+                "student_comment": task.commentStudent,
+                "images": images2,
+            }
+        )
 
-    return JSONResponse(content={"homework":  {"id": homework2.id, "name": homework2.name, "number_of_tasks": homework2.maxNumbersOfTasks},
-                                 "user": {"id": user.id, "name": user.name, "surname": user.surname}, "data": {"grade": homework.grade, "comment": homework.note, 
-                                                                                                               "comment_student": homework.note_student},
-                                "problems": tasks_data}, status_code=200)
-    
+    return JSONResponse(
+        content={
+            "homework": {
+                "id": homework2.id,
+                "name": homework2.name,
+                "number_of_tasks": homework2.maxNumbersOfTasks,
+            },
+            "user": {"id": user.id, "name": user.name, "surname": user.surname},
+            "data": {
+                "grade": homework.grade,
+                "comment": homework.note,
+                "comment_student": homework.note_student,
+            },
+            "problems": tasks_data,
+        },
+        status_code=200,
+    )
 
-@router.get("/get_homeworks/{homework_id}", response_model=list[HomeworkResponse])  ##sve predate zadaće jedne zadate zadaće za konkretnu grupu, endpoint salje podatke za rutu
-async def get_homeworks(                                                            ##profiles/profesor/zadaca/zadaca_id
+
+@router.get(
+    "/get_homeworks/{homework_id}", response_model=list[HomeworkResponse]
+)  ##sve predate zadaće jedne zadate zadaće za konkretnu grupu, endpoint salje podatke za rutu
+async def get_homeworks(  ##profiles/profesor/zadaca/zadaca_id
     homework_id,
     session: AsyncSession = Depends(deps.get_session),
     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
-):    
+):
     if not is_valid_uuid(homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
-    
+
     homeworks = await session.execute(
         select(HomeworkUser)
         .where(HomeworkUser.homework_id == homework_id)
@@ -141,15 +177,20 @@ async def get_homeworks(                                                        
 
     if not homework and not homeworks:
         raise HTTPException(status_code=204, detail="Homeworks not found")
-    
+
     return JSONResponse(
         content={
-            "homework": {"id": homework.id, "name": homework.name, "status": homework.status.name},
+            "homework": {
+                "id": homework.id,
+                "name": homework.name,
+                "status": homework.status.name,
+            },
             "data": response_data,
         },
         status_code=200,
     )
-    
+
+
 # Profesor ukoliko pozove bez parametara vraća sve zadaće,
 # a sa parametrom samo zadaće da određenu grupu. Endpoint salje podatke za rutu profiles/profesor/grupa/grupa_id
 # Student ako pozove sa ili bez parametara uvijek vraća samo za njegovu grupu.
@@ -159,9 +200,9 @@ async def get_homeworks(
     current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
-    if not is_valid_uuid(class_id):
+    if class_id is not None and not is_valid_uuid(class_id):
         raise HTTPException(status_code=400, detail="id is not valid")
-    
+
     # Initialize the query
     query = select(Homework).order_by(desc(Homework.dateOfCreation))
 
@@ -183,25 +224,31 @@ async def get_homeworks(
 
     result = await session.execute(query)
     homeworks = result.scalars().all()
-    
+
     if not homeworks:
         raise HTTPException(status_code=204, detail="Homeworks not found")
-    
+
     current_time = datetime.utcnow()
-    
+
     for homework in homeworks:
-        if homework.status == HomeworkStatus.NOT_STARTED and homework.deadline < current_time:
+        if (
+            homework.status == HomeworkStatus.NOT_STARTED
+            and homework.deadline < current_time
+        ):
             # Update the status of the homework to indicate that the deadline has passed
             homework.status = HomeworkStatus.IN_PROGRESS
             await session.commit()
-    
+
     result2 = await session.execute(query)
     homeworks2 = result2.scalars().all()
 
     return homeworks2
 
-@router.get("", response_model=List[ClassHomeworkResponse])   ##endpoint koji se koristi za rutu profiles/profesor/professor-homework, i salje na tu rutu sve zadace svih grupa koje se onda brisu 
-async def list_all_homeworks(                                 ##ili se dodaju nove zadace
+
+@router.get(
+    "", response_model=List[ClassHomeworkResponse]
+)  ##endpoint koji se koristi za rutu profiles/profesor/professor-homework, i salje na tu rutu sve zadace svih grupa koje se onda brisu
+async def list_all_homeworks(  ##ili se dodaju nove zadace
     _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR])),
     session: AsyncSession = Depends(deps.get_session),
 ):
@@ -275,7 +322,7 @@ async def delete_homework(
 ):
     if not is_valid_uuid(homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
-    
+
     await session.execute(
         delete(ClassHomework).where(ClassHomework.homework_id == homework_id)
     )
@@ -292,7 +339,7 @@ async def update_homework_status(
 ):
     if not is_valid_uuid(homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
-    
+
     # Nadjemo zadacu koju trazimo
     homework_query = await session.execute(
         select(Homework).where(Homework.id == homework_id)
@@ -315,8 +362,10 @@ async def update_homework_status(
 
     # return {"message": "Homework status updated successfully"}
 
+
 ##########################################################################################################################################################
-    
+
+
 @router.get(
     "/get_homework/{user_homework_task_id}", response_model=list[HomeworkResponse]
 )
@@ -548,6 +597,7 @@ async def get_homework_data(
 
     return JSONResponse(content={"data": student_homeworks4}, status_code=200)
 
+
 @router.get(
     "/{homework_id}/homework-user/{homework_user_id}",
     response_model=Optional[HomeworkUserDetailsResponse],
@@ -560,7 +610,10 @@ async def get_homework_user_details(
     ),
     session: AsyncSession = Depends(deps.get_session),
 ):
-    query = select(HomeworkUser).where(HomeworkUser.user_id == homework_user_id, HomeworkUser.homework_id == homework_id)
+    query = select(HomeworkUser).where(
+        HomeworkUser.user_id == homework_user_id,
+        HomeworkUser.homework_id == homework_id,
+    )
     result = await session.execute(query)
     homework_user = result.scalar()
     if not homework_user:
@@ -576,7 +629,10 @@ async def get_homework_user_details(
 
     query = (
         select(taskUserHomework)
-        .where(taskUserHomework.user_id == homework_user.user_id, taskUserHomework.homework_id == homework_id)
+        .where(
+            taskUserHomework.user_id == homework_user.user_id,
+            taskUserHomework.homework_id == homework_id,
+        )
         .options(selectinload(taskUserHomework.images))
     )
 
@@ -615,6 +671,7 @@ async def get_homework_user_details(
     )
 
     return homework_user_response
+
 
 @router.post("/submit-task/{homework_id}/task/{task_number}")
 async def submit_task(
@@ -711,18 +768,17 @@ async def get_task_image(
     storage_client: Client = Depends(Client),
     current_user: User = Depends(deps.get_current_user),
 ):
-    image_query = await session.execute(
-        select(Image).where(Image.id == image_id)
-    )
+    image_query = await session.execute(select(Image).where(Image.id == image_id))
     image: Image = image_query.scalar()
     if not image:
         raise HTTPException(status_code=404, detail="Image not found")
-    
+
     # Vracanje slike kopirano sa https://github.com/TrueFaces/fastapi-test/blob/f5b25291d04b5f1dcf740404b48d5b2055199ee9/app/utils/storage.py#L41
     return StreamingResponse(
         storage_client.get_image(image.file_path),
         media_type="application/octet-stream",
-        headers={"Content-Disposition": f"attachment; filename={image.file_path}"})
+        headers={"Content-Disposition": f"attachment; filename={image.file_path}"},
+    )
 
 
 @router.post("/submit-general-comment/{homework_id}")
@@ -774,37 +830,39 @@ async def submit_comment(
 
     return {"message": "Comment submitted successfully"}
 
+
 @router.get("/reviewed", response_model=List[ReviewedHomeworkResponse])
-async def reviewed_homework(session: AsyncSession = Depends(deps.get_session), current_user: User = Depends(deps.get_current_user)):
-    
+async def reviewed_homework(
+    session: AsyncSession = Depends(deps.get_session),
+    current_user: User = Depends(deps.get_current_user),
+):
     results = await session.execute(
         select(HomeworkUser, Homework)
         .join(Homework, HomeworkUser.homework_id == Homework.id)
-        .where(
-            HomeworkUser.user_id == current_user.id,
-            HomeworkUser.grade.isnot(None)
-        )
+        .where(HomeworkUser.user_id == current_user.id, HomeworkUser.grade.isnot(None))
     )
-    
+
     reviewed_homeworks = results.fetchall()
 
     response_data = []
     for homework_user, homework in reviewed_homeworks:
-        response_data.append({
-            "id": homework_user.id,
-            "homework_id": homework.id,
-            "name": homework.name,
-            "maxNumbersOfTasks": homework.maxNumbersOfTasks,
-            "grade": homework_user.grade,
-            "note": homework_user.note,
-            "note_student": homework_user.note_student,
-            "deadline": homework.deadline.date(),
-            "dateOfCreation": homework.dateOfCreation.date(),
-            "status": homework.status 
-        })
-
+        response_data.append(
+            {
+                "id": homework_user.id,
+                "homework_id": homework.id,
+                "name": homework.name,
+                "maxNumbersOfTasks": homework.maxNumbersOfTasks,
+                "grade": homework_user.grade,
+                "note": homework_user.note,
+                "note_student": homework_user.note_student,
+                "deadline": homework.deadline.date(),
+                "dateOfCreation": homework.dateOfCreation.date(),
+                "status": homework.status,
+            }
+        )
 
     return response_data
+
 
 @router.post("/submit-general-student-comment/{homework_id}")
 async def submit_comment(

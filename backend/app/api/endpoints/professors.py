@@ -1,6 +1,12 @@
-from pathlib import Path
 import uuid
+from pathlib import Path
 
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
+from sqlalchemy import delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api import deps
 from app.core.security import get_password_hash
 from app.models import (
     Homework,
@@ -10,25 +16,24 @@ from app.models import (
     UserClass,
     UserRole,
     taskUserHomework,
-    taskUserHomeworkImage
+    taskUserHomeworkImage,
 )
 from app.schemas.requests import (
     ProfessorCommentsHomework,
-    TaskComment,
     ProfessorGradesHomework,
+    TaskComment,
     UserCreateRequest,
     UserDeleteRequest,
 )
-from app.schemas.responses import GradeResponse, CommentResponse, UserResponse, TaskCommentResponse
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse
-from sqlalchemy import delete, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.api import deps
+from app.schemas.responses import (
+    CommentResponse,
+    GradeResponse,
+    TaskCommentResponse,
+    UserResponse,
+)
 
 router = APIRouter()
-# #naredne dvije linije nigdje se ne koriste pa cemo ih zakomentraisat da ne prave gresku  
+# #naredne dvije linije nigdje se ne koriste pa cemo ih zakomentraisat da ne prave gresku
 # BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # IMAGES_DIR = BASE_DIR / "images"
 
@@ -43,10 +48,10 @@ def is_valid_uuid(uuid_str):
 
 @router.post("/register_student", response_model=UserResponse)
 async def add_student(
-        group_id: str,
-        new_student: UserCreateRequest,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    group_id: str,
+    new_student: UserCreateRequest,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     email = await session.execute(select(User).where(User.email == new_student.email))
     if email.scalar() is not None:
@@ -56,7 +61,7 @@ async def add_student(
         hashed_password=get_password_hash(new_student.password),
         role_id=select(Role.id).where(Role.role == UserRole.STUDENT),
         name=new_student.name,
-        surname=new_student.surname
+        surname=new_student.surname,
     )
     session.add(user)
     await session.commit()
@@ -69,9 +74,9 @@ async def add_student(
 
 @router.delete("/delete_student", response_model=UserResponse)
 async def delete_student(
-        student: UserDeleteRequest,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    student: UserDeleteRequest,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     user = await session.execute(select(User).where(User.email == student.email))
     user = user.scalar()
@@ -98,9 +103,9 @@ async def delete_student(
 
 @router.get("/list_students/{class_id}", response_model=UserResponse)
 async def list_students(
-        class_id,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    class_id,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(class_id):
         raise HTTPException(status_code=400, detail="id is not valid")
@@ -131,9 +136,9 @@ async def list_students(
 
 @router.get("/get_homeworks/{homework_id}", response_model=UserResponse)
 async def get_homeworks(
-        homework_id,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    homework_id,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
@@ -152,8 +157,10 @@ async def get_homeworks(
             select(User).where(User.id == user_homework.user_id)
         )
         user_homework_temp = await session.execute(
-            select(HomeworkUser).where(HomeworkUser.homework_id == user_homework.homework_id
-                                       and HomeworkUser.user_id == user_homework.user_id)
+            select(HomeworkUser).where(
+                HomeworkUser.homework_id == user_homework.homework_id
+                and HomeworkUser.user_id == user_homework.user_id
+            )
         )
         user_homework_temp = user_homework_temp.scalar()
         user = user.scalar()
@@ -170,7 +177,7 @@ async def get_homeworks(
                         "surname": user.surname,
                         "username": user.username,
                     },
-                    "grade": grade
+                    "grade": grade,
                 }
             )
         ids.append(user_homework.user_id)
@@ -187,7 +194,7 @@ async def get_homeworks(
             "deadline": homework.deadline.isoformat(),
             "number_of_tasks": homework.maxNumbersOfTasks,
         },
-        "students": response_data
+        "students": response_data,
     }
 
     return JSONResponse(content={"data": res}, status_code=200)
@@ -195,9 +202,9 @@ async def get_homeworks(
 
 @router.get("/get_homework/{task_user_homework_id}", response_model=UserResponse)
 async def get_homework(
-        task_user_homework_id,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    task_user_homework_id,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(task_user_homework_id):
         raise HTTPException(status_code=400, detail="id is not valid")
@@ -240,95 +247,103 @@ async def get_homework(
 
 @router.post("/grade_homework", response_model=GradeResponse)
 async def grade_homework(
-        grade: ProfessorGradesHomework,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    grade: ProfessorGradesHomework,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(grade.user_id) or not is_valid_uuid(grade.homework_id):
         raise HTTPException(status_code=400, detail="ids are not valid")
-    
+
     homework_user = await session.execute(
-            select(HomeworkUser)
-            .where(HomeworkUser.user_id == grade.user_id)
-            .where(HomeworkUser.homework_id == grade.homework_id)
-        )
+        select(HomeworkUser)
+        .where(HomeworkUser.user_id == grade.user_id)
+        .where(HomeworkUser.homework_id == grade.homework_id)
+    )
     homework_user = homework_user.scalar()
 
     if not homework_user:
-        raise HTTPException(status_code=400, detail="The user doesn't have that homework")
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have that homework"
+        )
 
     homework_user.grade = grade.grade
-    
+
     await session.commit()
     return homework_user
 
 
 @router.post("/comment_homework", response_model=CommentResponse)
 async def comment_homework(
-        comment: ProfessorCommentsHomework,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    comment: ProfessorCommentsHomework,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(comment.user_id) or not is_valid_uuid(comment.homework_id):
         raise HTTPException(status_code=400, detail="ids are not valid")
-    
+
     homework_user = await session.execute(
-            select(HomeworkUser)
-            .where(HomeworkUser.user_id == comment.user_id)
-            .where(HomeworkUser.homework_id == comment.homework_id)
-        )
+        select(HomeworkUser)
+        .where(HomeworkUser.user_id == comment.user_id)
+        .where(HomeworkUser.homework_id == comment.homework_id)
+    )
     homework_user = homework_user.scalar()
 
     if not homework_user:
-        raise HTTPException(status_code=400, detail="The user doesn't have that homework")
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have that homework"
+        )
 
     homework_user.note = comment.note
-    
+
     await session.commit()
     return homework_user
 
+
 @router.post("/comment_homework_task", response_model=TaskCommentResponse)
 async def comment_homework_task(
-        comment: TaskComment,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    comment: TaskComment,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(comment.task_id):
         raise HTTPException(status_code=400, detail="id is not valid")
-    
+
     homework_task = await session.execute(
-            select(taskUserHomework)
-            .where(taskUserHomework.id == comment.task_id)
-        )
+        select(taskUserHomework).where(taskUserHomework.id == comment.task_id)
+    )
     homework_task = homework_task.scalar()
 
     if not homework_task:
-        raise HTTPException(status_code=400, detail="The user doesn't have that task in that homework")
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have that task in that homework"
+        )
 
     homework_task.commentProfessor = comment.comment
-    
+
     await session.commit()
     return homework_task
 
+
 @router.post("/comment_homework_task_image", response_model=TaskCommentResponse)
 async def comment_homework_task_image(
-        comment: TaskComment,
-        session: AsyncSession = Depends(deps.get_session),
-        _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
+    comment: TaskComment,
+    session: AsyncSession = Depends(deps.get_session),
+    _: User = Depends(deps.RoleCheck([UserRole.PROFESSOR, UserRole.ADMINISTRATOR])),
 ):
     if not is_valid_uuid(comment.task_id):
         raise HTTPException(status_code=400, detail="id is not valid")
-    
+
     homework_task_image = await session.execute(
-            select(taskUserHomeworkImage)
-            .where(taskUserHomeworkImage.id == comment.task_id)
-        )
+        select(taskUserHomeworkImage).where(taskUserHomeworkImage.id == comment.task_id)
+    )
     homework_task_image = homework_task_image.scalar()
 
     if not homework_task_image:
-        raise HTTPException(status_code=400, detail="The user doesn't have that image for that task")
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have that image for that task"
+        )
 
     homework_task_image.comment_professor = comment.comment
-    
+
     await session.commit()
     return homework_task_image

@@ -1,17 +1,17 @@
-from main import app
+import pytest
+from httpx import AsyncClient
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models import User
 from app.tests.conftest import (
     default_user_email,
     default_user_id,
-    professor_user_id,
-    generic_user_id,
     default_user_password_hash,
+    generic_user_id,
+    professor_user_id,
 )
-from httpx import AsyncClient
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete
-import pytest
+from main import app
 
 
 async def test_read_current_user(client: AsyncClient, default_user_headers):
@@ -51,6 +51,7 @@ async def test_reset_current_user_password(
     assert user is not None
     assert user.hashed_password != default_user_password_hash
 
+
 @pytest.mark.no_teardown
 async def test_register_new_user(
     client: AsyncClient, default_user_headers, session: AsyncSession
@@ -62,7 +63,7 @@ async def test_register_new_user(
             "email": "qwe@example.com",
             "password": "asdasdasd",
             "name": "test",
-            "surname": "user"
+            "surname": "user",
         },
     )
     assert response.status_code == 200
@@ -75,4 +76,3 @@ async def test_register_new_user(
 
     result = await session.execute(select(User).where(User.email == "qwe@example.com"))
     user = result.scalars().first()
-    

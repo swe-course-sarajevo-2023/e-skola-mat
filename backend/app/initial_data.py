@@ -1,12 +1,12 @@
 import asyncio
 import uuid
 
-from app.core.session import async_session
-from app.models import Class, Role, User, UserRole
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import config, security
+from app.core.session import async_session
+from app.models import Class, Role, User, UserRole
 
 
 async def insert_roles_and_groups(session: AsyncSession):

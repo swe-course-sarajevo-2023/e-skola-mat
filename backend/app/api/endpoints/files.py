@@ -2,12 +2,13 @@ from pathlib import Path
 from typing import Annotated
 from uuid import uuid4
 
-from app.api import deps
-from app.models import Image, taskUserHomeworkImage
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api import deps
+from app.models import Image, taskUserHomeworkImage
 
 router = APIRouter()
 

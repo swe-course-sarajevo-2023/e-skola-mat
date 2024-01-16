@@ -1,9 +1,6 @@
 import time
 
 import jwt
-from app.models import User
-from app.schemas.requests import RefreshTokenRequest
-from app.schemas.responses import AccessTokenResponse, VerifyTokenResponse
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ValidationError
@@ -12,6 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
 from app.core import config, security
+from app.models import User
+from app.schemas.requests import RefreshTokenRequest
+from app.schemas.responses import AccessTokenResponse, VerifyTokenResponse
 
 router = APIRouter()
 
