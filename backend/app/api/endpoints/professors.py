@@ -101,7 +101,8 @@ async def delete_student(
     )
 
 
-@router.get("/list_students/{class_id}", response_model=UserResponse)
+@router.get("/list_students/{class_id}", response_model=UserResponse, summary="List Students in a Class",
+    description="Retrieves a list of students belonging to a specified class. Accessible only by users with PROFESSOR or ADMINISTRATOR roles. Requires a valid class UUID.",)
 async def list_students(
     class_id,
     session: AsyncSession = Depends(deps.get_session),
@@ -134,7 +135,9 @@ async def list_students(
     return JSONResponse(content={"data": response_data}, status_code=200)
 
 
-@router.get("/get_homeworks/{homework_id}", response_model=UserResponse)
+@router.get("/get_homeworks/{homework_id}", response_model=UserResponse, summary="Get List of Homeworks",
+    description="Retrieves a list of all homework tasks for a specific homework, along with student details and grades, accessible to professors and administrators."
+)
 async def get_homeworks(
     homework_id,
     session: AsyncSession = Depends(deps.get_session),
@@ -200,7 +203,9 @@ async def get_homeworks(
     return JSONResponse(content={"data": res}, status_code=200)
 
 
-@router.get("/get_homework/{task_user_homework_id}", response_model=UserResponse)
+@router.get("/get_homework/{task_user_homework_id}", response_model=UserResponse, summary="Get Homework Details",
+    description="Retrieves the details of a specific homework task assigned to a student, accessible by professors and administrators."
+)
 async def get_homework(
     task_user_homework_id,
     session: AsyncSession = Depends(deps.get_session),
@@ -245,7 +250,9 @@ async def get_homework(
     return JSONResponse(content={"data": response_data}, status_code=200)
 
 
-@router.post("/grade_homework", response_model=GradeResponse)
+@router.post("/grade_homework", response_model=GradeResponse, summary="Grade Homework",
+    description="Allows a professor or an administrator to assign a grade to a student's homework."
+)
 async def grade_homework(
     grade: ProfessorGradesHomework,
     session: AsyncSession = Depends(deps.get_session),
@@ -272,7 +279,9 @@ async def grade_homework(
     return homework_user
 
 
-@router.post("/comment_homework", response_model=CommentResponse)
+@router.post("/comment_homework", response_model=CommentResponse, summary="Comment on Homework",
+    description="Enables a professor or administrator to add comments or notes to a student's homework."
+)
 async def comment_homework(
     comment: ProfessorCommentsHomework,
     session: AsyncSession = Depends(deps.get_session),
@@ -299,7 +308,9 @@ async def comment_homework(
     return homework_user
 
 
-@router.post("/comment_homework_task", response_model=TaskCommentResponse)
+@router.post("/comment_homework_task", response_model=TaskCommentResponse, summary="Comment on Homework Task",
+    description="Allows a professor or an administrator to add a comment to a student's homework task."
+)
 async def comment_homework_task(
     comment: TaskComment,
     session: AsyncSession = Depends(deps.get_session),
@@ -324,7 +335,9 @@ async def comment_homework_task(
     return homework_task
 
 
-@router.post("/comment_homework_task_image", response_model=TaskCommentResponse)
+@router.post("/comment_homework_task_image", response_model=TaskCommentResponse,  summary="Comment on Homework Task Image",
+    description="Allows a professor or an administrator to add a comment to a homework task image."
+)
 async def comment_homework_task_image(
     comment: TaskComment,
     session: AsyncSession = Depends(deps.get_session),
