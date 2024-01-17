@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy import and_, delete, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -708,7 +708,8 @@ async def get_homework_user_details(
 async def submit_task(
     homework_id: str,
     task_number: int,
-    submit_task_request: SubmitTaskRequest,
+    task_comment: str = Form(...),
+    images: List[UploadFile] = File(...),
     session: AsyncSession = Depends(deps.get_session),
     storage_client: Client = Depends(get_storage_client),
     current_user: User = Depends(deps.get_current_user),
@@ -733,7 +734,7 @@ async def submit_task(
             homework_id=homework_id,
         )
         session.add(new_homework_submission)
-        session.flush()
+        await session.flush()
 
     if task_number > homework.maxNumbersOfTasks:
         raise HTTPException(
@@ -752,25 +753,25 @@ async def submit_task(
     task = task_query.scalar()
     # Ako smo nasli trazeni task, postaviti da
     if task:
-        task.commentStudent = submit_task_request.task_comment
+        task.commentStudent = task_comment
         task_user_homework_id = task.id
     else:
         new_task_submission = taskUserHomework(
             user_id=current_user.id,
             homework_id=homework_id,
             order_number_of_the_task=task_number,
-            commentStudent=submit_task_request.task_comment,
+            commentStudent=task_comment,
         )
         session.add(new_task_submission)
         await session.flush()
         task_user_homework_id = new_task_submission.id
 
-    for image in submit_task_request.images:
-        filename = storage_client.save_image(image)
+    for image in images:
+        (url, filename) = storage_client.save_image(image)
 
         single_image = Image(
             filename=filename,
-            file_path=filename,
+            file_path=url,
             created_at=datetime.now(),
         )
         session.add(single_image)
@@ -780,6 +781,7 @@ async def submit_task(
         task_image = taskUserHomeworkImage(
             task_user_homework_id=task_user_homework_id,
             image_id=single_image.id,  # Ovdje vezemo zadatak za sliku
+            image_path=url,
         )
         session.add(
             task_image

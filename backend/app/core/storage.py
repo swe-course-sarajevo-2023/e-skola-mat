@@ -44,9 +44,9 @@ class Client:
 
     def save_image(self, file: UploadFile):
         if self.save_on_cloud:
-            blob = self.images_bucket.blob(str(uuid4()))
+            blob = self.images_bucket.blob(str(uuid4()) + "_" + file.filename)
             blob.upload_from_file(file.file)
-            return blob.name
+            return (blob.public_url, blob.name)
         else:
             unique_filename = str(uuid4())
             file_path = self.local_directory / (unique_filename + file.filename)
