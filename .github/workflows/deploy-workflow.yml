@@ -1,0 +1,52 @@
+name: Deploy to Google Cloud
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Google Cloud
+        uses: google-github-actions/setup-gcloud@v2.0.1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Authenticate Google Cloud
+        uses: google-github-actions/auth@v2.0.0
+        with:
+          credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
+      - name: Build and Deploy Backend
+        run: |
+            gcloud builds submit --config .github/workflows/cloudbuild/cloudbuild-backend.yml --substitutions=\
+            _REGION="europe-west6",\
+            _CLOUDSQL_INSTANCES=":europe-west6:e-skola-mat",\
+            _DEFAULT_DATABASE_PASSWORD="${{ secrets.DEFAULT_DATABASE_PASSWORD }}",\
+            _FIRST_SUPERUSER_PASSWORD="${{ secrets.FIRST_SUPERUSER_PASSWORD }}",\
+            _TEST_DATABASE_PASSWORD="${{ secrets.TEST_DATABASE_PASSWORD }}",\
+            _ACCESS_TOKEN_EXPIRE_MINUTES="11520",\
+            _DEFAULT_DATABASE_DB="default_db",\
+            _DEFAULT_DATABASE_HOSTNAME="/cloudsql/e-skola-mat:europe-west6:e-skola-mat",\
+            _DEFAULT_DATABASE_PORT="5432",\
+            _DEFAULT_DATABASE_USER="rDGJeEDqAz",\
+            _ENVIRONMENT="${{ vars.ENVIRONMENT }}",\
+            _FIRST_SUPERUSER_EMAIL="example@example.com",\
+            _GCP_BUCKET="e-skola-mat-images",\
+            _GCP_PROJECT_ID="e-skola-mat",\
+            _REFRESH_TOKEN_EXPIRE_MINUTES="40320",\
+            _TEST_DATABASE_DB="test_db",\
+            _TEST_DATABASE_HOSTNAME="localhost",\
+            _TEST_DATABASE_PORT="37270",\
+            _TEST_DATABASE_USER="test",\
+            _PROJECT_ID="${{ secrets.GCP_PROJECT_ID }}",\
+            _COMMIT_SHA="${{ github.sha }}",
+
+      - name: Check Deployment Status
+        run: |
+          gcloud run services describe sample --platform managed --region europe-west6 --format="value(status.url)"
