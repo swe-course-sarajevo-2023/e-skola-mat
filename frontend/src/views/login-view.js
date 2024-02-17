@@ -51,10 +51,12 @@ export default function LoginView() {
 			console.log('here 2');
 			const data = await mutateAsync(user);
 			localStorage.setItem('token', data.access_token);
+			
 			console.log('tokken,', data.access_token);
 
 			const decodedToken = jwtDecode(data.access_token);
 			console.log('LOGGED,', decodedToken);
+			localStorage.setItem('student_id', decodedToken.sub )
 			setRole(decodedToken.role);
 			if (decodedToken.role == 'profesor') {
 				router.push('/profiles/profesor');
