@@ -75,7 +75,7 @@ export default function ButtonAppBar() {
                         href={
                             data?.user_role === 'PROFESSOR'
                                 ? '/profiles/profesor'
-                                : '/profiles/student'
+                                : '/profiles/home'
                         }
                         passHref
                     >
