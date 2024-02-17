@@ -61,7 +61,7 @@ export default function LoginView() {
 			if (decodedToken.role == 'profesor') {
 				router.push('/profiles/profesor');
 			} else if (decodedToken.role == 'student') {
-				router.push('/profiles/student');
+				router.push('/profiles/home');
 			} else {
 				router.push('/');
 			}
