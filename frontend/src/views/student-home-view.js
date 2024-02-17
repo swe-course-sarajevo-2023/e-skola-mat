@@ -37,7 +37,7 @@ const StudentHomeView = () => {
             setNumAllHomeworks(res.data?.length);
         });
 
-		const student_id = 'f47ac13b-58cc-4372-a567-0e02b2c3d479';
+		const student_id = localStorage.getItem('student_id')
 
        
         getAllStudentsSubmittedHomeworks(student_id).then((res) => {

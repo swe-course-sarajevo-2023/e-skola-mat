@@ -93,7 +93,7 @@ const UcenikView = () => {
 		setDate(expired);
 	};
 
-	const student_id = 'f47ac13b-58cc-4372-a567-0e02b2c3d479';
+	const student_id = localStorage.getItem('student_id');
 
 	const { data, isLoading, isRefetching, error, isError } = useQuery(
 		['getAllStudentsSubmittedHomeworks'],
