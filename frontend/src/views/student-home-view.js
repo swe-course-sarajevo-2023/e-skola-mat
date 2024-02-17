@@ -51,7 +51,10 @@ const StudentHomeView = () => {
 
 	return (
 		<>
-		<Container style={{ marginTop: '10%', padding: 30 }}>
+		<Container style={{ marginTop: '5%', padding: 30 }}>
+			<Typography variant="h4" style={{paddingBottom: 30 }}>
+				Dobrodošli!
+            </Typography>
 			<Grid container spacing={3} columnSpacing={12}>
 				{/* Card for number of all homeworks */}
 				<Grid item xs={12} sm={4}>
