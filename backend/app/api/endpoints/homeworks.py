@@ -613,13 +613,14 @@ async def get_homework_data(
 
     homeworks_serialized = []
     for homework in homeworks:
-        json_str_date = json.dumps(homework.deadline.date().isoformat())
+        deadline_isoformat = homework.deadline.date().isoformat()
+        dateOfCreation_isoformat = homework.dateOfCreation.date().isoformat()
         homeworks_serialized.append({
             "id": homework.id,
             "name": homework.name,
-            "dateOfCreation": homework.dateOfCreation,
+            "dateOfCreation": dateOfCreation_isoformat,
             "number_of_tasks": homework.maxNumbersOfTasks,
-            "deadline": json_str_date,
+            "deadline": deadline_isoformat,
             "status": homework.status.value,
         })
 
