@@ -45,7 +45,7 @@ const Home = () => {
 				</a>
 
 				<a
-					href="https://github.com/olden-labs/web-app"
+					href="https://github.com/swe-course-sarajevo-2023/e-skola-mat"
 					className={styles.card}
 					target="_blank"
 					rel="noopener noreferrer"

@@ -39,11 +39,11 @@ const ProfessorHomeworkView = () => {
 
 	return (
 		<Container
-			sx={{ p: 5, background: 'silver', height: '100vh', overflowY: 'auto' }}
+			sx={{ p: 5, height: '100vh', overflowY: 'auto' }}
 		>
 			<Box sx={{ pt: 3 }}>
 				<Typography variant="h3">Zadaće</Typography>
-				<Box display="flex">
+				<Box display="flex" justifyContent="flex-end">
 					<Button variant="contained" onClick={handleOpen}>
 						Dodaj zadaću
 					</Button>
